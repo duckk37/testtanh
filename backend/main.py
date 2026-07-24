@@ -263,6 +263,36 @@ def read_users_me(current_user: models.User = Depends(get_current_user), db: Ses
         "badges": badge_list
     }
 
+@app.get("/users/leaderboard")
+def get_leaderboard(db: Session = Depends(get_db)):
+    users = db.query(models.User).all()
+    leaderboard = []
+    
+    for user in users:
+        # Calculate total score from UserLessonProgress
+        progress_records = db.query(models.UserLessonProgress).filter(
+            models.UserLessonProgress.user_id == user.id
+        ).all()
+        total_score = sum([p.highest_score for p in progress_records])
+        
+        # Calculate words learned for tie-breakers or extra stats
+        words_learned = db.query(models.UserProgress).filter(
+            models.UserProgress.user_id == user.id
+        ).count()
+        
+        leaderboard.append({
+            "id": user.id,
+            "username": user.username,
+            "streak_count": user.streak_count,
+            "total_score": total_score,
+            "words_learned": words_learned
+        })
+        
+    # Sort by total_score descending, then streak_count
+    leaderboard.sort(key=lambda x: (x["total_score"], x["streak_count"]), reverse=True)
+    
+    return leaderboard[:10] # Return top 10
+
 @app.get("/users/me/stats")
 def get_user_stats(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     # Total words learned

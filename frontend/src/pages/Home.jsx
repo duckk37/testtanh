@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CourseCard from '../components/CourseCard';
 import ExamCard from '../components/ExamCard';
 import { BookOpen, Award, CheckCircle, ArrowRight } from 'lucide-react';
+import { SkeletonCard } from '../components/Skeleton';
 
 function Home() {
   const [courses, setCourses] = useState([]);
@@ -25,7 +26,15 @@ function Home() {
   }, []);
 
   if (loading) {
-    return <div className="p-20 text-center text-slate-500 font-medium">Đang tải dữ liệu khóa học...</div>;
+    return (
+      <div className="min-h-screen bg-slate-50 pt-32 px-4">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      </div>
+    );
   }
 
   return (

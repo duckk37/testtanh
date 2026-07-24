@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, CheckCircle, XCircle } from 'lucide-react';
+import { SkeletonExam } from '../components/Skeleton';
 
 function ExamDetail() {
   const { examId } = useParams();
@@ -43,7 +44,7 @@ function ExamDetail() {
   };
 
   if (loading) {
-    return <div className="p-10 text-center text-slate-500">Đang tải đề thi...</div>;
+    return <SkeletonExam />;
   }
 
   if (questions.length === 0) {

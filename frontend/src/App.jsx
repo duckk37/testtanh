@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { LogOut, User, Flame, Settings, BookOpen } from 'lucide-react';
+import { LogOut, User, Flame, Settings, BookOpen, Trophy } from 'lucide-react';
 
 const Home = lazy(() => import('./pages/Home'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
@@ -10,6 +10,7 @@ const Auth = lazy(() => import('./pages/Auth'));
 const Profile = lazy(() => import('./pages/Profile'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const Flashcard = lazy(() => import('./pages/Flashcard'));
+const Leaderboard = lazy(() => import('./pages/Leaderboard'));
 
 function Header() {
   const { user, logout } = useAuth();
@@ -37,6 +38,11 @@ function Header() {
                 <Link to="/flashcards" className="text-slate-600 hover:text-blue-600 mr-4 flex items-center">
                   <BookOpen size={18} className="mr-1" />
                   Sổ tay
+                </Link>
+
+                <Link to="/leaderboard" className="text-slate-600 hover:text-blue-600 mr-4 flex items-center font-bold">
+                  <Trophy size={18} className="mr-1 text-yellow-500" />
+                  BXH
                 </Link>
 
                 <Link to="/profile" className="flex items-center text-slate-600 hover:text-blue-600 mr-4">
@@ -77,6 +83,7 @@ function App() {
             <Route path="/login" element={<Auth />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/flashcards" element={<Flashcard />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/courses/:courseId" element={<CourseDetail />} />
             <Route path="/exams/:examId" element={<ExamDetail />} />

@@ -5,6 +5,7 @@ import LessonTest from '../components/LessonTest';
 import LessonComments from '../components/LessonComments';
 import { ChevronLeft, PlayCircle, Lock, CheckCircle2, FileText, Video } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { SkeletonSidebar, SkeletonVideo } from '../components/Skeleton';
 
 function CourseDetail() {
   const { courseId } = useParams();
@@ -71,7 +72,12 @@ function CourseDetail() {
   };
 
   if (loading) {
-    return <div className="p-10 text-center text-slate-500">Đang tải bài học...</div>;
+    return (
+      <div className="flex flex-col md:flex-row h-[calc(100vh-64px)] bg-slate-50">
+        <SkeletonSidebar />
+        <SkeletonVideo />
+      </div>
+    );
   }
 
   if (lessons.length === 0) {
