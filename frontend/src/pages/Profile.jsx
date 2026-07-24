@@ -2,14 +2,47 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Target, Award, BookOpen, Flame } from 'lucide-react';
+import { Target, Award, BookOpen, Flame, ShoppingCart, CheckCircle, Shield, PaintBucket } from 'lucide-react';
 import { API_URL } from '../config';
 
 export default function Profile() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [courses, setCourses] = useState([]);
+  const [quests, setQuests] = useState([]);
+  const [storeItems, setStoreItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showStore, setShowStore] = useState(false);
+  const [buying, setBuying] = useState(false);
+
+  const handleBuyItem = async (item) => {
+    if (buying) return;
+    setBuying(true);
+    try {
+      const res = await fetch(`${API_URL}/store/buy/${item.id}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert('Mua thành công!');
+        // Update user coins (this is simplistic, ideally update global auth context)
+        setStats(prev => ({...prev, coins: data.coins}));
+        user.coins = data.coins; 
+        
+        if (item.type === 'theme') {
+          user.active_theme = item.id;
+          alert('Hãy F5 lại trang để áp dụng Theme mới cho thẻ Flashcard nhé!');
+        }
+      } else {
+        const err = await res.json();
+        alert(err.detail || 'Không đủ xu hoặc đã sở hữu!');
+      }
+    } catch (e) {
+      alert('Có lỗi xảy ra');
+    }
+    setBuying(false);
+  };
 
   useEffect(() => {
     if (user) {
@@ -19,16 +52,21 @@ export default function Profile() {
         }).then(res => res.json()),
         fetch(API_URL + '/users/me/courses', {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        }).then(res => res.json())
+        }).then(res => res.json()),
+        fetch(API_URL + '/users/me/quests', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        }).then(res => res.json()),
+        fetch(API_URL + '/store/items').then(res => res.json())
       ])
-      .then(([statsData, coursesData]) => {
+      .then(([statsData, coursesData, questsData, storeData]) => {
         setStats(statsData);
-        // Sometimes FastAPI might return null or detail on error, so ensure it's an array
         setCourses(Array.isArray(coursesData) ? coursesData : []);
+        setQuests(Array.isArray(questsData) ? questsData : []);
+        setStoreItems(Array.isArray(storeData) ? storeData : []);
         setLoading(false);
       })
       .catch(err => {
-        console.error('Error fetching stats:', err);
+        console.error('Error fetching data:', err);
         setLoading(false);
       });
     }
@@ -71,6 +109,45 @@ export default function Profile() {
               ) : (
                 <p className="text-sm text-slate-500 bg-white p-4 rounded-xl border border-slate-100 text-center">Chưa có huy hiệu nào</p>
               )}
+            </div>
+            <div className="p-6 bg-slate-50 border-t border-slate-100">
+              <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-500" /> Nhiệm vụ hàng ngày
+              </h2>
+              {quests.length > 0 ? (
+                <div className="flex flex-col gap-3">
+                  {quests.map(quest => {
+                    const pct = Math.min(100, Math.round((quest.current_progress / quest.target_value) * 100));
+                    return (
+                      <div key={quest.id} className="bg-white rounded-xl p-3 shadow-sm border border-slate-100">
+                        <div className="flex justify-between items-center mb-2">
+                          <h3 className="font-bold text-slate-800 text-sm">
+                            {quest.quest_type === 'learn_words' ? `Học ${quest.target_value} từ vựng` :
+                             quest.quest_type === 'perfect_score' ? `Đạt 100% điểm 1 bài test` :
+                             `Hoàn thành ${quest.target_value} bài học`}
+                          </h3>
+                          <span className="text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded-md">+{quest.reward_coins} 🪙</span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden mb-1">
+                          <div className={`h-2 rounded-full transition-all ${quest.is_completed ? 'bg-green-500' : 'bg-blue-500'}`} style={{ width: `${pct}%` }}></div>
+                        </div>
+                        <div className="text-right text-xs text-slate-500 font-medium">{quest.current_progress} / {quest.target_value}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-500">Đang tải nhiệm vụ...</p>
+              )}
+            </div>
+
+            <div className="p-6 bg-slate-50 border-t border-slate-100">
+              <button 
+                onClick={() => setShowStore(true)}
+                className="w-full flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-colors"
+              >
+                <ShoppingCart size={18} /> Cửa Hàng Vật Phẩm
+              </button>
             </div>
           </div>
         </div>
@@ -179,6 +256,48 @@ export default function Profile() {
           )}
         </div>
       </div>
+      </div>
+
+      {/* Store Modal */}
+      {showStore && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <ShoppingCart className="text-yellow-500" /> Cửa hàng
+              </h2>
+              <div className="flex items-center gap-4">
+                <div className="font-bold text-yellow-600 bg-yellow-50 px-3 py-1.5 rounded-lg border border-yellow-100">
+                  Của bạn: {stats?.coins || user.coins || 0} 🪙
+                </div>
+                <button onClick={() => setShowStore(false)} className="text-slate-400 hover:text-slate-600 font-bold p-2">✕</button>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {storeItems.map(item => (
+                  <div key={item.id} className="border border-slate-200 rounded-xl p-4 flex flex-col justify-between hover:border-blue-300 hover:shadow-md transition-all">
+                    <div>
+                      <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mb-3 text-blue-600">
+                        {item.type === 'shield' ? <Shield size={24} className="text-emerald-500" /> : <PaintBucket size={24} className="text-purple-500" />}
+                      </div>
+                      <h3 className="font-bold text-slate-800 mb-1">{item.name}</h3>
+                      <p className="text-sm text-slate-500 mb-4">{item.description}</p>
+                    </div>
+                    <button 
+                      onClick={() => handleBuyItem(item)}
+                      disabled={buying}
+                      className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      Mua {item.price} 🪙
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

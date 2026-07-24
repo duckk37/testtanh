@@ -165,6 +165,7 @@ function CourseDetail() {
                   <InteractiveVideoPlayer 
                     key={`video-${activeLesson.id}`} 
                     youtubeId={activeLesson.youtube_id}
+                    subtitles={activeLesson.subtitles}
                     onVideoEnd={() => setVideoEnded(true)}
                   />
                   

@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
-import { LogOut, User, Flame, Settings, BookOpen, Trophy, Moon, Sun } from 'lucide-react';
+import { LogOut, User, Flame, Settings, BookOpen, Trophy, Moon, Sun, PenTool } from 'lucide-react';
 
 const Home = lazy(() => import('./pages/Home'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
@@ -13,6 +13,7 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const Flashcard = lazy(() => import('./pages/Flashcard'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const WritingPractice = lazy(() => import('./pages/WritingPractice'));
 
 function Header() {
   const { user, logout } = useAuth();
@@ -33,9 +34,13 @@ function Header() {
             </button>
             {user ? (
               <>
-                <div className="flex items-center space-x-1 mr-4 bg-gradient-to-r from-orange-50 to-amber-50 px-4 py-1.5 rounded-xl text-orange-600 font-bold border border-orange-100 shadow-sm">
+                <div className="flex items-center space-x-1 mr-2 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/30 dark:to-amber-900/30 px-3 py-1.5 rounded-xl text-orange-600 dark:text-orange-400 font-bold border border-orange-100 dark:border-orange-800 shadow-sm">
                   <Flame size={18} className="text-orange-500" />
                   <span>{user.streak_count || 0}</span>
+                </div>
+                <div className="flex items-center space-x-1 mr-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/30 dark:to-amber-900/30 px-3 py-1.5 rounded-xl text-yellow-600 dark:text-yellow-400 font-bold border border-yellow-100 dark:border-yellow-800 shadow-sm">
+                  <span className="text-yellow-500">🪙</span>
+                  <span>{user.coins || 0}</span>
                 </div>
                 
                 {user.role === 'admin' && (
@@ -48,6 +53,11 @@ function Header() {
                 <Link to="/flashcards" className="text-slate-600 hover:text-blue-600 mr-4 flex items-center">
                   <BookOpen size={18} className="mr-1" />
                   Sổ tay
+                </Link>
+
+                <Link to="/writing" className="text-slate-600 hover:text-blue-600 mr-4 flex items-center">
+                  <PenTool size={18} className="mr-1 text-indigo-500" />
+                  Luyện viết
                 </Link>
 
                 <Link to="/leaderboard" className="text-slate-600 hover:text-blue-600 mr-4 flex items-center font-bold">
@@ -96,6 +106,7 @@ function App() {
             <Route path="/flashcards" element={<Flashcard />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/writing" element={<WritingPractice />} />
             <Route path="/courses/:courseId" element={<CourseDetail />} />
             <Route path="/exams/:examId" element={<ExamDetail />} />
             <Route path="*" element={<NotFound />} />

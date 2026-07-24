@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Mic, Volume2 } from 'lucide-react';
 import { API_URL } from '../config';
+import { useAuth } from '../context/AuthContext';
 
 const Flashcard = () => {
   const [words, setWords] = useState([]);
@@ -12,6 +13,8 @@ const Flashcard = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [score, setScore] = useState(null);
+  
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchReviewWords();
@@ -161,6 +164,27 @@ const Flashcard = () => {
   }
 
   const currentWord = words[currentIndex];
+  const activeTheme = user?.active_theme || 'default';
+
+  const getThemeClasses = (isFront) => {
+    let base = "absolute w-full h-full backface-hidden rounded-3xl shadow-xl flex flex-col p-8 transition-all ";
+    if (!isFront) base += "rotate-y-180 ";
+    
+    if (activeTheme === 'theme_dark') {
+      return base + "bg-slate-800 border-2 border-slate-700 shadow-slate-900/50 text-white hover:border-slate-500";
+    } else if (activeTheme === 'theme_neon') {
+      return base + "bg-slate-900 border-2 border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)] text-white hover:shadow-[0_0_30px_rgba(168,85,247,0.7)] hover:border-fuchsia-400";
+    }
+    // Default
+    return base + "bg-white border-2 border-slate-100 hover:shadow-2xl hover:border-blue-200" + (isFront ? " items-center justify-center" : "");
+  };
+
+  const getTextColor = (isMain) => {
+    if (activeTheme === 'theme_dark' || activeTheme === 'theme_neon') {
+      return isMain ? "text-white" : "text-slate-300";
+    }
+    return isMain ? "text-slate-800" : "text-slate-500";
+  };
 
   return (
     <div className="max-w-xl mx-auto py-12 px-4">
@@ -177,9 +201,9 @@ const Flashcard = () => {
       >
         <div className={`w-full h-full transition-transform duration-500 transform-style-preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
           
-          <div className="absolute w-full h-full backface-hidden bg-white border-2 border-slate-100 rounded-3xl shadow-xl flex flex-col items-center justify-center p-8 hover:shadow-2xl hover:border-blue-200 transition-all">
-            <h2 className="text-5xl font-bold text-slate-800">{currentWord.word}</h2>
-            <p className="text-slate-400 mt-6 font-medium tracking-widest uppercase text-sm mb-8">Chạm để lật thẻ</p>
+          <div className={getThemeClasses(true) + (activeTheme === 'default' ? " items-center justify-center" : "")}>
+            <h2 className={`text-5xl font-bold ${getTextColor(true)}`}>{currentWord.word}</h2>
+            <p className={`${getTextColor(false)} mt-6 font-medium tracking-widest uppercase text-sm mb-8`}>Chạm để lật thẻ</p>
             
             <div className="flex justify-center gap-4">
               {/* AI Pronunciation Button on Front */}
@@ -214,23 +238,23 @@ const Flashcard = () => {
             )}
           </div>
 
-          <div className="absolute w-full h-full backface-hidden bg-white border-2 border-slate-100 rounded-3xl shadow-xl flex flex-col p-8 rotate-y-180">
+          <div className={getThemeClasses(false)}>
             <div className="flex-1 overflow-y-auto">
-              <div className="flex items-baseline gap-3 mb-6 border-b border-slate-100 pb-4">
-                <h2 className="text-4xl font-bold text-slate-800">{currentWord.word}</h2>
-                <span className="text-lg text-slate-500 font-mono bg-slate-50 px-2 py-1 rounded">{currentWord.phonetic}</span>
+              <div className="flex items-baseline gap-3 mb-6 border-b border-slate-200/20 pb-4">
+                <h2 className={`text-4xl font-bold ${getTextColor(true)}`}>{currentWord.word}</h2>
+                <span className={`text-lg font-mono px-2 py-1 rounded ${activeTheme !== 'default' ? 'bg-slate-700 text-slate-300' : 'bg-slate-50 text-slate-500'}`}>{currentWord.phonetic}</span>
               </div>
               
               <div className="space-y-6">
                 <div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Định nghĩa</h4>
-                  <p className="text-xl text-slate-700">{currentWord.meaning}</p>
+                  <h4 className={`text-xs font-bold uppercase tracking-wider mb-2 ${getTextColor(false)}`}>Định nghĩa</h4>
+                  <p className={`text-xl ${getTextColor(true)}`}>{currentWord.meaning}</p>
                 </div>
                 
                 {currentWord.example && (
                   <div>
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Ví dụ</h4>
-                    <p className="text-lg text-slate-600 italic border-l-4 border-blue-200 pl-4 py-1">
+                    <h4 className={`text-xs font-bold uppercase tracking-wider mb-2 ${getTextColor(false)}`}>Ví dụ</h4>
+                    <p className={`text-lg italic border-l-4 border-blue-400 pl-4 py-1 ${getTextColor(true)}`}>
                       "{currentWord.example}"
                     </p>
                   </div>
@@ -238,7 +262,7 @@ const Flashcard = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-100">
+            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-200/20">
               <button 
                 onClick={(e) => { e.stopPropagation(); handleReview(2); }}
                 className="py-3 px-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 font-medium transition-colors"

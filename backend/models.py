@@ -16,6 +16,10 @@ class User(Base):
     role = Column(String, default="user") # 'user' or 'admin'
     streak_count = Column(Integer, default=0)
     last_activity_date = Column(DateTime, nullable=True)
+    coins = Column(Integer, default=0)
+    streak_shields = Column(Integer, default=0)
+    active_theme = Column(String, default="default")
+    unlocked_themes = Column(String, default="default") # JSON string or comma-separated
     
     progress = relationship("UserLessonProgress", back_populates="user")
     badges = relationship("UserBadge", back_populates="user")
@@ -71,8 +75,8 @@ class Lesson(Base):
     passing_score_required = Column(Integer, default=80)
     title = Column(String)
     youtube_id = Column(String)
+    subtitles = Column(String, nullable=True) # JSON array of {time: float, text: str}
     order_index = Column(Integer, default=0)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     course = relationship("Course", back_populates="lessons")
@@ -146,3 +150,18 @@ class Comment(Base):
     
     user = relationship("User", back_populates="comments")
     lesson = relationship("Lesson", back_populates="comments")
+
+class DailyQuest(Base):
+    __tablename__ = "daily_quests"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    quest_type = Column(String) # e.g., 'learn_words', 'perfect_score', 'listen_audio'
+    target_value = Column(Integer)
+    current_progress = Column(Integer, default=0)
+    reward_coins = Column(Integer, default=10)
+    date = Column(String) # YYYY-MM-DD
+    is_completed = Column(Integer, default=0) # 0 or 1
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    user = relationship("User")

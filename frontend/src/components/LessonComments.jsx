@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, Send } from 'lucide-react';
+import { MessageCircle, Send, User } from 'lucide-react';
+import TranslatableText from './TranslatableText';
 import { API_URL } from '../config';
 
 const LessonComments = ({ lessonId }) => {
@@ -104,7 +105,7 @@ const LessonComments = ({ lessonId }) => {
                   </div>
                   <span className="text-xs text-slate-400">{formatDate(comment.created_at)}</span>
                 </div>
-                <p className="text-slate-700">{comment.content}</p>
+                <TranslatableText text={comment.content} className="text-slate-700 whitespace-pre-line" />
               </div>
             </div>
           ))}

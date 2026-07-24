@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import YouTube from 'react-youtube';
 import { API_URL } from '../config';
 
@@ -8,7 +8,7 @@ const mockSubtitles = [
   { id: 3, start: 7.1, end: 12.0, text: "This is a great way to learn vocabulary in context." }
 ];
 
-const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd }) => {
+const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd, subtitles: rawSubtitles }) => {
   const [player, setPlayer] = useState(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [activeSubtitle, setActiveSubtitle] = useState(null);
@@ -16,6 +16,15 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd }) => {
   const [isLoading, setIsLoading] = useState(false);
   
   const timeUpdateInterval = useRef(null);
+
+  const subtitles = useMemo(() => {
+    if (!rawSubtitles) return [];
+    try {
+      return typeof rawSubtitles === 'string' ? JSON.parse(rawSubtitles) : rawSubtitles;
+    } catch (e) {
+      return [];
+    }
+  }, [rawSubtitles]);
 
   const onReady = (event) => {
     setPlayer(event.target);
@@ -35,13 +44,23 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd }) => {
   };
 
   useEffect(() => {
-    const currentSub = mockSubtitles.find(
-      (sub) => currentTime >= sub.start && currentTime <= sub.end
-    );
-    setActiveSubtitle(currentSub || null);
-  }, [currentTime]);
+    if (subtitles.length > 0) {
+      const currentSub = subtitles.find(
+        (sub) => currentTime >= sub.start && currentTime <= sub.end
+      );
+      setActiveSubtitle(currentSub || null);
+    }
+  }, [currentTime, subtitles]);
 
-  const handleWordClick = async (word) => {
+  const seekTo = (time) => {
+    if (player) {
+      player.seekTo(time);
+      player.playVideo();
+    }
+  };
+
+  const handleWordClick = async (e, word) => {
+    e.stopPropagation(); // Ngăn sự kiện click bubble lên câu (gây seek video)
     if (player) player.pauseVideo();
     
     const cleanWord = word.replace(/[^a-zA-Z]/g, '').toLowerCase();
@@ -72,7 +91,7 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd }) => {
     if (!token) return alert('Vui lòng đăng nhập để lưu từ vựng!');
     
     try {
-      const response = await fetch(API_URL + '/vocabularies', {
+      const response = await fetch(API_URL + '/api/v1/vocabulary', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,7 +101,8 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd }) => {
           word: dictionaryData.word,
           phonetic: dictionaryData.phonetic || '',
           meaning: dictionaryData.meanings[0]?.definitions[0]?.definition || '',
-          example: dictionaryData.meanings[0]?.definitions[0]?.example || ''
+          example: dictionaryData.meanings[0]?.definitions[0]?.example || '',
+          user_id: '' // Will be resolved by server or JWT in real app, but for now we modified route
         })
       });
       
@@ -101,7 +121,7 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd }) => {
     return text.split(' ').map((word, index) => (
       <span 
         key={index} 
-        onClick={() => handleWordClick(word)}
+        onClick={(e) => handleWordClick(e, word)}
         className="cursor-pointer mx-1 px-1 inline-block hover:bg-blue-100 hover:text-blue-700 transition-colors rounded"
       >
         {word}
@@ -110,35 +130,63 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd }) => {
   };
 
   return (
-    <div className="flex flex-col items-center p-4 max-w-4xl mx-auto">
-      <div className="w-full aspect-video rounded-xl overflow-hidden shadow-2xl bg-black">
-        <YouTube 
-          videoId={youtubeId} 
-          onReady={onReady}
-          onPlay={onPlay}
-          onPause={onPause}
-          onEnd={onVideoEnd}
-          opts={{
-            width: '100%',
-            height: '100%',
-            playerVars: { 
-              controls: 1, 
-              modestbranding: 1,
-              rel: 0,
-              iv_load_policy: 3,
-              playsinline: 1
-            }
-          }}
-          className="w-full h-full"
-        />
+    <div className="flex flex-col lg:flex-row gap-6 p-4 max-w-6xl mx-auto">
+      <div className="flex-1">
+        <div className="w-full aspect-video rounded-xl overflow-hidden shadow-2xl bg-black">
+          <YouTube 
+            videoId={youtubeId} 
+            onReady={onReady}
+            onPlay={onPlay}
+            onPause={onPause}
+            onEnd={onVideoEnd}
+            opts={{
+              width: '100%',
+              height: '100%',
+              playerVars: { 
+                controls: 1, 
+                modestbranding: 1,
+                rel: 0,
+                iv_load_policy: 3,
+                playsinline: 1
+              }
+            }}
+            className="w-full h-full"
+          />
+        </div>
+        
+        <div className="mt-6 text-xl md:text-2xl text-center min-h-[80px] font-medium text-slate-700 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 w-full flex items-center justify-center">
+          {activeSubtitle ? (
+            <div>{renderInteractiveSubtitle(activeSubtitle.text)}</div>
+          ) : (
+            <div className="text-slate-300">...</div>
+          )}
+        </div>
       </div>
-      
-      <div className="mt-8 text-2xl md:text-3xl text-center min-h-[80px] font-medium text-slate-700 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 w-full flex items-center justify-center">
-        {activeSubtitle ? (
-          <div>{renderInteractiveSubtitle(activeSubtitle.text)}</div>
-        ) : (
-          <div className="text-slate-300">...</div>
-        )}
+
+      <div className="w-full lg:w-1/3 bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col h-[600px]">
+        <div className="p-4 border-b border-slate-100 bg-slate-50 rounded-t-2xl">
+          <h3 className="font-bold text-slate-800">Transcript (Phụ đề)</h3>
+          <p className="text-xs text-slate-500">Bấm vào câu để tua video, bấm vào từ để tra nghĩa</p>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          {subtitles.length > 0 ? subtitles.map((sub, idx) => {
+            const isActive = activeSubtitle?.id === sub.id;
+            return (
+              <div 
+                key={idx} 
+                onClick={() => seekTo(sub.start)}
+                className={`p-3 rounded-xl cursor-pointer transition-colors ${isActive ? 'bg-blue-50 border-l-4 border-blue-500 shadow-sm' : 'hover:bg-slate-50'}`}
+              >
+                <div className="text-xs text-slate-400 font-mono mb-1">{new Date(sub.start * 1000).toISOString().substr(14, 5)}</div>
+                <div className={`text-sm ${isActive ? 'text-blue-800 font-medium' : 'text-slate-600'}`}>
+                  {renderInteractiveSubtitle(sub.text)}
+                </div>
+              </div>
+            );
+          }) : (
+            <p className="text-sm text-slate-500 text-center mt-10">Video này chưa có phụ đề.</p>
+          )}
+        </div>
       </div>
 
       {dictionaryData && (

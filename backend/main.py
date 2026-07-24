@@ -320,6 +320,10 @@ def get_user_stats(current_user: models.User = Depends(get_current_user), db: Se
         "total_words": total_words,
         "avg_score": round(avg_score, 1),
         "streak_count": current_user.streak_count,
+        "coins": current_user.coins,
+        "streak_shields": current_user.streak_shields,
+        "active_theme": current_user.active_theme,
+        "unlocked_themes": current_user.unlocked_themes.split(',') if current_user.unlocked_themes else [],
         "chart_data": chart_data
     }
 
@@ -446,6 +450,13 @@ def submit_lesson_test(lesson_id: str, req: SubmitTestRequest, db: Session = Dep
         if perfect_badge:
             if not db.query(models.UserBadge).filter(models.UserBadge.user_id == current_user.id, models.UserBadge.badge_id == perfect_badge.id).first():
                 db.add(models.UserBadge(user_id=current_user.id, badge_id=perfect_badge.id))
+                
+    # Update Streak and Quests
+    check_and_update_streak(current_user, db)
+    if is_passed:
+        update_quest_progress(current_user.id, "complete_lesson", 1, db)
+    if score == 100:
+        update_quest_progress(current_user.id, "perfect_score", 1, db)
         
     db.commit()
     return {
@@ -555,6 +566,11 @@ def submit_review(id: str, req: ReviewSubmit, db: Session = Depends(get_db), cur
         progress.ease_factor = 1.3
         
     progress.next_review_date = datetime.utcnow() + timedelta(days=progress.interval)
+    
+    # Update Streak and Quests
+    check_and_update_streak(current_user, db)
+    update_quest_progress(current_user.id, "learn_words", 1, db)
+    
     db.commit()
     return {"message": "Reviewed successfully", "next_review_date": progress.next_review_date}
 
@@ -649,3 +665,178 @@ def review_vocabulary(request: ReviewRequest, db: Session = Depends(get_db)):
         message="Cập nhật tiến độ ôn tập thành công!",
         next_review_date=new_stats["next_review_date"]
     )
+
+# ==========================================
+# GAMIFICATION & QUESTS ROUTES
+# ==========================================
+import random
+
+def check_and_update_streak(user: models.User, db: Session):
+    now = datetime.datetime.utcnow()
+    
+    if not user.last_activity_date:
+        user.streak_count = 1
+        user.last_activity_date = now
+        db.commit()
+        return
+
+    # Calculate days difference
+    last_date = user.last_activity_date.date()
+    today = now.date()
+    delta_days = (today - last_date).days
+
+    if delta_days == 1:
+        # Consecutive day
+        user.streak_count += 1
+        user.last_activity_date = now
+    elif delta_days > 1:
+        # Streak broken, check shields
+        if user.streak_shields > 0:
+            user.streak_shields -= 1
+            # Keep streak, just update date
+            user.last_activity_date = now
+        else:
+            user.streak_count = 1
+            user.last_activity_date = now
+    elif delta_days == 0:
+        # Already updated today
+        user.last_activity_date = now
+        
+    db.commit()
+
+@app.get("/users/me/quests")
+def get_daily_quests(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    today_str = datetime.datetime.utcnow().date().isoformat()
+    
+    quests = db.query(models.DailyQuest).filter(
+        models.DailyQuest.user_id == current_user.id,
+        models.DailyQuest.date == today_str
+    ).all()
+    
+    if not quests:
+        # Generate new quests for today
+        quest_templates = [
+            {"type": "learn_words", "target": 10, "reward": 20},
+            {"type": "perfect_score", "target": 1, "reward": 50},
+            {"type": "complete_lesson", "target": 1, "reward": 30}
+        ]
+        
+        for q in quest_templates:
+            new_q = models.DailyQuest(
+                user_id=current_user.id,
+                quest_type=q["type"],
+                target_value=q["target"],
+                reward_coins=q["reward"],
+                date=today_str
+            )
+            db.add(new_q)
+            quests.append(new_q)
+        db.commit()
+        
+    return quests
+
+def update_quest_progress(user_id: str, quest_type: str, progress_amount: int, db: Session):
+    today_str = datetime.datetime.utcnow().date().isoformat()
+    quest = db.query(models.DailyQuest).filter(
+        models.DailyQuest.user_id == user_id,
+        models.DailyQuest.date == today_str,
+        models.DailyQuest.quest_type == quest_type,
+        models.DailyQuest.is_completed == 0
+    ).first()
+    
+    if quest:
+        quest.current_progress += progress_amount
+        if quest.current_progress >= quest.target_value:
+            quest.current_progress = quest.target_value
+            quest.is_completed = 1
+            
+            # Reward user
+            user = db.query(models.User).filter(models.User.id == user_id).first()
+            if user:
+                user.coins = (user.coins or 0) + quest.reward_coins
+                
+        db.commit()
+
+@app.get("/store/items")
+def get_store_items():
+    return [
+        {"id": "shield_1", "name": "Khiên bảo vệ Streak", "description": "Bảo vệ chuỗi học của bạn không bị mất nếu lỡ quên 1 ngày", "price": 100, "type": "shield"},
+        {"id": "theme_dark", "name": "Giao diện Dark Mode", "description": "Giao diện tối ngầu đét", "price": 200, "type": "theme"},
+        {"id": "theme_neon", "name": "Giao diện Cyberpunk Neon", "description": "Giao diện Neon nổi bật", "price": 500, "type": "theme"},
+    ]
+
+@app.post("/store/buy/{item_id}")
+def buy_item(item_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    items = get_store_items()
+    item = next((i for i in items if i["id"] == item_id), None)
+    
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+        
+    if (current_user.coins or 0) < item["price"]:
+        raise HTTPException(status_code=400, detail="Not enough coins")
+        
+    if item["type"] == "shield":
+        current_user.streak_shields = (current_user.streak_shields or 0) + 1
+    elif item["type"] == "theme":
+        unlocked = current_user.unlocked_themes.split(',') if current_user.unlocked_themes else []
+        if item_id in unlocked:
+            raise HTTPException(status_code=400, detail="Already owned this theme")
+        unlocked.append(item_id)
+        current_user.unlocked_themes = ','.join(unlocked)
+        current_user.active_theme = item_id
+        
+    current_user.coins -= item["price"]
+    db.commit()
+    
+    return {"message": "Purchase successful", "coins": current_user.coins}
+
+# ==========================================
+# WRITING PRACTICE API
+# ==========================================
+from textblob import TextBlob
+from pydantic import BaseModel
+from typing import List
+
+class WritingRequest(BaseModel):
+    text: str
+
+@app.post("/api/check-writing")
+def check_writing(req: WritingRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    blob = TextBlob(req.text)
+    
+    # Simple spell check
+    corrected_text = str(blob.correct())
+    
+    # Find mistakes by comparing words
+    original_words = blob.words
+    corrected_words = TextBlob(corrected_text).words
+    
+    mistakes = []
+    for i in range(min(len(original_words), len(corrected_words))):
+        if original_words[i].lower() != corrected_words[i].lower():
+            mistakes.append({
+                "original": str(original_words[i]),
+                "suggestion": str(corrected_words[i])
+            })
+            
+    # Word count and lexical diversity (unique words / total words)
+    word_count = len(original_words)
+    unique_words = len(set(word.lower() for word in original_words))
+    diversity = round((unique_words / word_count * 100), 1) if word_count > 0 else 0
+    
+    # Gamification
+    if word_count >= 50 and len(mistakes) == 0:
+        update_quest_progress(current_user.id, "perfect_score", 1, db)
+    if word_count > 0:
+        check_and_update_streak(current_user, db)
+        
+    return {
+        "corrected_text": corrected_text,
+        "mistakes": mistakes,
+        "stats": {
+            "word_count": word_count,
+            "lexical_diversity": diversity,
+            "mistake_count": len(mistakes)
+        }
+    }
