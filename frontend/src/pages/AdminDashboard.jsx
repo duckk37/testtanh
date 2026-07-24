@@ -15,6 +15,8 @@ import {
 import OverviewTab from '../components/admin/OverviewTab';
 import CoursesTab from '../components/admin/CoursesTab';
 import UsersTab from '../components/admin/UsersTab';
+import VocabulariesTab from '../components/admin/VocabulariesTab';
+import ExamsTab from '../components/admin/ExamsTab';
 import { useAuth } from '../context/AuthContext';
 
 export default function AdminDashboard() {
@@ -52,7 +54,7 @@ export default function AdminDashboard() {
           </h2>
         </div>
         
-        <nav className="flex-1 px-4 space-y-2">
+        <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
           <button 
             onClick={() => setActiveTab('overview')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
@@ -73,6 +75,28 @@ export default function AdminDashboard() {
             <BookOpen size={20} />
             <span className="font-medium">Khóa học</span>
             {activeTab === 'courses' && <ChevronRight size={16} className="ml-auto" />}
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('vocabularies')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+              activeTab === 'vocabularies' ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-blue-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <BookOpen size={20} />
+            <span className="font-medium">Từ vựng</span>
+            {activeTab === 'vocabularies' && <ChevronRight size={16} className="ml-auto" />}
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('exams')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+              activeTab === 'exams' ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-blue-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <TrendingUp size={20} />
+            <span className="font-medium">Đề thi</span>
+            {activeTab === 'exams' && <ChevronRight size={16} className="ml-auto" />}
           </button>
           
           <button 
@@ -99,6 +123,8 @@ export default function AdminDashboard() {
       <div className="flex-1 overflow-y-auto p-8">
         {activeTab === 'overview' && <OverviewTab />}
         {activeTab === 'courses' && <CoursesTab />}
+        {activeTab === 'vocabularies' && <VocabulariesTab />}
+        {activeTab === 'exams' && <ExamsTab />}
         {activeTab === 'users' && <UsersTab />}
       </div>
     </div>

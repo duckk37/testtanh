@@ -120,6 +120,11 @@ class VocabularyCreateUpdate(BaseModel):
     meaning: str
     example: str
 
+@router.get("/vocabularies")
+def get_all_vocabularies(db: Session = Depends(get_db), admin: models.User = Depends(require_admin)):
+    vocabs = db.query(models.Vocabulary).all()
+    return [{"id": v.id, "word": v.word, "phonetic": v.phonetic, "meaning": v.meaning, "example": v.example} for v in vocabs]
+
 @router.post("/vocabularies")
 def create_vocabulary(vocab: VocabularyCreateUpdate, db: Session = Depends(get_db), admin: models.User = Depends(require_admin)):
     new_vocab = models.Vocabulary(**vocab.dict())
