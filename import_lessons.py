@@ -30,7 +30,7 @@ def import_data():
         print(f"Course ID: {course.id}")
         
         # Read the CSV
-        with open('../data.csv', 'r', encoding='utf-8') as f:
+        with open('data.csv', 'r', encoding='utf-8') as f:
             reader = csv.reader(f)
             lines = list(reader)
             

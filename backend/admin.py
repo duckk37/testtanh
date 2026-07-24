@@ -47,6 +47,21 @@ def delete_course(course_id: str, db: Session = Depends(get_db), admin: models.U
     db.commit()
     return {"message": "Course deleted"}
 
+@router.put("/courses/{course_id}")
+def update_course(course_id: str, course_in: CourseCreate, db: Session = Depends(get_db), admin: models.User = Depends(require_admin)):
+    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    
+    course.title = course_in.title
+    course.description = course_in.description
+    course.price = course_in.price
+    course.thumbnail = course_in.thumbnail
+    
+    db.commit()
+    db.refresh(course)
+    return course
+
 class LessonCreate(BaseModel):
     course_id: str
     title: str

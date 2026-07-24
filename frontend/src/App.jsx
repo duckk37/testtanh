@@ -1,7 +1,8 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { LogOut, User, Flame, Settings, BookOpen, Trophy } from 'lucide-react';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { LogOut, User, Flame, Settings, BookOpen, Trophy, Moon, Sun } from 'lucide-react';
 
 const Home = lazy(() => import('./pages/Home'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
@@ -11,16 +12,25 @@ const Profile = lazy(() => import('./pages/Profile'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const Flashcard = lazy(() => import('./pages/Flashcard'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 function Header() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          <Link to="/" className="text-xl font-bold text-blue-600 font-sans">EnglishMaster</Link>
+          <Link to="/" className="text-xl font-bold text-blue-600 dark:text-blue-400 font-sans">EnglishMaster</Link>
           <div className="flex items-center space-x-4">
+            <button 
+              onClick={toggleTheme}
+              className="p-2 rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
+              title="Giao diện Sáng/Tối"
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
             {user ? (
               <>
                 <div className="flex items-center space-x-1 mr-4 bg-gradient-to-r from-orange-50 to-amber-50 px-4 py-1.5 rounded-xl text-orange-600 font-bold border border-orange-100 shadow-sm">
@@ -74,8 +84,9 @@ function Header() {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
         <Header />
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-blue-600 font-medium">Đang tải trang...</div>}>
           <Routes>
@@ -87,10 +98,12 @@ function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/courses/:courseId" element={<CourseDetail />} />
             <Route path="/exams/:examId" element={<ExamDetail />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

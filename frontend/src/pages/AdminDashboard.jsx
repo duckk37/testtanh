@@ -13,7 +13,8 @@ import {
   ShieldAlert,
   ChevronRight,
   TrendingUp,
-  X
+  X,
+  Flame
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -24,6 +25,8 @@ export default function AdminDashboard() {
   
   // Modal state
   const [showAddCourseModal, setShowAddCourseModal] = useState(false);
+  const [showEditCourseModal, setShowEditCourseModal] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
   const [newCourse, setNewCourse] = useState({
     title: '',
     description: '',
@@ -87,6 +90,38 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleEditCourse = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('access_token');
+    try {
+      const res = await fetch(`${API_URL}/admin/courses/${editingCourse.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: editingCourse.title,
+          description: editingCourse.description,
+          price: editingCourse.price,
+          thumbnail: editingCourse.thumbnail
+        })
+      });
+      
+      if (res.ok) {
+        alert("Cập nhật khóa học thành công!");
+        setShowEditCourseModal(false);
+        setEditingCourse(null);
+        fetchData(); // Refresh list
+      } else {
+        alert("Có lỗi xảy ra khi cập nhật khóa học.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi kết nối.");
+    }
+  };
+
   const handleDeleteCourse = async (courseId, courseTitle) => {
     if (!window.confirm(`Bạn có chắc chắn muốn xóa khóa học "${courseTitle}"? Hành động này không thể hoàn tác.`)) {
       return;
@@ -116,12 +151,12 @@ export default function AdminDashboard() {
   const activeUsers = users.filter(u => u.streak_count > 0).length;
 
   return (
-    <div className="flex h-[calc(100vh-64px)] bg-slate-50 font-sans">
+    <div className="flex h-[calc(100vh-64px)] bg-slate-50 dark:bg-slate-900 font-sans transition-colors duration-200">
       
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-slate-200 flex flex-col shadow-sm z-10">
+      <div className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shadow-sm z-10 transition-colors duration-200">
         <div className="p-6">
-          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
             <ShieldAlert className="text-blue-600" size={24} />
             Admin Panel
           </h2>
@@ -230,9 +265,12 @@ export default function AdminDashboard() {
 
         {/* COURSES TAB */}
         {activeTab === 'courses' && (
-          <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4">
-            <div className="flex justify-between items-center mb-8">
-              <h1 className="text-3xl font-bold text-slate-900">Quản lý Khóa học</h1>
+          <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4">
+            <div className="mb-8 flex justify-between items-end">
+              <div>
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Quản trị Hệ thống</h1>
+                <p className="text-slate-500 dark:text-slate-400">Quản lý khóa học, người dùng và dữ liệu hệ thống</p>
+              </div>
               <button 
                 onClick={() => setShowAddCourseModal(true)}
                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm"
@@ -241,8 +279,8 @@ export default function AdminDashboard() {
               </button>
             </div>
             
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-              <table className="min-w-full divide-y divide-slate-200">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
                 <thead className="bg-slate-50">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Khóa học</th>
@@ -267,7 +305,11 @@ export default function AdminDashboard() {
                         {course.price.toLocaleString()} ₫
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors mr-2" title="Sửa (Chưa mở)">
+                        <button 
+                          onClick={() => { setEditingCourse(course); setShowEditCourseModal(true); }}
+                          className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors mr-2" 
+                          title="Sửa khóa học"
+                        >
                           <Edit size={18} />
                         </button>
                         <button 
@@ -427,6 +469,94 @@ export default function AdminDashboard() {
                   className="px-5 py-2.5 rounded-xl font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm"
                 >
                   Tạo khóa học
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Course Modal */}
+      {showEditCourseModal && editingCourse && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center p-6 border-b border-slate-100">
+              <h2 className="text-xl font-bold text-slate-900">Sửa Khóa Học</h2>
+              <button 
+                onClick={() => { setShowEditCourseModal(false); setEditingCourse(null); }}
+                className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-full hover:bg-slate-100"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleEditCourse} className="p-6 space-y-4 bg-slate-50">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Tên khóa học</label>
+                <input 
+                  type="text" 
+                  required
+                  value={editingCourse.title}
+                  onChange={e => setEditingCourse({...editingCourse, title: e.target.value})}
+                  className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Mô tả chi tiết</label>
+                <textarea 
+                  required
+                  rows={3}
+                  value={editingCourse.description}
+                  onChange={e => setEditingCourse({...editingCourse, description: e.target.value})}
+                  className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Giá bán (VNĐ)</label>
+                  <input 
+                    type="number" 
+                    required
+                    min={0}
+                    value={editingCourse.price}
+                    onChange={e => setEditingCourse({...editingCourse, price: parseInt(e.target.value) || 0})}
+                    className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Link Ảnh Bìa (URL)</label>
+                  <input 
+                    type="url" 
+                    required
+                    value={editingCourse.thumbnail}
+                    onChange={e => setEditingCourse({...editingCourse, thumbnail: e.target.value})}
+                    className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  />
+                </div>
+              </div>
+              
+              {editingCourse.thumbnail && (
+                <div className="mt-2 text-sm text-slate-500">
+                  <p className="mb-1">Xem trước ảnh bìa:</p>
+                  <img src={editingCourse.thumbnail} alt="Preview" className="h-24 object-cover rounded-lg border border-slate-200" onError={(e) => e.target.style.display = 'none'} />
+                </div>
+              )}
+              
+              <div className="pt-4 flex justify-end gap-3 border-t border-slate-200 mt-6">
+                <button 
+                  type="button"
+                  onClick={() => { setShowEditCourseModal(false); setEditingCourse(null); }}
+                  className="px-5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-200 transition-colors"
+                >
+                  Hủy bỏ
+                </button>
+                <button 
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm"
+                >
+                  Cập nhật
                 </button>
               </div>
             </form>

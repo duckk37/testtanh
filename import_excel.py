@@ -32,7 +32,7 @@ def extract_youtube_id(url):
     return None
 
 def import_excel_data():
-    wb = openpyxl.load_workbook("../48 NGÀY LẤY GỐC TIẾNG ANH.xlsx")
+    wb = openpyxl.load_workbook("48 NGÀY LẤY GỐC TIẾNG ANH.xlsx")
     sheet = wb.active
 
     # Find where the data starts
