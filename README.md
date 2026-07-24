@@ -72,60 +72,92 @@ interactive-english/
 
 ---
 
-## 🚀 Hướng dẫn cài đặt chạy cục bộ (Local Development)
+## 🚀 Hướng dẫn Cài đặt & Setup Chi tiết
 
 ### Yêu cầu hệ thống
 - **Node.js** (Phiên bản >= 18.x)
 - **Python** (Phiên bản >= 3.9)
-- **Cơ sở dữ liệu PostgreSQL** (Có thể dùng local hoặc Neon.tech)
+- **Git**
 
-### 1. Cài đặt Backend (FastAPI)
+### Bước 1: Thiết lập Database trên Neon.tech (PostgreSQL)
+1. Truy cập [Neon.tech](https://neon.tech/) và tạo tài khoản.
+2. Tạo Project mới, đặt tên tùy ý.
+3. Ở trang Dashboard của Neon, tìm mục **Connection Details**, sao chép chuỗi kết nối (Connection String). Trông nó sẽ giống như thế này:  
+   `postgresql://neondb_owner:xxxxxx@ep-wandering-leaf-xxx.aws.neon.tech/neondb?sslmode=require`
 
+### Bước 2: Cài đặt Backend (FastAPI)
 1. Mở terminal, di chuyển vào thư mục backend:
    ```bash
    cd backend
    ```
 2. Tạo và kích hoạt môi trường ảo (Virtual Environment):
    ```bash
-   # Windows
+   # Dành cho Windows
    python -m venv venv
    venv\Scripts\activate
    
-   # macOS/Linux
+   # Dành cho macOS/Linux
    python3 -m venv venv
    source venv/bin/activate
    ```
-3. Cài đặt thư viện:
+3. Cài đặt các thư viện cần thiết:
    ```bash
    pip install -r requirements.txt
    ```
-4. Cấu hình CSDL PostgreSQL:
-   - Mở file `database.py`
-   - Tìm biến `SQLALCHEMY_DATABASE_URL` và đổi sang link Database của bạn (ví dụ link từ Neon).
-5. Khởi chạy Server:
+4. **Cấu hình Database:**
+   - Mở file `backend/database.py`.
+   - Tìm biến `SQLALCHEMY_DATABASE_URL` và thay chuỗi kết nối vừa lấy từ Neon vào đây.
+5. **Chạy Script để chèn dữ liệu mẫu (Seed Data):**
+   *(Nếu bạn muốn hệ thống có sẵn Khóa học, Bài học và Flashcard để xem thử)*
+   ```bash
+   python import_lessons.py
+   ```
+6. Khởi chạy Server:
    ```bash
    uvicorn main:app --reload
    ```
-   *Backend sẽ chạy tại: `http://localhost:8000`*
-   *Tài liệu API tự động (Swagger): `http://localhost:8000/docs`*
+   *Backend sẽ chạy tại: `http://localhost:8000`*  
+   *Xem tài liệu API tự động tại: `http://localhost:8000/docs`*
 
-### 2. Cài đặt Frontend (React)
-
-1. Mở terminal khác, di chuyển vào thư mục frontend:
+### Bước 3: Cài đặt Frontend (React)
+1. Mở một cửa sổ terminal **mới** và di chuyển vào thư mục frontend:
    ```bash
    cd frontend
    ```
-2. Cài đặt gói Node Modules:
+2. Cài đặt các gói thư viện Node Modules:
    ```bash
    npm install
    ```
-3. Khởi chạy giao diện:
+3. **Cấu hình API URL:**
+   - Mở file `frontend/src/config.js`.
+   - Nếu chạy ở máy tính (Local), đặt `export const API_URL = 'http://localhost:8000';`.
+   - Nếu đã Deploy Backend lên Render, đổi thành link Render của bạn (VD: `https://testtanh-backend.onrender.com`).
+4. Khởi chạy giao diện:
    ```bash
    npm run dev
    ```
-   *Frontend sẽ chạy tại: `http://localhost:5173`*
+   *Frontend sẽ mở tại: `http://localhost:5173`*
 
-> **Lưu ý kết nối:** Hãy đảm bảo biến `API_URL` trong tệp `frontend/src/config.js` trỏ đúng vào địa chỉ Backend của bạn (ví dụ `http://localhost:8000` khi chạy local, hoặc link Render khi deploy).
+---
+
+## 🌐 Hướng dẫn Triển khai (Deployment)
+
+### 1. Deploy Backend lên Render.com
+1. Đăng nhập [Render.com](https://render.com/), chọn **New Web Service**.
+2. Kết nối với repo GitHub của dự án này.
+3. Thiết lập thông số:
+   - **Root Directory:** `backend`
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
+4. Ấn **Create Web Service**. Đợi vài phút để Render cấp phát link cho Backend.
+5. Copy link Backend vừa tạo và sửa vào file `frontend/src/config.js`.
+
+### 2. Deploy Frontend lên Vercel.com
+1. Đăng nhập [Vercel](https://vercel.com/), chọn **Add New... -> Project**.
+2. Chọn repo GitHub của dự án này.
+3. Trong phần **Framework Preset**, chọn `Vite`.
+4. Trong phần **Root Directory**, gõ `frontend`.
+5. Bấm **Deploy**. Vercel sẽ tự động đọc cấu hình `vercel.json` để ngăn chặn lỗi 404 khi load lại trang và xuất bản website của bạn lên internet.
 
 ---
 
