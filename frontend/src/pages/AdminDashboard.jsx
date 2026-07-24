@@ -15,17 +15,20 @@ import {
 import OverviewTab from '../components/admin/OverviewTab';
 import CoursesTab from '../components/admin/CoursesTab';
 import UsersTab from '../components/admin/UsersTab';
+import { useAuth } from '../context/AuthContext';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-    const role = localStorage.getItem('role');
-    if (role !== 'admin') {
-      navigate('/login');
-      return;
+    if (!loading) {
+      if (!user || user.role !== 'admin') {
+        navigate('/login');
+        return;
+      }
     }
 
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -35,7 +38,7 @@ export default function AdminDashboard() {
       setDarkMode(false);
       document.documentElement.classList.remove('dark');
     }
-  }, [navigate]);
+  }, [navigate, user, loading]);
 
   return (
     <div className="flex h-[calc(100vh-64px)] bg-slate-50 dark:bg-slate-900 font-sans transition-colors duration-200">
