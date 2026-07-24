@@ -15,12 +15,14 @@ export default function LessonTest({ lesson, onTestPassed }) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
+  const [showReview, setShowReview] = useState(false);
   const { user } = useAuth();
   
   const timerRef = useRef(null);
 
   const resetTest = () => {
     setResult(null);
+    setShowReview(false);
     setAnswers({});
     setFlags({});
     setCurrentQuestionIndex(0);
@@ -170,6 +172,63 @@ export default function LessonTest({ lesson, onTestPassed }) {
               Thử sức làm lại
             </button>
           )}
+
+          <div className="mt-8 border-t border-slate-100 pt-8">
+            <button 
+              onClick={() => setShowReview(!showReview)}
+              className="px-6 py-2 border-2 border-slate-200 text-slate-600 rounded-lg font-medium hover:bg-slate-50 transition-colors"
+            >
+              {showReview ? 'Ẩn chi tiết bài làm' : 'Xem lại chi tiết bài làm'}
+            </button>
+            
+            {showReview && (
+              <div className="mt-8 text-left space-y-6">
+                {questions.map((q, idx) => {
+                  const selectedOpt = answers[q.id];
+                  const correctOpt = q.correct_option;
+                  const isCorrect = selectedOpt === correctOpt;
+                  
+                  return (
+                    <div key={q.id} className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                      <h4 className="font-bold text-slate-800 mb-4 flex gap-2">
+                        <span className="text-slate-500">Câu {idx + 1}:</span> {q.content}
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {['A', 'B', 'C', 'D'].map(opt => {
+                          const optText = q[`option_${opt.toLowerCase()}`];
+                          let optClass = "border-slate-200 bg-white text-slate-600";
+                          
+                          if (opt === correctOpt) {
+                            optClass = "border-green-500 bg-green-50 text-green-700 font-bold ring-2 ring-green-200";
+                          } else if (opt === selectedOpt && !isCorrect) {
+                            optClass = "border-red-500 bg-red-50 text-red-700 font-bold ring-2 ring-red-200";
+                          } else if (opt !== selectedOpt && opt !== correctOpt) {
+                            optClass = "border-slate-200 bg-slate-50 text-slate-400 opacity-60";
+                          }
+                          
+                          return (
+                            <div key={opt} className={`px-4 py-3 rounded-lg border-2 flex items-center gap-3 ${optClass}`}>
+                              <span className={`w-6 h-6 rounded flex items-center justify-center text-xs border font-bold ${
+                                opt === correctOpt ? 'bg-green-500 border-green-600 text-white' :
+                                opt === selectedOpt && !isCorrect ? 'bg-red-500 border-red-600 text-white' :
+                                'bg-slate-100 border-slate-300'
+                              }`}>{opt}</span>
+                              <span className="text-sm">{optText}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {!isCorrect && (
+                        <div className="mt-3 text-sm text-red-600 flex items-center gap-1">
+                          <AlertCircle size={16} /> Bạn đã chọn sai. Đáp án đúng là {correctOpt}.
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         /* Exam In Progress View */

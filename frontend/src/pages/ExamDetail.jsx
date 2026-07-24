@@ -7,23 +7,49 @@ import { API_URL } from '../config';
 function ExamDetail() {
   const { examId } = useParams();
   const [questions, setQuestions] = useState([]);
+  const [exam, setExam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(null);
+  
+  const timerRef = React.useRef(null);
 
   useEffect(() => {
-    fetch(`${API_URL}/exams/${examId}/questions`)
-      .then(res => res.json())
-      .then(data => {
-        setQuestions(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error fetching questions:", err);
-        setLoading(false);
-      });
+    Promise.all([
+      fetch(`${API_URL}/exams/${examId}`).then(res => res.json()),
+      fetch(`${API_URL}/exams/${examId}/questions`).then(res => res.json())
+    ])
+    .then(([examData, questionsData]) => {
+      setExam(examData);
+      setQuestions(questionsData);
+      if (examData.duration_minutes) {
+        setTimeLeft(examData.duration_minutes * 60);
+      }
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error("Error fetching exam/questions:", err);
+      setLoading(false);
+    });
   }, [examId]);
+
+  useEffect(() => {
+    if (timeLeft === null || submitted) return;
+    
+    if (timeLeft <= 0) {
+      alert("Hết thời gian làm bài! Hệ thống sẽ tự động nộp bài.");
+      handleSubmit(true);
+      return;
+    }
+    
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => prev - 1);
+    }, 1000);
+    
+    return () => clearInterval(timerRef.current);
+  }, [timeLeft, submitted]);
 
   const handleSelectOption = (questionId, option) => {
     if (submitted) return;
@@ -33,7 +59,20 @@ function ExamDetail() {
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (force = false) => {
+    if (!force) {
+      const unanswered = questions.filter(q => !answers[q.id]).length;
+      if (unanswered > 0) {
+        if (!window.confirm(`Bạn còn ${unanswered} câu chưa trả lời. Bạn có chắc chắn muốn nộp bài?`)) {
+          return;
+        }
+      } else {
+        if (!window.confirm("Bạn có chắc chắn muốn nộp bài?")) return;
+      }
+    }
+
+    if (timerRef.current) clearInterval(timerRef.current);
+
     let currentScore = 0;
     questions.forEach(q => {
       if (answers[q.id] === q.correct_option) {
@@ -42,6 +81,12 @@ function ExamDetail() {
     });
     setScore(currentScore);
     setSubmitted(true);
+  };
+  
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
   };
 
   if (loading) {
@@ -61,8 +106,14 @@ function ExamDetail() {
             <Link to="/" className="text-slate-500 hover:text-blue-600 transition-colors">
               <ChevronLeft size={24} />
             </Link>
-            <h1 className="font-bold text-xl text-slate-900">Làm Đề Thi Thử</h1>
+            <h1 className="font-bold text-xl text-slate-900">{exam?.title || "Làm Đề Thi Thử"}</h1>
           </div>
+          
+          {!submitted && timeLeft !== null && (
+            <div className={`font-mono font-bold text-lg px-4 py-2 rounded-lg border ${timeLeft <= 60 ? 'bg-red-50 text-red-600 border-red-200 animate-pulse' : 'bg-slate-50 text-slate-700 border-slate-200'}`}>
+              {formatTime(timeLeft)}
+            </div>
+          )}
           {submitted && (
             <div className="px-4 py-2 bg-green-50 text-green-700 font-bold rounded-lg border border-green-200">
               Điểm số: {score} / {questions.length}

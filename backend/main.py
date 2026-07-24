@@ -323,6 +323,41 @@ def get_user_stats(current_user: models.User = Depends(get_current_user), db: Se
         "chart_data": chart_data
     }
 
+@app.get("/users/me/courses")
+def get_user_courses(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    courses = db.query(models.Course).all()
+    result = []
+    
+    for course in courses:
+        total_lessons = db.query(models.Lesson).filter(models.Lesson.course_id == course.id).count()
+        if total_lessons == 0:
+            continue
+            
+        # Get lessons the user has completed in this course
+        completed_lessons = db.query(models.UserLessonProgress).join(models.Lesson).filter(
+            models.UserLessonProgress.user_id == current_user.id,
+            models.Lesson.course_id == course.id,
+            models.UserLessonProgress.is_completed == 1
+        ).count()
+        
+        # Only include courses the user has interacted with (or you can include all, let's include courses with at least 1 lesson completed or attempted)
+        attempted_lessons = db.query(models.UserLessonProgress).join(models.Lesson).filter(
+            models.UserLessonProgress.user_id == current_user.id,
+            models.Lesson.course_id == course.id
+        ).count()
+        
+        if attempted_lessons > 0:
+            result.append({
+                "id": course.id,
+                "title": course.title,
+                "thumbnail": course.thumbnail,
+                "total_lessons": total_lessons,
+                "completed_lessons": completed_lessons,
+                "progress_percentage": round((completed_lessons / total_lessons) * 100)
+            })
+            
+    return result
+
 @app.get("/courses", response_model=List[CourseResponse])
 def get_courses(db: Session = Depends(get_db)):
     return db.query(models.Course).all()

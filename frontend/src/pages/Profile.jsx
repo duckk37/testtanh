@@ -8,18 +8,23 @@ import { API_URL } from '../config';
 export default function Profile() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
+  const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
-      fetch(API_URL + '/users/me/stats', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      })
-      .then(res => res.json())
-      .then(data => {
-        setStats(data);
+      Promise.all([
+        fetch(API_URL + '/users/me/stats', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        }).then(res => res.json()),
+        fetch(API_URL + '/users/me/courses', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        }).then(res => res.json())
+      ])
+      .then(([statsData, coursesData]) => {
+        setStats(statsData);
+        // Sometimes FastAPI might return null or detail on error, so ensure it's an array
+        setCourses(Array.isArray(coursesData) ? coursesData : []);
         setLoading(false);
       })
       .catch(err => {
@@ -143,6 +148,33 @@ export default function Profile() {
                   </ResponsiveContainer>
                 </div>
               </div>
+              
+              {/* Courses Progress */}
+              {courses.length > 0 && (
+                <div className="bg-white rounded-2xl p-6 shadow-soft border border-slate-100">
+                  <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-blue-500" /> Khóa học đang học
+                  </h3>
+                  <div className="space-y-6">
+                    {courses.map(course => (
+                      <div key={course.id}>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-bold text-slate-700">{course.title}</span>
+                          <span className="text-sm font-medium text-slate-500">{course.completed_lessons} / {course.total_lessons} bài ({course.progress_percentage}%)</span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                          <div 
+                            className="bg-blue-600 h-3 rounded-full transition-all duration-1000 relative" 
+                            style={{ width: `${course.progress_percentage}%` }}
+                          >
+                            <div className="absolute inset-0 bg-white/20 w-full animate-pulse"></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>

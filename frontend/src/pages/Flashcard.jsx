@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Mic } from 'lucide-react';
+import { BookOpen, Mic, Volume2 } from 'lucide-react';
 import { API_URL } from '../config';
 
 const Flashcard = () => {
@@ -104,6 +104,13 @@ const Flashcard = () => {
     recognition.start();
   };
 
+  const playAudio = (e, text) => {
+    e.stopPropagation();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    window.speechSynthesis.speak(utterance);
+  };
+
   const handleReview = async (quality) => {
     const currentWord = words[currentIndex];
     const token = localStorage.getItem('access_token');
@@ -174,14 +181,24 @@ const Flashcard = () => {
             <h2 className="text-5xl font-bold text-slate-800">{currentWord.word}</h2>
             <p className="text-slate-400 mt-6 font-medium tracking-widest uppercase text-sm mb-8">Chạm để lật thẻ</p>
             
-            {/* AI Pronunciation Button on Front */}
-            <button 
-              onClick={(e) => startPronunciationTest(e, currentWord.word)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full text-white font-medium shadow-md transition-all ${isRecording ? 'bg-red-500 animate-pulse' : 'bg-blue-600 hover:bg-blue-700 hover:scale-105'}`}
-            >
-              <Mic size={20} />
-              {isRecording ? 'Đang nghe...' : 'Luyện phát âm'}
-            </button>
+            <div className="flex justify-center gap-4">
+              {/* AI Pronunciation Button on Front */}
+              <button 
+                onClick={(e) => startPronunciationTest(e, currentWord.word)}
+                className={`flex items-center gap-2 px-6 py-3 rounded-full text-white font-medium shadow-md transition-all ${isRecording ? 'bg-red-500 animate-pulse' : 'bg-blue-600 hover:bg-blue-700 hover:scale-105'}`}
+              >
+                <Mic size={20} />
+                {isRecording ? 'Đang nghe...' : 'Luyện phát âm'}
+              </button>
+
+              <button
+                onClick={(e) => playAudio(e, currentWord.word)}
+                className="flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-500 text-white font-medium shadow-md hover:bg-emerald-600 hover:scale-105 transition-all"
+              >
+                <Volume2 size={20} />
+                Nghe
+              </button>
+            </div>
             
             {/* AI Pronunciation Result */}
             {transcript && (
