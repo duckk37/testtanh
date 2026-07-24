@@ -11,8 +11,14 @@ from fastapi.security import OAuth2PasswordRequestForm
 from auth import get_password_hash, verify_password, create_access_token, get_current_user, ACCESS_TOKEN_EXPIRE_MINUTES
 import admin
 
+import os
+
 # Create tables
 models.Base.metadata.create_all(bind=engine)
+
+# Download TextBlob corpora on startup
+print("Downloading TextBlob corpora...")
+os.system("python -m textblob.download_corpora")
 
 app = FastAPI()
 app.include_router(admin.router)
