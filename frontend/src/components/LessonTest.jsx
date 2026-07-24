@@ -74,23 +74,30 @@ export default function LessonTest({ lesson, onTestPassed }) {
       <h2 className="text-xl font-bold mb-4">Bài kiểm tra: {lesson.title}</h2>
       
       {result ? (
-        <div className="text-center py-8">
-          <div className={`flex justify-center mb-4 ${result.is_passed ? 'text-green-500' : 'text-red-500'}`}>
-            {result.is_passed ? <CheckCircle2 size={48} /> : <AlertCircle size={48} />}
+        <div className="text-center py-12 px-4">
+          <div className={`flex justify-center mb-6 animate-bounce`}>
+            <div className={`w-24 h-24 rounded-full flex items-center justify-center ${result.is_passed ? 'bg-green-100 text-green-500' : 'bg-red-100 text-red-500'}`}>
+              {result.is_passed ? <CheckCircle2 size={56} /> : <AlertCircle size={56} />}
+            </div>
           </div>
-          <h3 className="text-2xl font-bold mb-2">
+          <h3 className="text-3xl font-extrabold mb-3 text-slate-800">
             {result.is_passed ? 'Tuyệt vời! Bạn đã vượt qua' : 'Rất tiếc! Bạn chưa đạt'}
           </h3>
-          <p className="text-lg">Điểm của bạn: <span className={`font-bold ${result.is_passed ? 'text-green-600' : 'text-red-600'}`}>{result.score}%</span></p>
-          <p className="text-sm text-slate-500 mt-1">Điểm yêu cầu: {lesson.passing_score_required}%</p>
-          <p className="text-sm text-slate-500 mt-1">Điểm cao nhất: {result.highest_score}% | Số lần thử: {result.attempts}</p>
+          <p className="text-xl text-slate-600 mb-6">Điểm của bạn: <span className={`font-black text-3xl ${result.is_passed ? 'text-green-600' : 'text-red-600'}`}>{result.score}%</span></p>
+          
+          <div className="flex justify-center gap-6 text-sm text-slate-500 mb-8">
+            <span className="bg-slate-50 px-4 py-2 rounded-lg border border-slate-100">Điểm yêu cầu: <strong>{lesson.passing_score_required}%</strong></span>
+            <span className="bg-slate-50 px-4 py-2 rounded-lg border border-slate-100">Cao nhất: <strong>{result.highest_score}%</strong></span>
+          </div>
           
           {result.is_passed ? (
-            <p className="mt-4 text-green-600 font-medium">Bạn đã hoàn thành bài học này và mở khóa bài tiếp theo.</p>
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-100 inline-block">
+              <p className="text-green-700 font-bold text-lg">🎉 Chúc mừng! Bạn đã mở khóa bài học tiếp theo.</p>
+            </div>
           ) : (
             <button 
               onClick={resetTest}
-              className="mt-6 px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              className="mt-2 px-8 py-4 bg-blue-600 text-white font-bold text-lg rounded-xl hover:bg-blue-700 hover:scale-105 transition-all shadow-md"
             >
               Làm lại bài kiểm tra
             </button>
@@ -106,29 +113,31 @@ export default function LessonTest({ lesson, onTestPassed }) {
             </div>
           </div>
           {questions.map((q, index) => (
-            <div key={q.id} className="p-4 border rounded-lg bg-slate-50">
-              <p className="font-medium mb-3">Câu {index + 1}: {q.content}</p>
-              <div className="space-y-2">
+            <div key={q.id} className="p-6 border border-slate-100 rounded-2xl bg-white shadow-soft">
+              <h3 className="font-bold text-lg mb-6 text-slate-800">
+                <span className="text-blue-600 mr-2 bg-blue-50 px-3 py-1 rounded-lg">Câu {index + 1}</span>
+                {q.content}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {['A', 'B', 'C', 'D'].map(opt => {
                   const optionText = q[`option_${opt.toLowerCase()}`];
                   const isSelected = answers[q.id] === opt;
                   
                   return (
-                    <label 
+                    <button 
                       key={opt}
-                      className={`flex items-center p-3 border rounded-md cursor-pointer transition-colors ${
-                        isSelected ? 'bg-blue-50 border-blue-500 text-blue-700' : 'bg-white hover:bg-slate-100 border-slate-200'
+                      onClick={() => handleOptionSelect(q.id, opt)}
+                      className={`text-left px-6 py-4 border-2 rounded-2xl cursor-pointer transition-all duration-200 group flex items-center gap-3 ${
+                        isSelected 
+                          ? 'bg-blue-50 border-blue-500 text-blue-700 font-bold ring-4 ring-blue-100 shadow-sm' 
+                          : 'bg-white hover:bg-blue-50/50 border-slate-200 hover:border-blue-400 text-slate-700'
                       }`}
                     >
-                      <input 
-                        type="radio" 
-                        name={`question-${q.id}`} 
-                        className="mr-3 text-blue-600 focus:ring-blue-500"
-                        checked={isSelected}
-                        onChange={() => handleOptionSelect(q.id, opt)}
-                      />
-                      <span className="font-medium mr-2">{opt}.</span> {optionText}
-                    </label>
+                      <span className={`w-8 h-8 flex items-center justify-center rounded-lg border-2 text-sm transition-colors ${isSelected ? 'border-blue-500 bg-blue-600 text-white' : 'border-slate-300 text-slate-500 group-hover:border-blue-400 group-hover:text-blue-600'}`}>
+                          {opt}
+                      </span>
+                      <span className="text-lg">{optionText}</span>
+                    </button>
                   );
                 })}
               </div>

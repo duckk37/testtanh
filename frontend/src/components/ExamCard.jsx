@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { FileText, Clock, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -37,4 +37,4 @@ function ExamCard({ exam }) {
   );
 }
 
-export default ExamCard;
+export default memo(ExamCard);

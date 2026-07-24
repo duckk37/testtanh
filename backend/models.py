@@ -19,6 +19,7 @@ class User(Base):
     
     progress = relationship("UserLessonProgress", back_populates="user")
     badges = relationship("UserBadge", back_populates="user")
+    comments = relationship("Comment", back_populates="user")
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 class Video(Base):
@@ -40,8 +41,8 @@ class Vocabulary(Base):
 class UserProgress(Base):
     __tablename__ = "user_progress"
     id = Column(String, primary_key=True, default=generate_uuid)
-    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"))
-    vocabulary_id = Column(String, ForeignKey("vocabularies.id", ondelete="CASCADE"))
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    vocabulary_id = Column(String, ForeignKey("vocabularies.id", ondelete="CASCADE"), index=True)
     repetition = Column(Integer, default=0)
     interval = Column(Integer, default=0)
     ease_factor = Column(Float, default=2.5)
@@ -66,8 +67,8 @@ class Course(Base):
 class Lesson(Base):
     __tablename__ = "lessons"
     id = Column(String, primary_key=True, default=generate_uuid)
-    course_id = Column(String, ForeignKey("courses.id", ondelete="CASCADE"))
-    exam_id = Column(String, ForeignKey("exams.id", ondelete="SET NULL"), nullable=True)
+    course_id = Column(String, ForeignKey("courses.id", ondelete="CASCADE"), index=True)
+    exam_id = Column(String, ForeignKey("exams.id", ondelete="SET NULL"), nullable=True, index=True)
     passing_score_required = Column(Integer, default=80)
     title = Column(String)
     youtube_id = Column(String)
@@ -76,6 +77,7 @@ class Lesson(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     course = relationship("Course", back_populates="lessons")
+    comments = relationship("Comment", back_populates="lesson")
 
 class Exam(Base):
     __tablename__ = "exams"
@@ -90,7 +92,7 @@ class Exam(Base):
 class Question(Base):
     __tablename__ = "questions"
     id = Column(String, primary_key=True, default=generate_uuid)
-    exam_id = Column(String, ForeignKey("exams.id", ondelete="CASCADE"))
+    exam_id = Column(String, ForeignKey("exams.id", ondelete="CASCADE"), index=True)
     content = Column(String)
     option_a = Column(String)
     option_b = Column(String)
@@ -104,8 +106,8 @@ class Question(Base):
 class UserLessonProgress(Base):
     __tablename__ = "user_lesson_progress"
     id = Column(String, primary_key=True, default=generate_uuid)
-    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"))
-    lesson_id = Column(String, ForeignKey("lessons.id", ondelete="CASCADE"))
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    lesson_id = Column(String, ForeignKey("lessons.id", ondelete="CASCADE"), index=True)
     is_completed = Column(Integer, default=0) # 0 = false, 1 = true
     score = Column(Integer, default=0) # Current/Last score
     highest_score = Column(Integer, default=0)
@@ -127,9 +129,21 @@ class UserBadge(Base):
     __tablename__ = "user_badges"
     
     id = Column(String, primary_key=True, default=generate_uuid)
-    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"))
-    badge_id = Column(String, ForeignKey("badges.id", ondelete="CASCADE"))
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    badge_id = Column(String, ForeignKey("badges.id", ondelete="CASCADE"), index=True)
     awarded_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     user = relationship("User", back_populates="badges")
     badge = relationship("Badge")
+
+class Comment(Base):
+    __tablename__ = "comments"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    lesson_id = Column(String, ForeignKey("lessons.id", ondelete="CASCADE"), index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    content = Column(String)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    user = relationship("User", back_populates="comments")
+    lesson = relationship("Lesson", back_populates="comments")

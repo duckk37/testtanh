@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 from typing import List, Optional
@@ -24,6 +24,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    max_age=600,
 )
 
 def calculate_sm2(quality: int, repetition: int, ease_factor: float, interval: int) -> dict:
@@ -262,6 +263,36 @@ def read_users_me(current_user: models.User = Depends(get_current_user), db: Ses
         "badges": badge_list
     }
 
+@app.get("/users/me/stats")
+def get_user_stats(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Total words learned
+    progress_records = db.query(models.UserProgress).filter(models.UserProgress.user_id == current_user.id).all()
+    total_words = len(progress_records)
+    
+    # Average exam score
+    lesson_progress = db.query(models.UserLessonProgress).filter(models.UserLessonProgress.user_id == current_user.id, models.UserLessonProgress.highest_score > 0).all()
+    avg_score = sum([lp.highest_score for lp in lesson_progress]) / len(lesson_progress) if lesson_progress else 0
+    
+    # Chart data (last 7 days vocabulary progress)
+    today = datetime.utcnow().date()
+    chart_data = []
+    
+    for i in range(6, -1, -1):
+        target_date = today - timedelta(days=i)
+        # Count words learned on this specific date
+        count = sum(1 for p in progress_records if p.created_at.date() == target_date)
+        chart_data.append({
+            "name": target_date.strftime("%d/%m"),
+            "words": count
+        })
+        
+    return {
+        "total_words": total_words,
+        "avg_score": round(avg_score, 1),
+        "streak_count": current_user.streak_count,
+        "chart_data": chart_data
+    }
+
 @app.get("/courses", response_model=List[CourseResponse])
 def get_courses(db: Session = Depends(get_db)):
     return db.query(models.Course).all()
@@ -368,6 +399,110 @@ def get_exams(db: Session = Depends(get_db)):
 @app.get("/exams/{exam_id}/questions", response_model=List[QuestionResponse])
 def get_questions(exam_id: str, db: Session = Depends(get_db)):
     return db.query(models.Question).filter(models.Question.exam_id == exam_id).all()
+
+# ==========================================
+# VOCABULARY & SM-2 ALGORITHM
+# ==========================================
+class VocabularyCreate(BaseModel):
+    word: str
+    phonetic: str
+    meaning: str
+    example: str
+
+@app.post("/vocabularies")
+def save_vocabulary(vocab: VocabularyCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    word_obj = db.query(models.Vocabulary).filter(models.Vocabulary.word == vocab.word).first()
+    if not word_obj:
+        word_obj = models.Vocabulary(word=vocab.word, phonetic=vocab.phonetic, meaning=vocab.meaning, example=vocab.example)
+        db.add(word_obj)
+        db.commit()
+        db.refresh(word_obj)
+        
+    progress = db.query(models.UserProgress).filter(
+        models.UserProgress.user_id == current_user.id,
+        models.UserProgress.vocabulary_id == word_obj.id
+    ).first()
+    
+    if not progress:
+        progress = models.UserProgress(user_id=current_user.id, vocabulary_id=word_obj.id)
+        db.add(progress)
+        db.commit()
+        
+    return {"message": "Saved successfully"}
+
+@app.get("/vocabularies/review")
+def get_due_vocabularies(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    today = datetime.utcnow()
+    progress_list = db.query(models.UserProgress).filter(
+        models.UserProgress.user_id == current_user.id,
+        models.UserProgress.next_review_date <= today
+    ).all()
+    
+    return [
+        {
+            "id": p.vocabulary.id,
+            "word": p.vocabulary.word,
+            "phonetic": p.vocabulary.phonetic,
+            "meaning": p.vocabulary.meaning,
+            "example": p.vocabulary.example,
+            "repetition": p.repetition,
+            "interval": p.interval,
+            "ease_factor": p.ease_factor
+        }
+        for p in progress_list
+    ]
+
+class ReviewSubmit(BaseModel):
+    quality: int # 1 to 5 (SM-2 standard)
+
+@app.post("/vocabularies/{id}/review")
+def submit_review(id: str, req: ReviewSubmit, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    progress = db.query(models.UserProgress).filter(
+        models.UserProgress.user_id == current_user.id,
+        models.UserProgress.vocabulary_id == id
+    ).first()
+    if not progress:
+        raise HTTPException(status_code=404, detail="Vocabulary not found in user's notebook")
+        
+    # SM-2 Algorithm
+    q = req.quality
+    if q >= 3:
+        if progress.repetition == 0:
+            progress.interval = 1
+        elif progress.repetition == 1:
+            progress.interval = 6
+        else:
+            progress.interval = int(round(progress.interval * progress.ease_factor))
+        progress.repetition += 1
+    else:
+        progress.repetition = 0
+        progress.interval = 1
+        
+    progress.ease_factor = progress.ease_factor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
+    if progress.ease_factor < 1.3:
+        progress.ease_factor = 1.3
+        
+    progress.next_review_date = datetime.utcnow() + timedelta(days=progress.interval)
+    db.commit()
+    return {"message": "Reviewed successfully", "next_review_date": progress.next_review_date}
+
+# ==========================================
+# COMMENTS API
+# ==========================================
+class CommentCreate(BaseModel):
+    content: str
+
+@app.get("/lessons/{lesson_id}/comments")
+def get_comments(lesson_id: str, db: Session = Depends(get_db)):
+    comments = db.query(models.Comment).options(joinedload(models.Comment.user)).filter(models.Comment.lesson_id == lesson_id).order_by(models.Comment.created_at.desc()).all()
+    return [{"id": c.id, "content": c.content, "created_at": c.created_at, "username": c.user.username, "role": c.user.role} for c in comments]
+
+@app.post("/lessons/{lesson_id}/comments")
+def post_comment(lesson_id: str, req: CommentCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    new_comment = models.Comment(lesson_id=lesson_id, user_id=current_user.id, content=req.content)
+    db.add(new_comment)
+    db.commit()
+    return {"message": "Comment posted"}
 
 class ReviewRequest(BaseModel):
     user_id: str

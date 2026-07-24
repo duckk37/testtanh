@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CourseCard from '../components/CourseCard';
 import ExamCard from '../components/ExamCard';
-import { BookOpen, Award, CheckCircle } from 'lucide-react';
+import { BookOpen, Award, CheckCircle, ArrowRight } from 'lucide-react';
 
 function Home() {
   const [courses, setCourses] = useState([]);
@@ -25,73 +25,88 @@ function Home() {
   }, []);
 
   if (loading) {
-    return <div className="p-10 text-center text-slate-500">Đang tải dữ liệu...</div>;
+    return <div className="p-20 text-center text-slate-500 font-medium">Đang tải dữ liệu khóa học...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <div className="bg-blue-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-              Hệ thống Học Tiếng Anh Tương Tác
-            </h1>
-            <p className="text-lg text-blue-100 mb-8 max-w-2xl">
-              Cải thiện kỹ năng Nghe - Đọc - Hiểu thông qua các khóa học video tương tác và hệ thống đề thi sát với thực tế. Tra từ điển tức thời ngay trong lúc học.
-            </p>
-            <div className="flex gap-4">
-              <a href="#courses" className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-slate-50 transition-colors">
-                Xem khóa học
-              </a>
-              <a href="#exams" className="px-6 py-3 bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-800 transition-colors">
-                Làm đề thi thử
-              </a>
-            </div>
+      <div className="relative overflow-hidden">
+        {/* Background Decorative Elements */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-500/10 blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-32 relative z-10 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 text-sm font-bold mb-6 border border-blue-100/50 shadow-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            </span>
+            Nền tảng học tập chuẩn Quốc tế
+          </div>
+          
+          <h1 className="text-4xl md:text-[56px] font-extrabold mb-6 leading-[1.15] text-slate-900 tracking-tight">
+            Nâng tầm tiếng Anh của bạn <br className="hidden md:block" /> 
+            với <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">BGKH English</span>
+          </h1>
+          
+          <p className="text-lg md:text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
+            Học tiếng Anh chưa bao giờ dễ dàng đến thế. Trải nghiệm phương pháp học video tương tác, tra từ điển tức thì và hệ thống ôn tập thông minh SM-2.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="#courses" className="btn-modern btn-primary-modern px-8 w-full sm:w-auto h-[56px] text-base">
+              Khám phá khóa học <ArrowRight size={18} />
+            </a>
+            <a href="#exams" className="btn-modern bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 hover:-translate-y-[1px] px-8 w-full sm:w-auto h-[56px] text-base shadow-sm">
+              Làm bài kiểm tra
+            </a>
           </div>
         </div>
       </div>
 
       {/* Feature Highlights */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20 mb-24">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-md border border-slate-100 flex items-start gap-4">
-            <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="card-modern p-6">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-5 border border-blue-200/50">
               <BookOpen size={24} />
             </div>
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-1">Video Tương Tác</h3>
-              <p className="text-sm text-slate-600">Click để tra từ trực tiếp trên phụ đề, lưu từ vựng tự động.</p>
-            </div>
+            <h3 className="font-bold text-lg text-slate-900 mb-2">Video Tương Tác 100%</h3>
+            <p className="text-[14.5px] text-slate-500 leading-relaxed">Dừng video và tra từ trực tiếp trên phụ đề. Không cần dùng thêm từ điển bên ngoài, lưu từ mới tự động vào sổ tay.</p>
           </div>
-          <div className="bg-white p-6 rounded-xl shadow-md border border-slate-100 flex items-start gap-4">
-            <div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+          
+          <div className="card-modern p-6">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-5 border border-emerald-200/50">
               <CheckCircle size={24} />
             </div>
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-1">Ôn Tập Thông Minh</h3>
-              <p className="text-sm text-slate-600">Thuật toán SM-2 giúp ghi nhớ từ vựng hiệu quả hơn 300%.</p>
-            </div>
+            <h3 className="font-bold text-lg text-slate-900 mb-2">Trí Tuệ Nhân Tạo (SM-2)</h3>
+            <p className="text-[14.5px] text-slate-500 leading-relaxed">Thuật toán lặp lại ngắt quãng SM-2 phân tích và nhắc bạn ôn tập đúng lúc bạn sắp quên từ vựng đó.</p>
           </div>
-          <div className="bg-white p-6 rounded-xl shadow-md border border-slate-100 flex items-start gap-4">
-            <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+          
+          <div className="card-modern p-6">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-50 to-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-5 border border-purple-200/50">
               <Award size={24} />
             </div>
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-1">Đề Thi Bám Sát</h3>
-              <p className="text-sm text-slate-600">Ngân hàng đề thi thử bám sát cấu trúc của Bộ GD&ĐT.</p>
-            </div>
+            <h3 className="font-bold text-lg text-slate-900 mb-2">Mở Khóa Lộ Trình</h3>
+            <p className="text-[14.5px] text-slate-500 leading-relaxed">Phải hoàn thành bài kiểm tra đạt điểm chuẩn mới được học bài tiếp theo. Đảm bảo chất lượng đầu ra.</p>
           </div>
         </div>
       </div>
 
       {/* Courses Section */}
-      <div id="courses" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="mb-10">
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">Khóa Học Nổi Bật</h2>
-          <div className="w-20 h-1 bg-blue-600 rounded"></div>
+      <div id="courses" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="flex justify-between items-end mb-10">
+          <div>
+            <h2 className="text-[32px] font-bold text-slate-900 mb-2">Khóa Học Phổ Biến</h2>
+            <p className="text-slate-500">Được hàng ngàn học viên tin tưởng lựa chọn</p>
+          </div>
+          <a href="#" className="hidden sm:flex text-blue-600 font-bold items-center gap-1 hover:text-blue-700">
+            Xem tất cả <ArrowRight size={16} />
+          </a>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           {courses.map(course => (
             <CourseCard key={course.id} course={course} />
           ))}
@@ -99,13 +114,14 @@ function Home() {
       </div>
 
       {/* Exams Section */}
-      <div id="exams" className="bg-slate-100 py-20 border-t border-slate-200">
+      <div id="exams" className="bg-gradient-to-b from-white to-slate-50 border-t border-slate-100 mt-12 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-10">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Đề Thi Thử Mới Nhất</h2>
-            <div className="w-20 h-1 bg-blue-600 rounded"></div>
+          <div className="text-center mb-12">
+            <h2 className="text-[32px] font-bold text-slate-900 mb-2">Luyện Thi Thực Tế</h2>
+            <p className="text-slate-500 max-w-xl mx-auto">Hệ thống ngân hàng đề thi khổng lồ được cập nhật liên tục bám sát cấu trúc đề thi chính thức.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
             {exams.map(exam => (
               <ExamCard key={exam.id} exam={exam} />
             ))}

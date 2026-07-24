@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import InteractiveVideoPlayer from '../components/InteractiveVideoPlayer';
 import LessonTest from '../components/LessonTest';
+import LessonComments from '../components/LessonComments';
 import { ChevronLeft, PlayCircle, Lock, CheckCircle2, FileText, Video } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -94,9 +95,9 @@ function CourseDetail() {
             <div 
               key={lesson.id}
               onClick={() => handleLessonSelect(lesson)}
-              className={`p-4 border-b border-slate-100 flex items-start gap-3 transition-colors ${
-                !lesson.is_unlocked ? 'opacity-50 cursor-not-allowed bg-slate-50' : 'cursor-pointer hover:bg-slate-50'
-              } ${activeLesson?.id === lesson.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : 'border-l-4 border-l-transparent'}`}
+              className={`p-4 mx-3 my-2 rounded-xl flex items-start gap-3 transition-all ${
+                !lesson.is_unlocked ? 'opacity-50 cursor-not-allowed bg-slate-50' : 'cursor-pointer hover:bg-slate-50 hover:shadow-sm'
+              } ${activeLesson?.id === lesson.id ? 'bg-blue-50 border border-blue-200 shadow-sm' : 'border border-transparent'}`}
             >
               <div className={`mt-0.5 ${!lesson.is_unlocked ? 'text-slate-400' : lesson.is_completed ? 'text-green-500' : activeLesson?.id === lesson.id ? 'text-blue-600' : 'text-slate-400'}`}>
                 {!lesson.is_unlocked ? <Lock size={20} /> : lesson.is_completed ? <CheckCircle2 size={20} /> : <PlayCircle size={20} />}
@@ -119,7 +120,7 @@ function CourseDetail() {
         <div className="p-4 md:p-8">
           <div className="max-w-5xl mx-auto">
             {/* Header Area */}
-            <div className="bg-white p-6 rounded-t-xl shadow-sm border border-slate-200 border-b-0">
+            <div className="bg-white p-6 rounded-t-2xl shadow-soft border border-slate-100 border-b-0">
               <h1 className="text-2xl font-bold text-slate-900 mb-4">{activeLesson?.title}</h1>
               
               {/* Tabs */}
@@ -150,7 +151,7 @@ function CourseDetail() {
             </div>
             
             {/* Tab Content */}
-            <div className="bg-white shadow-sm border border-slate-200 rounded-b-xl overflow-hidden p-6">
+            <div className="bg-white shadow-soft border border-slate-100 rounded-b-2xl overflow-hidden p-6 mb-8">
               {activeTab === 'video' && activeLesson && (
                 <>
                   <p className="text-slate-600 mb-6">Xem video, bật phụ đề và click vào bất kỳ từ nào để tra nghĩa. Bạn cần xem hết video để làm bài kiểm tra.</p>
@@ -170,6 +171,8 @@ function CourseDetail() {
                       </button>
                     </div>
                   )}
+                  
+                  <LessonComments lessonId={activeLesson.id} />
                 </>
               )}
 

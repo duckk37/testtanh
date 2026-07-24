@@ -64,6 +64,38 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd }) => {
     }
   };
 
+  const saveVocabulary = async () => {
+    if (!dictionaryData || dictionaryData.error) return;
+    
+    const token = localStorage.getItem('access_token');
+    if (!token) return alert('Vui lòng đăng nhập để lưu từ vựng!');
+    
+    try {
+      const response = await fetch('http://localhost:8000/vocabularies', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          word: dictionaryData.word,
+          phonetic: dictionaryData.phonetic || '',
+          meaning: dictionaryData.meanings[0]?.definitions[0]?.definition || '',
+          example: dictionaryData.meanings[0]?.definitions[0]?.example || ''
+        })
+      });
+      
+      if (response.ok) {
+        alert('Đã lưu vào sổ tay!');
+      } else {
+        alert('Có lỗi xảy ra khi lưu từ.');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Lỗi mạng, không thể lưu.');
+    }
+  };
+
   const renderInteractiveSubtitle = (text) => {
     return text.split(' ').map((word, index) => (
       <span 
@@ -147,7 +179,10 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd }) => {
                 ))}
               </div>
               
-              <button className="mt-6 w-full md:w-auto bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition font-medium shadow-md shadow-blue-600/20 flex items-center justify-center gap-2">
+              <button 
+                onClick={saveVocabulary}
+                className="mt-6 w-full md:w-auto bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition font-medium shadow-md shadow-blue-600/20 flex items-center justify-center gap-2"
+              >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
                 Lưu vào sổ tay
               </button>

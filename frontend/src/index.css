@@ -4,6 +4,54 @@
 
 @layer base {
   body {
-    @apply antialiased;
+    @apply antialiased text-slate-900;
+    font-family: 'Inter', sans-serif;
+    background: 
+      radial-gradient(60% 45% at 88% 6%, rgba(37, 99, 235, 0.08), transparent 60%),
+      radial-gradient(55% 40% at 6% 96%, rgba(37, 99, 235, 0.06), transparent 60%),
+      linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    min-height: 100vh;
+  }
+  
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: 
+      linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 72%);
+    -webkit-mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 72%);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+@layer components {
+  .card-modern {
+    @apply bg-white border border-slate-200 rounded-2xl shadow-soft relative overflow-hidden;
+  }
+  .card-modern::before {
+    content: "";
+    @apply absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400;
+  }
+  
+  .input-modern {
+    @apply w-full h-[52px] bg-white border border-slate-200 rounded-xl px-12 text-[15px] outline-none transition-all duration-200;
+  }
+  .input-modern:focus {
+    @apply border-blue-500 ring-4 ring-blue-500/10;
+  }
+  
+  .btn-modern {
+    @apply w-full min-h-[52px] inline-flex items-center justify-center gap-2 rounded-xl text-[15px] font-semibold transition-all duration-200;
+  }
+  .btn-primary-modern {
+    @apply bg-blue-600 text-white shadow-glow hover:bg-blue-700 hover:-translate-y-[1px] hover:shadow-glow-hover active:translate-y-0 disabled:opacity-60 disabled:hover:translate-y-0 disabled:shadow-none;
   }
 }
