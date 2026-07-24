@@ -237,42 +237,42 @@ export default function AdminDashboard() {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {/* Stat Card 1 */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center">
-                  <Users className="text-blue-600" size={28} />
+              <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                  <Users className="text-blue-600 dark:text-blue-400" size={28} />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-500">Tổng Học Viên</p>
-                  <p className="text-2xl font-bold text-slate-900">{totalUsers}</p>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tổng Học Viên</p>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">{totalUsers}</p>
                 </div>
               </div>
               
               {/* Stat Card 2 */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center">
-                  <TrendingUp className="text-orange-500" size={28} />
+              <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center">
+                  <TrendingUp className="text-orange-500 dark:text-orange-400" size={28} />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-500">Học viên năng nổ</p>
-                  <p className="text-2xl font-bold text-slate-900">{activeUsers}</p>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Học viên năng nổ</p>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">{activeUsers}</p>
                 </div>
               </div>
               
               {/* Stat Card 3 */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center">
-                  <BookOpen className="text-emerald-600" size={28} />
+              <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
+                  <BookOpen className="text-emerald-600 dark:text-emerald-400" size={28} />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-500">Tổng Khóa học</p>
-                  <p className="text-2xl font-bold text-slate-900">{courses.length}</p>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tổng Khóa học</p>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">{courses.length}</p>
                 </div>
               </div>
             </div>
             
             {/* Quick Actions */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-              <h3 className="text-lg font-bold text-slate-800 mb-4">Hành động nhanh</h3>
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Hành động nhanh</h3>
               <div className="flex gap-4">
                 <button 
                   onClick={() => { setActiveTab('courses'); setShowAddCourseModal(true); }}
@@ -360,9 +360,9 @@ export default function AdminDashboard() {
           <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4">
             <h1 className="text-3xl font-bold text-slate-900 mb-8">Danh sách Người dùng</h1>
             
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                <thead className="bg-slate-50 dark:bg-slate-900/50">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Học viên</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Email</th>
@@ -370,18 +370,18 @@ export default function AdminDashboard() {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Chăm chỉ</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-slate-100">
+                <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700">
                   {users.map(u => (
-                    <tr key={u.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
+                          <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm">
                             {u.username.charAt(0).toUpperCase()}
                           </div>
-                          <span className="font-bold text-slate-900">{u.username}</span>
+                          <span className="font-bold text-slate-900 dark:text-white">{u.username}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{u.email}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-300">{u.email}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {u.role === 'admin' ? (
                           <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-purple-100 text-purple-700">Admin</span>
