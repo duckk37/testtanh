@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Target, Award, BookOpen, Flame } from 'lucide-react';
+import { API_URL } from '../config';
 
 export default function Profile() {
   const { user } = useAuth();
@@ -11,7 +12,7 @@ export default function Profile() {
 
   useEffect(() => {
     if (user) {
-      fetch('http://localhost:8000/users/me/stats', {
+      fetch(API_URL + '/users/me/stats', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

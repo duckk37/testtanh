@@ -1,8 +1,10 @@
 # Backend
 backend/venv/
+backend/.venv/
 backend/__pycache__/
 backend/*.pyc
 backend/english_app.db
+english_app.db
 backend/.env
 
 # Frontend

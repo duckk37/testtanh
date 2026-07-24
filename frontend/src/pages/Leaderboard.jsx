@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Medal, Flame, BookOpen, Crown } from 'lucide-react';
+import { API_URL } from '../config';
 
 export default function Leaderboard() {
   const [leaders, setLeaders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:8000/users/leaderboard')
+    fetch(API_URL + '/users/leaderboard')
       .then(res => res.json())
       .then(data => {
         setLeaders(data);

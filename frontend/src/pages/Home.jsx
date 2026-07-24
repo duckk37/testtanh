@@ -3,6 +3,7 @@ import CourseCard from '../components/CourseCard';
 import ExamCard from '../components/ExamCard';
 import { BookOpen, Award, CheckCircle, ArrowRight } from 'lucide-react';
 import { SkeletonCard } from '../components/Skeleton';
+import { API_URL } from '../config';
 
 function Home() {
   const [courses, setCourses] = useState([]);
@@ -11,8 +12,8 @@ function Home() {
 
   useEffect(() => {
     Promise.all([
-      fetch('http://localhost:8000/courses').then(res => res.json()),
-      fetch('http://localhost:8000/exams').then(res => res.json())
+      fetch(API_URL + '/courses').then(res => res.json()),
+      fetch(API_URL + '/exams').then(res => res.json())
     ])
     .then(([coursesData, examsData]) => {
       setCourses(coursesData);

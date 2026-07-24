@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Mic } from 'lucide-react';
+import { API_URL } from '../config';
 
 const Flashcard = () => {
   const [words, setWords] = useState([]);
@@ -21,7 +22,7 @@ const Flashcard = () => {
     if (!token) return;
 
     try {
-      const response = await fetch('http://localhost:8000/vocabularies/review', {
+      const response = await fetch(API_URL + '/vocabularies/review', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -108,7 +109,7 @@ const Flashcard = () => {
     const token = localStorage.getItem('access_token');
     
     try {
-      await fetch(`http://localhost:8000/vocabularies/${currentWord.id}/review`, {
+      await fetch(`${API_URL}/vocabularies/${currentWord.id}/review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

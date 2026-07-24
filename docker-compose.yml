@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: english_backend
+    volumes:
+      - ./backend/english_app.db:/app/english_app.db # Persist SQLite database
+    ports:
+      - "8000:8000"
+    restart: always
+
+  frontend:
+    build: ./frontend
+    container_name: english_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always

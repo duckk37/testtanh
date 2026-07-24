@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { API_URL } from '../config';
 
 const AuthContext = createContext();
 
@@ -9,7 +10,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (token) {
-      fetch('http://localhost:8000/users/me', {
+      fetch(API_URL + '/users/me', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -35,7 +36,7 @@ export function AuthProvider({ children }) {
     formData.append('username', email); // OAuth2 expects 'username' field
     formData.append('password', password);
 
-    const res = await fetch('http://localhost:8000/login', {
+    const res = await fetch(API_URL + '/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -52,7 +53,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('access_token', data.access_token);
     
     // Fetch user info
-    const userRes = await fetch('http://localhost:8000/users/me', {
+    const userRes = await fetch(API_URL + '/users/me', {
       headers: { 'Authorization': `Bearer ${data.access_token}` }
     });
     const userData = await userRes.json();
@@ -60,7 +61,7 @@ export function AuthProvider({ children }) {
   };
 
   const register = async (username, email, password) => {
-    const res = await fetch('http://localhost:8000/register', {
+    const res = await fetch(API_URL + '/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -77,7 +78,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('access_token', data.access_token);
     
     // Fetch user info
-    const userRes = await fetch('http://localhost:8000/users/me', {
+    const userRes = await fetch(API_URL + '/users/me', {
       headers: { 'Authorization': `Bearer ${data.access_token}` }
     });
     const userData = await userRes.json();

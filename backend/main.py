@@ -426,6 +426,13 @@ def submit_lesson_test(lesson_id: str, req: SubmitTestRequest, db: Session = Dep
 def get_exams(db: Session = Depends(get_db)):
     return db.query(models.Exam).all()
 
+@app.get("/exams/{exam_id}", response_model=ExamResponse)
+def get_exam(exam_id: str, db: Session = Depends(get_db)):
+    exam = db.query(models.Exam).filter(models.Exam.id == exam_id).first()
+    if not exam:
+        raise HTTPException(status_code=404, detail="Exam not found")
+    return exam
+
 @app.get("/exams/{exam_id}/questions", response_model=List[QuestionResponse])
 def get_questions(exam_id: str, db: Session = Depends(get_db)):
     return db.query(models.Question).filter(models.Question.exam_id == exam_id).all()

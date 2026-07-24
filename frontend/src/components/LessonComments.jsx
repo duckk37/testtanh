@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MessageCircle, Send } from 'lucide-react';
+import { API_URL } from '../config';
 
 const LessonComments = ({ lessonId }) => {
   const [comments, setComments] = useState([]);
@@ -12,7 +13,7 @@ const LessonComments = ({ lessonId }) => {
 
   const fetchComments = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/lessons/${lessonId}/comments`);
+      const response = await fetch(`${API_URL}/lessons/${lessonId}/comments`);
       if (response.ok) {
         const data = await response.json();
         setComments(data);
@@ -32,7 +33,7 @@ const LessonComments = ({ lessonId }) => {
     if (!token) return alert('Vui lòng đăng nhập để bình luận');
 
     try {
-      const response = await fetch(`http://localhost:8000/lessons/${lessonId}/comments`, {
+      const response = await fetch(`${API_URL}/lessons/${lessonId}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

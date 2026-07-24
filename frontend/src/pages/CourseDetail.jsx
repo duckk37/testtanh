@@ -6,6 +6,7 @@ import LessonComments from '../components/LessonComments';
 import { ChevronLeft, PlayCircle, Lock, CheckCircle2, FileText, Video } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { SkeletonSidebar, SkeletonVideo } from '../components/Skeleton';
+import { API_URL } from '../config';
 
 function CourseDetail() {
   const { courseId } = useParams();
@@ -25,7 +26,7 @@ function CourseDetail() {
       return;
     }
 
-    fetch(`http://localhost:8000/courses/${courseId}/lessons`, {
+    fetch(`${API_URL}/courses/${courseId}/lessons`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -163,7 +164,7 @@ function CourseDetail() {
                   <p className="text-slate-600 mb-6">Xem video, bật phụ đề và click vào bất kỳ từ nào để tra nghĩa. Bạn cần xem hết video để làm bài kiểm tra.</p>
                   <InteractiveVideoPlayer 
                     key={`video-${activeLesson.id}`} 
-                    videoId={activeLesson.youtube_id}
+                    youtubeId={activeLesson.youtube_id}
                     onVideoEnd={() => setVideoEnded(true)}
                   />
                   

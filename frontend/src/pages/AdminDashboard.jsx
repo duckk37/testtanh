@@ -1,12 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
+import { 
+import { API_URL } from '../config';
+  LayoutDashboard, 
+  BookOpen, 
+  Users, 
+  Settings,
+  Plus,
+  Trash2,
+  Edit,
+  ShieldAlert,
+  ChevronRight,
+  TrendingUp,
+  X
+} from 'lucide-react';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [courses, setCourses] = useState([]);
   const [users, setUsers] = useState([]);
-  const [activeTab, setActiveTab] = useState('courses');
+  const [activeTab, setActiveTab] = useState('overview'); // overview, courses, users
+  
+  // Modal state
+  const [showAddCourseModal, setShowAddCourseModal] = useState(false);
+  const [newCourse, setNewCourse] = useState({
+    title: '',
+    description: '',
+    price: 0,
+    thumbnail: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=600&auto=format&fit=crop'
+  });
 
   if (!user || user.role !== 'admin') {
     return <Navigate to="/" replace />;
@@ -14,100 +37,403 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchData();
-  }, [activeTab]);
+  }, []);
 
   const fetchData = async () => {
     const token = localStorage.getItem('access_token');
     const headers = { 'Authorization': `Bearer ${token}` };
     
-    if (activeTab === 'courses') {
-      const res = await fetch('http://localhost:8000/courses', { headers });
-      const data = await res.json();
-      setCourses(data);
-    } else {
-      const res = await fetch('http://localhost:8000/admin/users', { headers });
-      const data = await res.json();
-      setUsers(data);
+    try {
+      const resCourses = await fetch(API_URL + '/courses', { headers });
+      if (resCourses.ok) {
+        const data = await resCourses.json();
+        setCourses(data);
+      }
+
+      const resUsers = await fetch(API_URL + '/admin/users', { headers });
+      if (resUsers.ok) {
+        const data = await resUsers.json();
+        setUsers(data);
+      }
+    } catch (err) {
+      console.error("Error fetching admin data:", err);
     }
   };
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-slate-800 mb-6">Admin Dashboard</h1>
+  const handleAddCourse = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('access_token');
+    try {
+      const res = await fetch(API_URL + '/admin/courses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(newCourse)
+      });
       
-      <div className="flex border-b border-slate-200 mb-6">
-        <button 
-          className={`px-4 py-2 font-medium ${activeTab === 'courses' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-600'}`}
-          onClick={() => setActiveTab('courses')}
-        >
-          Quản lý Khóa học
-        </button>
-        <button 
-          className={`px-4 py-2 font-medium ${activeTab === 'users' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-600'}`}
-          onClick={() => setActiveTab('users')}
-        >
-          Người dùng
-        </button>
+      if (res.ok) {
+        alert("Thêm khóa học thành công!");
+        setShowAddCourseModal(false);
+        setNewCourse({ title: '', description: '', price: 0, thumbnail: '' });
+        fetchData(); // Refresh list
+      } else {
+        alert("Có lỗi xảy ra khi thêm khóa học.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi kết nối.");
+    }
+  };
+
+  const handleDeleteCourse = async (courseId, courseTitle) => {
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa khóa học "${courseTitle}"? Hành động này không thể hoàn tác.`)) {
+      return;
+    }
+    
+    const token = localStorage.getItem('access_token');
+    try {
+      const res = await fetch(`${API_URL}/admin/courses/${courseId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (res.ok) {
+        alert("Đã xóa khóa học.");
+        fetchData();
+      } else {
+        alert("Lỗi khi xóa khóa học.");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Stats
+  const totalRevenue = courses.reduce((acc, curr) => acc + curr.price, 0); // Mock revenue
+  const totalUsers = users.length;
+  const activeUsers = users.filter(u => u.streak_count > 0).length;
+
+  return (
+    <div className="flex h-[calc(100vh-64px)] bg-slate-50 font-sans">
+      
+      {/* Sidebar */}
+      <div className="w-64 bg-white border-r border-slate-200 flex flex-col shadow-sm z-10">
+        <div className="p-6">
+          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+            <ShieldAlert className="text-blue-600" size={24} />
+            Admin Panel
+          </h2>
+        </div>
+        
+        <nav className="flex-1 px-4 space-y-2">
+          <button 
+            onClick={() => setActiveTab('overview')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+              activeTab === 'overview' ? 'bg-blue-600 text-white shadow-md shadow-blue-200' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            }`}
+          >
+            <LayoutDashboard size={20} />
+            <span className="font-medium">Tổng quan</span>
+            {activeTab === 'overview' && <ChevronRight size={16} className="ml-auto" />}
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab('courses')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+              activeTab === 'courses' ? 'bg-blue-600 text-white shadow-md shadow-blue-200' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            }`}
+          >
+            <BookOpen size={20} />
+            <span className="font-medium">Khóa học</span>
+            {activeTab === 'courses' && <ChevronRight size={16} className="ml-auto" />}
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab('users')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+              activeTab === 'users' ? 'bg-blue-600 text-white shadow-md shadow-blue-200' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            }`}
+          >
+            <Users size={20} />
+            <span className="font-medium">Người dùng</span>
+            {activeTab === 'users' && <ChevronRight size={16} className="ml-auto" />}
+          </button>
+        </nav>
+        
+        <div className="p-4 border-t border-slate-200">
+          <Link to="/" className="flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-colors px-4 py-2 text-sm font-medium">
+            <ChevronRight size={16} className="rotate-180" />
+            Về trang chủ
+          </Link>
+        </div>
       </div>
 
-      {activeTab === 'courses' && (
-        <div>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md mb-4 hover:bg-blue-700">
-            + Thêm khóa học
-          </button>
-          <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-            <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Tên khóa học</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Giá</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Hành động</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-slate-200">
-                {courses.map(course => (
-                  <tr key={course.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-slate-900">{course.title}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-slate-500">
-                      {course.price.toLocaleString()}đ
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-blue-600 hover:text-blue-900 cursor-pointer">
-                      Chỉnh sửa
-                    </td>
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-y-auto p-8">
+        
+        {/* OVERVIEW TAB */}
+        {activeTab === 'overview' && (
+          <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4">
+            <h1 className="text-3xl font-bold text-slate-900 mb-8">Tổng quan hệ thống</h1>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {/* Stat Card 1 */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center">
+                  <Users className="text-blue-600" size={28} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-500">Tổng Học Viên</p>
+                  <p className="text-2xl font-bold text-slate-900">{totalUsers}</p>
+                </div>
+              </div>
+              
+              {/* Stat Card 2 */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center">
+                  <TrendingUp className="text-orange-500" size={28} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-500">Học viên năng nổ</p>
+                  <p className="text-2xl font-bold text-slate-900">{activeUsers}</p>
+                </div>
+              </div>
+              
+              {/* Stat Card 3 */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center">
+                  <BookOpen className="text-emerald-600" size={28} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-500">Tổng Khóa học</p>
+                  <p className="text-2xl font-bold text-slate-900">{courses.length}</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Quick Actions */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+              <h3 className="text-lg font-bold text-slate-800 mb-4">Hành động nhanh</h3>
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => { setActiveTab('courses'); setShowAddCourseModal(true); }}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm"
+                >
+                  <Plus size={18} /> Thêm khóa học mới
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* COURSES TAB */}
+        {activeTab === 'courses' && (
+          <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4">
+            <div className="flex justify-between items-center mb-8">
+              <h1 className="text-3xl font-bold text-slate-900">Quản lý Khóa học</h1>
+              <button 
+                onClick={() => setShowAddCourseModal(true)}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm"
+              >
+                <Plus size={18} /> Thêm khóa học
+              </button>
+            </div>
+            
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+              <table className="min-w-full divide-y divide-slate-200">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Khóa học</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Mô tả ngắn</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Giá bán</th>
+                    <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Hành động</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-slate-100">
+                  {courses.map(course => (
+                    <tr key={course.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-4">
+                          <img src={course.thumbnail} alt="" className="w-16 h-12 object-cover rounded-lg shadow-sm border border-slate-200" />
+                          <div className="font-bold text-slate-900 line-clamp-1">{course.title}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-500 line-clamp-2 max-w-xs">
+                        {course.description}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap font-medium text-emerald-600">
+                        {course.price.toLocaleString()} ₫
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors mr-2" title="Sửa (Chưa mở)">
+                          <Edit size={18} />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteCourse(course.id, course.title)}
+                          className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors" 
+                          title="Xóa khóa học"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {courses.length === 0 && (
+                    <tr>
+                      <td colSpan="4" className="px-6 py-10 text-center text-slate-500">Chưa có khóa học nào.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* USERS TAB */}
+        {activeTab === 'users' && (
+          <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4">
+            <h1 className="text-3xl font-bold text-slate-900 mb-8">Danh sách Người dùng</h1>
+            
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+              <table className="min-w-full divide-y divide-slate-200">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Học viên</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Vai trò</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Chăm chỉ</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-slate-100">
+                  {users.map(u => (
+                    <tr key={u.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
+                            {u.username.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="font-bold text-slate-900">{u.username}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{u.email}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {u.role === 'admin' ? (
+                          <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-purple-100 text-purple-700">Admin</span>
+                        ) : (
+                          <span className="px-2.5 py-1 text-xs font-medium rounded-md bg-blue-50 text-blue-600">Học viên</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {u.streak_count > 0 ? (
+                          <span className="flex items-center gap-1 text-orange-600 font-bold bg-orange-50 px-2.5 py-1 rounded-md w-fit">
+                            <Flame size={16} /> {u.streak_count} ngày
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 text-sm">Chưa học</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* Add Course Modal */}
+      {showAddCourseModal && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center p-6 border-b border-slate-100">
+              <h2 className="text-xl font-bold text-slate-900">Thêm Khóa Học Mới</h2>
+              <button 
+                onClick={() => setShowAddCourseModal(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-full hover:bg-slate-100"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleAddCourse} className="p-6 space-y-4 bg-slate-50">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Tên khóa học</label>
+                <input 
+                  type="text" 
+                  required
+                  value={newCourse.title}
+                  onChange={e => setNewCourse({...newCourse, title: e.target.value})}
+                  className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  placeholder="Ví dụ: Pro 3M - Ôn thi THPT"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Mô tả chi tiết</label>
+                <textarea 
+                  required
+                  rows={3}
+                  value={newCourse.description}
+                  onChange={e => setNewCourse({...newCourse, description: e.target.value})}
+                  className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
+                  placeholder="Khóa học này dành cho..."
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Giá bán (VNĐ)</label>
+                  <input 
+                    type="number" 
+                    required
+                    min={0}
+                    value={newCourse.price}
+                    onChange={e => setNewCourse({...newCourse, price: parseInt(e.target.value) || 0})}
+                    className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Link Ảnh Bìa (URL)</label>
+                  <input 
+                    type="url" 
+                    required
+                    value={newCourse.thumbnail}
+                    onChange={e => setNewCourse({...newCourse, thumbnail: e.target.value})}
+                    className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  />
+                </div>
+              </div>
+              
+              {newCourse.thumbnail && (
+                <div className="mt-2 text-sm text-slate-500">
+                  <p className="mb-1">Xem trước ảnh bìa:</p>
+                  <img src={newCourse.thumbnail} alt="Preview" className="h-24 object-cover rounded-lg border border-slate-200" onError={(e) => e.target.style.display = 'none'} />
+                </div>
+              )}
+              
+              <div className="pt-4 flex justify-end gap-3 border-t border-slate-200 mt-6">
+                <button 
+                  type="button"
+                  onClick={() => setShowAddCourseModal(false)}
+                  className="px-5 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-200 transition-colors"
+                >
+                  Hủy bỏ
+                </button>
+                <button 
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm"
+                >
+                  Tạo khóa học
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
 
-      {activeTab === 'users' && (
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Tên</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Vai trò</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Chuỗi (Ngày)</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-slate-200">
-              {users.map(u => (
-                <tr key={u.id}>
-                  <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900">{u.username}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-slate-500">{u.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-slate-500">{u.role}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-orange-500 font-bold">🔥 {u.streak_count}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
     </div>
   );
 }

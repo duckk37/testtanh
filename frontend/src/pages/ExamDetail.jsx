@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, CheckCircle, XCircle } from 'lucide-react';
 import { SkeletonExam } from '../components/Skeleton';
+import { API_URL } from '../config';
 
 function ExamDetail() {
   const { examId } = useParams();
@@ -12,7 +13,7 @@ function ExamDetail() {
   const [score, setScore] = useState(0);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/exams/${examId}/questions`)
+    fetch(`${API_URL}/exams/${examId}/questions`)
       .then(res => res.json())
       .then(data => {
         setQuestions(data);

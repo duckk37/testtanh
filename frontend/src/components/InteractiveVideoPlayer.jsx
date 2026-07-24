@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import YouTube from 'react-youtube';
+import { API_URL } from '../config';
 
 const mockSubtitles = [
   { id: 1, start: 1.0, end: 3.5, text: "Welcome to our interactive English lesson." },
@@ -71,7 +72,7 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd }) => {
     if (!token) return alert('Vui lòng đăng nhập để lưu từ vựng!');
     
     try {
-      const response = await fetch('http://localhost:8000/vocabularies', {
+      const response = await fetch(API_URL + '/vocabularies', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
