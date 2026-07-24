@@ -20,7 +20,9 @@ export default function CourseContentManager({ course, onBack }) {
   const fetchLessons = async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_URL + `/courses/${course.id}/lessons`);
+      const res = await fetch(API_URL + `/courses/${course.id}/lessons`, {
+        headers: getAuthHeaders()
+      });
       if (res.ok) {
         const json = await res.json();
         setLessons(json);
