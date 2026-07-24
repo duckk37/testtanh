@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import models
 from database import get_db
 from auth import get_current_user
@@ -25,10 +25,10 @@ def get_all_users(db: Session = Depends(get_db), admin: models.User = Depends(re
     return [{"id": u.id, "email": u.email, "username": u.username, "role": u.role, "streak_count": u.streak_count} for u in users]
 
 class CourseCreate(BaseModel):
-    title: str
-    description: str
+    title: str = Field(..., min_length=1)
+    description: str = Field(..., min_length=1)
     thumbnail: str
-    price: float
+    price: float = Field(..., ge=0)
 
 @router.post("/courses")
 def create_course(course: CourseCreate, db: Session = Depends(get_db), admin: models.User = Depends(require_admin)):

@@ -65,6 +65,20 @@ export default function AdminDashboard() {
 
   const handleAddCourse = async (e) => {
     e.preventDefault();
+    const trimmedTitle = newCourse.title.trim();
+    const trimmedDesc = newCourse.description.trim();
+    
+    if (!trimmedTitle || !trimmedDesc) {
+      alert("Tên và mô tả không được để trống hoặc chỉ chứa khoảng trắng.");
+      return;
+    }
+    
+    const payload = {
+      ...newCourse,
+      title: trimmedTitle,
+      description: trimmedDesc
+    };
+
     const token = localStorage.getItem('access_token');
     try {
       const res = await fetch(API_URL + '/admin/courses', {
@@ -73,7 +87,7 @@ export default function AdminDashboard() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(newCourse)
+        body: JSON.stringify(payload)
       });
       
       if (res.ok) {
@@ -92,6 +106,14 @@ export default function AdminDashboard() {
 
   const handleEditCourse = async (e) => {
     e.preventDefault();
+    const trimmedTitle = editingCourse.title.trim();
+    const trimmedDesc = editingCourse.description.trim();
+    
+    if (!trimmedTitle || !trimmedDesc) {
+      alert("Tên và mô tả không được để trống hoặc chỉ chứa khoảng trắng.");
+      return;
+    }
+
     const token = localStorage.getItem('access_token');
     try {
       const res = await fetch(`${API_URL}/admin/courses/${editingCourse.id}`, {
@@ -101,8 +123,8 @@ export default function AdminDashboard() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          title: editingCourse.title,
-          description: editingCourse.description,
+          title: trimmedTitle,
+          description: trimmedDesc,
           price: editingCourse.price,
           thumbnail: editingCourse.thumbnail
         })

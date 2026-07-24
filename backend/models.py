@@ -61,8 +61,7 @@ class Course(Base):
     thumbnail = Column(String)
     price = Column(Float, default=0.0)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    
-    lessons = relationship("Lesson", back_populates="course")
+    lessons = relationship("Lesson", back_populates="course", cascade="all, delete-orphan")
 
 class Lesson(Base):
     __tablename__ = "lessons"
