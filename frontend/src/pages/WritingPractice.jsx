@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PenTool, CheckCircle, RefreshCcw, AlertTriangle } from 'lucide-react';
+import { PenTool, CheckCircle, RefreshCcw, AlertTriangle, Target } from 'lucide-react';
 import { API_URL } from '../config';
 
 export default function WritingPractice() {

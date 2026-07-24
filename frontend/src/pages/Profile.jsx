@@ -256,8 +256,6 @@ export default function Profile() {
           )}
         </div>
       </div>
-      </div>
-
       {/* Store Modal */}
       {showStore && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">

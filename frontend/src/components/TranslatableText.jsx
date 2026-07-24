@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { API_URL } from '../../config';
-import { useAuth } from '../../context/AuthContext';
+import { API_URL } from '../config';
+import { useAuth } from '../context/AuthContext';
 import { BookPlus, Volume2 } from 'lucide-react';
 
 export default function TranslatableText({ text, className }) {
