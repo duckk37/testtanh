@@ -101,7 +101,7 @@ export default function CourseContentManager({ course, onBack }) {
         </button>
         <div className="flex items-end gap-6 border-b border-slate-200 dark:border-slate-700 pb-4">
           {course.thumbnail && (
-            <img src={course.thumbnail} alt="" className="w-24 h-16 object-cover rounded-lg shadow-sm" />
+            <img src={course.thumbnail} onError={(e) => { e.target.style.display = 'none'; }} alt="" className="w-24 h-16 object-cover rounded-lg shadow-sm" />
           )}
           <div>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{course.title}</h1>
