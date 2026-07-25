@@ -21,9 +21,7 @@ import migrations
 print("Applying database migrations if any...")
 migrations.apply_migrations(engine)
 
-# Download TextBlob corpora on startup
-print("Downloading TextBlob corpora...")
-os.system("python -m textblob.download_corpora")
+# TextBlob corpora download should be handled in build step (e.g., startup.sh)
 
 app = FastAPI()
 app.include_router(admin.router)
@@ -237,16 +235,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         raise HTTPException(status_code=400, detail="Incorrect email or password")
         
     # Update Streak
-    if user.last_activity_date:
-        today = datetime.utcnow().date()
-        last_date = user.last_activity_date.date()
-        if last_date == today - timedelta(days=1):
-            user.streak_count += 1
-        elif last_date < today - timedelta(days=1):
-            user.streak_count = 1
-    else:
-        user.streak_count = 1
-    user.last_activity_date = datetime.utcnow()
+    check_and_update_streak(user, db)
     
     # Check 3-Day Streak badge
     if user.streak_count >= 3:
@@ -276,33 +265,40 @@ def read_users_me(current_user: models.User = Depends(get_current_user), db: Ses
 
 @app.get("/users/leaderboard")
 def get_leaderboard(db: Session = Depends(get_db)):
-    users = db.query(models.User).all()
-    leaderboard = []
+    from sqlalchemy import func
     
-    for user in users:
-        # Calculate total score from UserLessonProgress
-        progress_records = db.query(models.UserLessonProgress).filter(
-            models.UserLessonProgress.user_id == user.id
-        ).all()
-        total_score = sum([p.highest_score for p in progress_records])
-        
-        # Calculate words learned for tie-breakers or extra stats
-        words_learned = db.query(models.UserProgress).filter(
-            models.UserProgress.user_id == user.id
-        ).count()
-        
+    score_subq = db.query(
+        models.UserLessonProgress.user_id,
+        func.sum(models.UserLessonProgress.highest_score).label('total_score')
+    ).group_by(models.UserLessonProgress.user_id).subquery()
+    
+    words_subq = db.query(
+        models.UserProgress.user_id,
+        func.count(models.UserProgress.id).label('words_learned')
+    ).group_by(models.UserProgress.user_id).subquery()
+    
+    query = db.query(
+        models.User,
+        func.coalesce(score_subq.c.total_score, 0).label('total_score'),
+        func.coalesce(words_subq.c.words_learned, 0).label('words_learned')
+    ).outerjoin(score_subq, models.User.id == score_subq.c.user_id) \
+     .outerjoin(words_subq, models.User.id == words_subq.c.user_id) \
+     .order_by(
+         func.coalesce(score_subq.c.total_score, 0).desc(),
+         models.User.streak_count.desc()
+     ).limit(10).all()
+     
+    leaderboard = []
+    for user, total_score, words_learned in query:
         leaderboard.append({
             "id": user.id,
             "username": user.username,
             "streak_count": user.streak_count,
-            "total_score": total_score,
+            "total_score": int(total_score),
             "words_learned": words_learned
         })
         
-    # Sort by total_score descending, then streak_count
-    leaderboard.sort(key=lambda x: (x["total_score"], x["streak_count"]), reverse=True)
-    
-    return leaderboard[:10] # Return top 10
+    return leaderboard
 
 @app.get("/users/me/stats")
 def get_user_stats(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -418,6 +414,9 @@ def submit_lesson_test(lesson_id: str, req: SubmitTestRequest, db: Session = Dep
         raise HTTPException(status_code=404, detail="Lesson or exam not found")
         
     questions = db.query(models.Question).filter(models.Question.exam_id == lesson.exam_id).all()
+    if not questions:
+        raise HTTPException(status_code=400, detail="Đề thi chưa khả dụng (Chưa có câu hỏi).")
+        
     correct_count = 0
     
     for q in questions:
@@ -702,12 +701,14 @@ def check_and_update_streak(user: models.User, db: Session):
         user.last_activity_date = now
     elif delta_days > 1:
         # Streak broken, check shields
-        if user.streak_shields > 0:
-            user.streak_shields -= 1
+        missed_days = delta_days - 1
+        if (user.streak_shields or 0) >= missed_days:
+            user.streak_shields = (user.streak_shields or 0) - missed_days
             # Keep streak, just update date
             user.last_activity_date = now
         else:
             user.streak_count = 1
+            user.streak_shields = 0
             user.last_activity_date = now
     elif delta_days == 0:
         # Already updated today
