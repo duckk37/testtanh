@@ -5,6 +5,20 @@ import { BookOpen, Award, CheckCircle, ArrowRight } from 'lucide-react';
 import { SkeletonCard } from '../components/Skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { API_URL } from '../config';
+import { motion } from 'framer-motion';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.15 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+};
 
 function Home() {
   const { data: courses = [], isLoading: loadingCourses } = useQuery({
@@ -47,63 +61,73 @@ function Home() {
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-500/10 blur-3xl"></div>
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl"></div>
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-32 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 text-sm font-bold mb-6 border border-blue-100/50 shadow-sm">
+        <motion.div 
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-32 relative z-10 text-center"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 text-sm font-bold mb-6 border border-blue-100/50 shadow-sm">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
             </span>
             Nền tảng học tập chuẩn Quốc tế
-          </div>
+          </motion.div>
           
-          <h1 className="text-4xl md:text-[56px] font-extrabold mb-6 leading-[1.15] text-slate-900 dark:text-white tracking-tight">
+          <motion.h1 variants={itemVariants} className="text-4xl md:text-[56px] font-extrabold mb-6 leading-[1.15] text-slate-900 dark:text-white tracking-tight">
             Nâng tầm tiếng Anh của bạn <br className="hidden md:block" /> 
             với <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">BGKH English</span>
-          </h1>
+          </motion.h1>
           
-          <p className="text-lg md:text-xl text-slate-500 dark:text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <motion.p variants={itemVariants} className="text-lg md:text-xl text-slate-500 dark:text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
             Học tiếng Anh chưa bao giờ dễ dàng đến thế. Trải nghiệm phương pháp học video tương tác, tra từ điển tức thì và hệ thống ôn tập thông minh SM-2.
-          </p>
+          </motion.p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a href="#courses" className="btn-modern btn-primary-modern px-8 w-full sm:w-auto h-[56px] text-base">
               Khám phá khóa học <ArrowRight size={18} />
             </a>
             <a href="#exams" className="btn-modern bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 hover:-translate-y-[1px] px-8 w-full sm:w-auto h-[56px] text-base shadow-sm">
               Làm bài kiểm tra
             </a>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
 
       {/* Feature Highlights */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20 mb-24">
+      <motion.div 
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20 mb-24"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
+      >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="card-modern p-6 dark:bg-slate-800 dark:border-slate-700">
+          <motion.div whileHover={{ y: -5 }} className="card-modern p-6 dark:bg-slate-800 dark:border-slate-700 transition-all">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-5 border border-blue-200/50">
               <BookOpen size={24} />
             </div>
             <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">Video Tương Tác 100%</h3>
             <p className="text-[14.5px] text-slate-500 dark:text-slate-400 leading-relaxed">Dừng video và tra từ trực tiếp trên phụ đề. Không cần dùng thêm từ điển bên ngoài, lưu từ mới tự động vào sổ tay.</p>
-          </div>
+          </motion.div>
           
-          <div className="card-modern p-6 dark:bg-slate-800 dark:border-slate-700">
+          <motion.div whileHover={{ y: -5 }} className="card-modern p-6 dark:bg-slate-800 dark:border-slate-700 transition-all">
             <div className="w-12 h-12 bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-5 border border-emerald-200/50">
               <CheckCircle size={24} />
             </div>
             <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">Trí Tuệ Nhân Tạo (SM-2)</h3>
             <p className="text-[14.5px] text-slate-500 dark:text-slate-400 leading-relaxed">Thuật toán lặp lại ngắt quãng SM-2 phân tích và nhắc bạn ôn tập đúng lúc bạn sắp quên từ vựng đó.</p>
-          </div>
+          </motion.div>
           
-          <div className="card-modern p-6 dark:bg-slate-800 dark:border-slate-700">
+          <motion.div whileHover={{ y: -5 }} className="card-modern p-6 dark:bg-slate-800 dark:border-slate-700 transition-all">
             <div className="w-12 h-12 bg-gradient-to-br from-purple-50 to-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-5 border border-purple-200/50">
               <Award size={24} />
             </div>
             <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">Mở Khóa Lộ Trình</h3>
             <p className="text-[14.5px] text-slate-500 dark:text-slate-400 leading-relaxed">Phải hoàn thành bài kiểm tra đạt điểm chuẩn mới được học bài tiếp theo. Đảm bảo chất lượng đầu ra.</p>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Courses Section */}
       <div id="courses" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

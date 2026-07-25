@@ -1,16 +1,21 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Home, BookOpen, PenTool, Trophy, User, Settings, LogOut } from 'lucide-react';
+import { Home, BookOpen, PenTool, Trophy, User, Settings, LogOut, Target, ShoppingCart, BarChart2, Youtube, MessageSquare, Map } from 'lucide-react';
 
-export default function Sidebar({ isOpen, setIsOpen }) {
+const Sidebar = ({ isOpen, setIsOpen }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
 
   const navItems = [
     { path: '/', label: 'Trang chủ', icon: Home },
+    { path: '/roadmap', label: 'Lộ trình AI', icon: Map, iconColor: 'text-blue-500' },
     { path: '/flashcards', label: 'Sổ tay', icon: BookOpen },
     { path: '/writing', label: 'Luyện viết', icon: PenTool, iconColor: 'text-indigo-500' },
+    { path: '/quests', label: 'Nhiệm vụ', icon: Target, iconColor: 'text-orange-500' },
+    { path: '/store', label: 'Cửa hàng', icon: ShoppingCart, iconColor: 'text-fuchsia-500' },
+    { path: '/analytics', label: 'Thống kê', icon: BarChart2, iconColor: 'text-cyan-500' },
+    { path: '/video', label: 'Học qua Video', icon: Youtube, iconColor: 'text-red-500' },
     { path: '/leaderboard', label: 'BXH', icon: Trophy, iconColor: 'text-yellow-500' }
   ];
 
@@ -50,10 +55,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${
                   isActive 
                     ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 shadow-sm' 
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200'
+                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-100'
                 }`}
               >
-                <item.icon size={20} className={isActive ? 'text-blue-600 dark:text-blue-400' : (item.iconColor || 'text-slate-400 dark:text-slate-500 dark:text-slate-400')} />
+                <item.icon size={20} className={isActive ? 'text-blue-600 dark:text-blue-400' : (item.iconColor || 'text-slate-400 dark:text-slate-400')} />
                 {item.label}
               </Link>
             );
@@ -65,7 +70,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             <Link 
               to="/profile" 
               onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              className="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             >
               <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold uppercase">
                 {user.username.charAt(0)}
@@ -99,4 +104,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       </aside>
     </>
   );
-}
+};
+
+export default memo(Sidebar);

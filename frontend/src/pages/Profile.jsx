@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -26,9 +26,9 @@ export default function Profile() {
       if (res.ok) {
         const data = await res.json();
         alert('Mua thành công!');
-        // Update user coins (this is simplistic, ideally update global auth context)
-        setStats(prev => ({...prev, coins: data.coins}));
-        user.coins = data.coins; 
+        // Update user CircleDollarSign (this is simplistic, ideally update global auth context)
+        setStats(prev => ({...prev, CircleDollarSign: data.CircleDollarSign}));
+        user.CircleDollarSign = data.CircleDollarSign; 
         
         if (item.type === 'theme') {
           user.active_theme = item.id;
@@ -266,7 +266,7 @@ export default function Profile() {
               </h2>
               <div className="flex items-center gap-4">
                 <div className="font-bold text-yellow-600 bg-yellow-50 px-3 py-1.5 rounded-lg border border-yellow-100">
-                  Của bạn: {stats?.coins || user.coins || 0} 🪙
+                  Của bạn: {stats?.CircleDollarSign || user.CircleDollarSign || 0} 🪙
                 </div>
                 <button onClick={() => setShowStore(false)} className="text-slate-400 hover:text-slate-600 dark:text-slate-300 font-bold p-2">✕</button>
               </div>

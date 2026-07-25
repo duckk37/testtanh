@@ -8,8 +8,14 @@ if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
 
 connect_args = {"check_same_thread": False} if SQLALCHEMY_DATABASE_URL.startswith("sqlite") else {}
 
+engine_kwargs = {"connect_args": connect_args}
+if SQLALCHEMY_DATABASE_URL.startswith("postgresql"):
+    engine_kwargs["pool_size"] = 5
+    engine_kwargs["max_overflow"] = 10
+    engine_kwargs["pool_pre_ping"] = True # Helps with dropped connections (like NeonDB scale to zero)
+
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args=connect_args
+    SQLALCHEMY_DATABASE_URL, **engine_kwargs
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

@@ -165,3 +165,15 @@ class DailyQuest(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     user = relationship("User")
+
+class LearningPath(Base):
+    __tablename__ = "learning_paths"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    level = Column(String, default="Beginner")
+    roadmap_json = Column(String) # Storing the 7-day roadmap as a JSON string
+    current_day = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    user = relationship("User")

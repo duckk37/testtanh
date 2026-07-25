@@ -1,10 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from database import engine, SessionLocal
 import models
 from auth import get_password_hash
 import admin
 import migrations
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Routers
 from routers import auth as auth_router
@@ -13,6 +18,10 @@ from routers import courses as courses_router
 from routers import gamification as gamification_router
 from routers import vocabulary as vocabulary_router
 from routers import comments as comments_router
+from routers import analytics as analytics_router
+from routers import video as video_router
+from routers import ai as ai_router
+from routers import learning_path as learning_path_router
 
 # Create tables
 models.Base.metadata.create_all(bind=engine)
@@ -21,7 +30,7 @@ models.Base.metadata.create_all(bind=engine)
 print("Applying database migrations if any...")
 migrations.apply_migrations(engine)
 
-app = FastAPI()
+app = FastAPI(title="English Master API")
 
 app.include_router(admin.router)
 app.include_router(auth_router.router)
@@ -30,6 +39,13 @@ app.include_router(courses_router.router)
 app.include_router(gamification_router.router)
 app.include_router(vocabulary_router.router)
 app.include_router(comments_router.router)
+app.include_router(analytics_router.router)
+app.include_router(video_router.router)
+app.include_router(ai_router.router)
+app.include_router(learning_path_router.router)
+
+# Add Gzip Compression for large responses (Video transcripts, roadmaps, etc)
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 # Allow CORS for local frontend
 app.add_middleware(
@@ -90,6 +106,7 @@ def on_startup():
 
         # Check if exam exists
         if not db.query(models.Exam).first():
+            # Trigger reload one more time
             exam1 = models.Exam(
                 title="Đề Thi Thử THPT Quốc Gia 2024 - Đề 1",
                 description="Đề thi thử bám sát cấu trúc đề minh họa Bộ GD&ĐT.",

@@ -1,9 +1,9 @@
-import React from 'react';
+﻿import React, { memo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { Menu, Moon, Sun, Flame } from 'lucide-react';
 
-export default function Header({ toggleSidebar }) {
+const Header = ({ toggleSidebar }) => {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   
@@ -31,16 +31,21 @@ export default function Header({ toggleSidebar }) {
               <div className="flex items-center space-x-1.5 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/30 dark:to-amber-900/30 px-3 py-1.5 rounded-xl text-orange-600 dark:text-orange-400 font-bold border border-orange-100 dark:border-orange-800/50 shadow-sm">
                 <Flame size={18} className="text-orange-500" />
                 <span>{user.streak_count || 0}</span>
+                {user.streak_shields > 0 && (
+                  <span className="ml-1 px-1.5 py-0.5 bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 rounded-md text-xs flex items-center" title="Khiên bảo vệ">
+                    🛡️ {user.streak_shields}
+                  </span>
+                )}
               </div>
               <div className="flex items-center space-x-1.5 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/30 dark:to-amber-900/30 px-3 py-1.5 rounded-xl text-yellow-600 dark:text-yellow-400 font-bold border border-yellow-100 dark:border-yellow-800/50 shadow-sm">
                 <span className="text-yellow-500">🪙</span>
-                <span>{user.coins || 0}</span>
+                <span>{user.CircleDollarSign || 0}</span>
               </div>
             </>
           )}
           <button 
             onClick={toggleTheme}
-            className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-xl text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             title="Giao diện Sáng/Tối"
           >
             {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
@@ -49,4 +54,6 @@ export default function Header({ toggleSidebar }) {
       </div>
     </header>
   );
-}
+};
+
+export default memo(Header);

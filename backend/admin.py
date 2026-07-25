@@ -22,7 +22,7 @@ class ReorderRequest(BaseModel):
 @router.get("/users")
 def get_all_users(db: Session = Depends(get_db), admin: models.User = Depends(require_admin)):
     users = db.query(models.User).all()
-    return [{"id": u.id, "email": u.email, "username": u.username, "role": u.role, "streak_count": u.streak_count} for u in users]
+    return [{"id": u.id, "email": u.email, "username": u.username, "role": u.role, "streak_count": u.streak_count, "coins": u.coins} for u in users]
 
 class CourseCreate(BaseModel):
     title: str = Field(..., min_length=1)
@@ -280,4 +280,46 @@ def get_admin_stats(db: Session = Depends(get_db), admin: models.User = Depends(
         },
         "user_growth": user_growth
     }
+
+class UserRoleUpdate(BaseModel):
+    role: str
+
+@router.put("/users/{user_id}/role")
+def update_user_role(user_id: str, role_update: UserRoleUpdate, db: Session = Depends(get_db), admin: models.User = Depends(require_admin)):
+    if role_update.role not in ["admin", "user"]:
+        raise HTTPException(status_code=400, detail="Invalid role")
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.role = role_update.role
+    db.commit()
+    db.refresh(user)
+    return {"message": f"User role updated to {user.role}"}
+
+class UserCoinsUpdate(BaseModel):
+    coins: int
+
+@router.put("/users/{user_id}/coins")
+def update_user_coins(user_id: str, coins_update: UserCoinsUpdate, db: Session = Depends(get_db), admin: models.User = Depends(require_admin)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # We can either set or add. Let's do add.
+    user.coins += coins_update.coins
+    db.commit()
+    db.refresh(user)
+    return {"message": "Coins added", "new_balance": user.coins}
+
+@router.delete("/users/{user_id}")
+def delete_user(user_id: str, db: Session = Depends(get_db), admin: models.User = Depends(require_admin)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    # Prevent self-deletion if needed, or just allow it
+    if user.id == admin.id:
+        raise HTTPException(status_code=400, detail="Cannot delete your own admin account")
+    db.delete(user)
+    db.commit()
+    return {"message": "User deleted"}
 
