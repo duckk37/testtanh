@@ -1,15 +1,19 @@
-import csv
 import os
+import re
 import models
+import openpyxl
+
+def extract_youtube_id(url):
+    if not url:
+        return "dQw4w9WgXcQ"
+    # Matches v=XXXX, or youtu.be/XXXX
+    match = re.search(r'(?:v=|youtu\.be/)([^&]+)', url)
+    if match:
+        return match.group(1)
+    return "dQw4w9WgXcQ"
 
 def import_data(db):
     try:
-        # Check if we already imported to avoid duplicates
-        existing_lesson = db.query(models.Lesson).filter(models.Lesson.title.ilike('%NGÀY 1%')).first()
-        if existing_lesson:
-            print("Lessons already imported.")
-            return
-
         # Create the course if not exists
         course_title = "48 NGÀY LẤY GỐC TIẾNG ANH"
         course = db.query(models.Course).filter(models.Course.title == course_title).first()
@@ -26,63 +30,69 @@ def import_data(db):
             
         print(f"Course ID: {course.id}")
         
-        # Read the CSV
-        csv_path = os.path.join(os.path.dirname(__file__), 'data.csv')
-        if not os.path.exists(csv_path):
-            print("data.csv not found!")
+        # Read the Excel file
+        excel_path = os.path.join(os.path.dirname(__file__), 'data.xlsx')
+        if not os.path.exists(excel_path):
+            print("data.xlsx not found!")
             return
 
-        with open(csv_path, 'r', encoding='utf-8') as f:
-            reader = csv.reader(f)
-            lines = list(reader)
-            
-            # Find the header row
-            start_idx = 0
-            for i, row in enumerate(lines):
-                if len(row) >= 2 and 'STT' in row[0] and 'TÊN BÀI HỌC' in row[1]:
-                    start_idx = i + 1
-                    break
-            
-            if start_idx == 0:
-                print("Could not find the header row")
-                return
+        wb = openpyxl.load_workbook(excel_path)
+        sheet = wb.active
+        
+        start_row = 1
+        for row in range(1, 10):
+            val = sheet.cell(row=row, column=2).value
+            if val and 'TÊN BÀI HỌC' in str(val):
+                start_row = row + 1
+                break
                 
-            print(f"Starting import from row {start_idx + 1}")
+        print(f"Starting import from row {start_row}")
+        
+        count = 0
+        updated = 0
+        for row in range(start_row, sheet.max_row + 1):
+            stt_val = sheet.cell(row=row, column=1).value
+            title_val = sheet.cell(row=row, column=2).value
             
-            # Import lessons
-            count = 0
-            for row in lines[start_idx:]:
-                if len(row) < 2:
-                    continue
-                stt_str = row[0].strip()
-                title = row[1].strip()
+            if not stt_val or not title_val:
+                continue
                 
-                if not stt_str.isdigit() or not title:
-                    continue
-                    
-                order_index = int(stt_str)
+            try:
+                order_index = int(stt_val)
+            except ValueError:
+                continue
                 
-                # Check if lesson already exists
-                existing_lesson = db.query(models.Lesson).filter(
-                    models.Lesson.course_id == course.id,
-                    models.Lesson.order_index == order_index
-                ).first()
-                
-                if not existing_lesson:
-                    # Note: Since the CSV doesn't contain real YouTube URLs (only text "BÀI GIẢNG"),
-                    # we will use a placeholder video ID.
-                    lesson = models.Lesson(
-                        course_id=course.id,
-                        title=title,
-                        youtube_id="dQw4w9WgXcQ", # Placeholder
-                        order_index=order_index,
-                        passing_score_required=80
-                    )
-                    db.add(lesson)
-                    count += 1
+            title = str(title_val).strip()
             
-            db.commit()
-            print(f"Successfully imported {count} new lessons to the course.")
+            # Extract hyperlink
+            cell_c = sheet.cell(row=row, column=3)
+            hyperlink = cell_c.hyperlink.target if cell_c.hyperlink else None
+            youtube_id = extract_youtube_id(hyperlink)
             
+            # Check if lesson already exists
+            existing_lesson = db.query(models.Lesson).filter(
+                models.Lesson.course_id == course.id,
+                models.Lesson.order_index == order_index
+            ).first()
+            
+            if not existing_lesson:
+                lesson = models.Lesson(
+                    course_id=course.id,
+                    title=title,
+                    youtube_id=youtube_id,
+                    order_index=order_index,
+                    passing_score_required=80
+                )
+                db.add(lesson)
+                count += 1
+            else:
+                # Update existing lesson
+                if existing_lesson.youtube_id != youtube_id and youtube_id != "dQw4w9WgXcQ":
+                    existing_lesson.youtube_id = youtube_id
+                    updated += 1
+        
+        db.commit()
+        print(f"Successfully imported {count} new lessons, updated {updated} lessons.")
+        
     except Exception as e:
         print(f"Error importing lessons: {e}")

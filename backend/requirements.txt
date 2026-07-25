@@ -11,3 +11,4 @@ textblob
 python-dotenv
 google-generativeai
 youtube-transcript-api
+openpyxl
