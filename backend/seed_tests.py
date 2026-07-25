@@ -156,4 +156,64 @@ def seed(db):
         print("Added 20 questions successfully during startup!")
         
     except Exception as e:
-        print(f"Error seeding tests: {e}")
+        print(f"Error seeding Lesson 1 tests: {e}")
+
+    # Import tests for Lessons 2 to 4 from JSON
+    import json
+    import os
+    json_path = os.path.join(os.path.dirname(__file__), 'tests_data.json')
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                tests_data = json.load(f)
+                
+            for lesson_num_str, data in tests_data.items():
+                lesson_num = int(lesson_num_str)
+                exam_title = data["title"]
+                
+                # Check if exam exists
+                existing_exam = db.query(models.Exam).filter(models.Exam.title == exam_title).first()
+                if existing_exam:
+                    continue
+                    
+                # Find lesson
+                lesson = db.query(models.Lesson).filter(
+                    (models.Lesson.title.ilike(f'%NGÀY {lesson_num}%')) | (models.Lesson.order_index == lesson_num)
+                ).first()
+                
+                if not lesson:
+                    print(f"Lesson {lesson_num} not found!")
+                    continue
+                    
+                # Create exam
+                exam = models.Exam(
+                    title=exam_title,
+                    description=data["description"],
+                    duration_minutes=data["duration_minutes"]
+                )
+                db.add(exam)
+                db.commit()
+                db.refresh(exam)
+                
+                # Link exam to lesson
+                lesson.exam_id = exam.id
+                db.commit()
+                
+                # Create questions
+                for q in data["questions"]:
+                    question = models.Question(
+                        exam_id=exam.id,
+                        content=q["content"],
+                        option_a=q["a"],
+                        option_b=q["b"],
+                        option_c=q["c"],
+                        option_d=q["d"],
+                        correct_option=q["correct"]
+                    )
+                    db.add(question)
+                
+                db.commit()
+                print(f"Added {len(data['questions'])} questions for Lesson {lesson_num}!")
+                
+        except Exception as e:
+            print(f"Error seeding tests from JSON: {e}")

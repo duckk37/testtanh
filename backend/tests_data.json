@@ -1,0 +1,173 @@
+{
+    "2": {
+        "title": "Bài kiểm tra Bài 2",
+        "description": "Bài tập kiểm tra kiến thức về danh từ số nhiều và đại từ This/That/These/Those.",
+        "duration_minutes": 15,
+        "questions": [
+            {
+                "content": "Dạng số nhiều của 'man' là gì?",
+                "a": "mans", "b": "men", "c": "mens", "d": "man",
+                "correct": "B"
+            },
+            {
+                "content": "Dạng số nhiều của 'apple' là gì?",
+                "a": "apple", "b": "apples", "c": "applies", "d": "applees",
+                "correct": "B"
+            },
+            {
+                "content": "Dạng số nhiều của 'box' là gì?",
+                "a": "boxs", "b": "boxes", "c": "box", "d": "boxies",
+                "correct": "B"
+            },
+            {
+                "content": "Dạng số nhiều của 'picture' là gì?",
+                "a": "picture", "b": "pictures", "c": "picturees", "d": "picturs",
+                "correct": "B"
+            },
+            {
+                "content": "Điền đại từ phù hợp: _____ my father (chỉ một người ở gần).",
+                "a": "This is", "b": "That is", "c": "These are", "d": "Those are",
+                "correct": "A"
+            },
+            {
+                "content": "Điền đại từ phù hợp: _____ my books (chỉ nhiều đồ vật ở xa).",
+                "a": "This is", "b": "That is", "c": "These are", "d": "Those are",
+                "correct": "D"
+            },
+            {
+                "content": "Điền đại từ phù hợp: _____ my friend (chỉ một người ở xa).",
+                "a": "This is", "b": "That is", "c": "These are", "d": "Those are",
+                "correct": "B"
+            },
+            {
+                "content": "Điền đại từ phù hợp: _____ my students (chỉ nhiều người ở gần).",
+                "a": "This is", "b": "That is", "c": "These are", "d": "Those are",
+                "correct": "C"
+            },
+            {
+                "content": "Are they oranges? - Yes, _______.",
+                "a": "they are", "b": "they aren't", "c": "it is", "d": "they do",
+                "correct": "A"
+            },
+            {
+                "content": "Are these your books? - No, _______.",
+                "a": "they are", "b": "they aren't", "c": "it isn't", "d": "they don't",
+                "correct": "B"
+            }
+        ]
+    },
+    "3": {
+        "title": "Bài kiểm tra Bài 3",
+        "description": "Bài tập kiểm tra câu hỏi Who và What.",
+        "duration_minutes": 15,
+        "questions": [
+            {
+                "content": "Who is she?",
+                "a": "It's my grandfather.", "b": "They are my children.", "c": "They are my socks.", "d": "She is my cousin.",
+                "correct": "D"
+            },
+            {
+                "content": "Who is this?",
+                "a": "It's my grandfather.", "b": "They are my children.", "c": "They are my socks.", "d": "She is my cousin.",
+                "correct": "A"
+            },
+            {
+                "content": "What is that?",
+                "a": "It's a banana.", "b": "They are my children.", "c": "She is my cousin.", "d": "They are my socks.",
+                "correct": "A"
+            },
+            {
+                "content": "Who are these?",
+                "a": "It's a banana.", "b": "They are my children.", "c": "She is my cousin.", "d": "They are my socks.",
+                "correct": "B"
+            },
+            {
+                "content": "What are they?",
+                "a": "It's a banana.", "b": "They are my children.", "c": "They are my socks.", "d": "She is my cousin.",
+                "correct": "C"
+            },
+            {
+                "content": "What are they? (những chiếc mũ)",
+                "a": "They are hat.", "b": "They are hats.", "c": "It is a hat.", "d": "It's hats.",
+                "correct": "B"
+            },
+            {
+                "content": "What is this? (một chiếc bánh)",
+                "a": "They are cakes.", "b": "It is a cake.", "c": "It's cakes.", "d": "They is a cake.",
+                "correct": "B"
+            },
+            {
+                "content": "What are these? (những chiếc gối)",
+                "a": "It is a pillow.", "b": "They are a pillow.", "c": "They are pillows.", "d": "It are pillows.",
+                "correct": "C"
+            },
+            {
+                "content": "______ is that boy?",
+                "a": "What", "b": "Who", "c": "Where", "d": "When",
+                "correct": "B"
+            },
+            {
+                "content": "______ is on the table?",
+                "a": "What", "b": "Who", "c": "Where", "d": "When",
+                "correct": "A"
+            }
+        ]
+    },
+    "4": {
+        "title": "Bài kiểm tra Bài 4",
+        "description": "Bài tập kiểm tra câu hỏi Where và When.",
+        "duration_minutes": 15,
+        "questions": [
+            {
+                "content": "When is the English class?",
+                "a": "It's in the garden.", "b": "They are in the house.", "c": "It's on the desk.", "d": "It's at 3:00 in the afternoon.",
+                "correct": "D"
+            },
+            {
+                "content": "Where is she?",
+                "a": "It's in the garden.", "b": "She's in the garden.", "c": "It's on the desk.", "d": "It's at 3:00 in the afternoon.",
+                "correct": "B"
+            },
+            {
+                "content": "Where are the dogs?",
+                "a": "They are in the house.", "b": "She's in the garden.", "c": "It's on the desk.", "d": "It's at night.",
+                "correct": "A"
+            },
+            {
+                "content": "When is the party?",
+                "a": "It's at night.", "b": "They are in the house.", "c": "She's in the garden.", "d": "It's on the desk.",
+                "correct": "A"
+            },
+            {
+                "content": "Where is the book?",
+                "a": "It's at night.", "b": "They are in the house.", "c": "It's on the desk.", "d": "She's in the garden.",
+                "correct": "C"
+            },
+            {
+                "content": "_____ is your exam? - It's on Monday.",
+                "a": "When", "b": "Where", "c": "What", "d": "Who",
+                "correct": "A"
+            },
+            {
+                "content": "_____ is my clock? - It's on the wall.",
+                "a": "When", "b": "Where", "c": "What", "d": "Who",
+                "correct": "B"
+            },
+            {
+                "content": "_____ is the class? - It's on Wednesday.",
+                "a": "When", "b": "Where", "c": "What", "d": "Who",
+                "correct": "A"
+            },
+            {
+                "content": "_____ are the kids? - They are in the park.",
+                "a": "When", "b": "Where", "c": "What", "d": "Who",
+                "correct": "B"
+            },
+            {
+                "content": "_____ is your bag? - It's on the table.",
+                "a": "When", "b": "Where", "c": "What", "d": "Who",
+                "correct": "B"
+            }
+        ]
+    }
+}
