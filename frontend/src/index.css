@@ -5,13 +5,20 @@
 @layer base {
   body {
     @apply antialiased text-slate-900;
-    @apply dark:bg-slate-900 dark:text-slate-100;
+    @apply dark:text-slate-100;
     font-family: 'Inter', sans-serif;
     background: 
       radial-gradient(60% 45% at 88% 6%, rgba(37, 99, 235, 0.08), transparent 60%),
       radial-gradient(55% 40% at 6% 96%, rgba(37, 99, 235, 0.06), transparent 60%),
       linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
     min-height: 100vh;
+  }
+  
+  .dark body {
+    background: 
+      radial-gradient(60% 45% at 88% 6%, rgba(59, 130, 246, 0.12), transparent 60%),
+      radial-gradient(55% 40% at 6% 96%, rgba(139, 92, 246, 0.12), transparent 60%),
+      linear-gradient(180deg, #0f172a 0%, #020617 100%);
   }
   
   body::before {
@@ -28,6 +35,12 @@
     -webkit-mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 72%);
   }
 
+  .dark body::before {
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Plus Jakarta Sans', sans-serif;
   }
@@ -35,18 +48,18 @@
 
 @layer components {
   .card-modern {
-    @apply bg-white border border-slate-200 rounded-2xl shadow-soft relative overflow-hidden;
+    @apply bg-white dark:bg-slate-800/80 dark:backdrop-blur-sm border border-slate-200 dark:border-slate-700/50 rounded-2xl shadow-soft dark:shadow-none relative overflow-hidden;
   }
   .card-modern::before {
     content: "";
-    @apply absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400;
+    @apply absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 opacity-90;
   }
   
   .input-modern {
-    @apply w-full h-[52px] bg-white border border-slate-200 rounded-xl px-12 text-[15px] outline-none transition-all duration-200;
+    @apply w-full h-[52px] bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-12 text-[15px] outline-none transition-all duration-200 dark:text-slate-100;
   }
   .input-modern:focus {
-    @apply border-blue-500 ring-4 ring-blue-500/10;
+    @apply border-blue-500 ring-4 ring-blue-500/10 dark:ring-blue-500/20;
   }
   
   .btn-modern {

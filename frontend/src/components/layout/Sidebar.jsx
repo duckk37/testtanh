@@ -30,9 +30,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
       {/* Sidebar Container */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white/95 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800">
+        <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800/60">
           <Link to="/" className="text-xl font-bold text-blue-600 dark:text-blue-400 font-sans tracking-tight">
             EnglishMaster
           </Link>
