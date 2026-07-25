@@ -183,7 +183,7 @@ const Flashcard = () => {
     if (activeTheme === 'theme_dark' || activeTheme === 'theme_neon') {
       return isMain ? "text-white" : "text-slate-300";
     }
-    return isMain ? "text-slate-800" : "text-slate-500 dark:text-slate-400";
+    return isMain ? "text-slate-800 dark:text-slate-100" : "text-slate-500 dark:text-slate-400";
   };
 
   return (
