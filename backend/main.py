@@ -16,6 +16,11 @@ import os
 # Create tables
 models.Base.metadata.create_all(bind=engine)
 
+# Apply migrations
+import migrations
+print("Applying database migrations if any...")
+migrations.apply_migrations(engine)
+
 # Download TextBlob corpora on startup
 print("Downloading TextBlob corpora...")
 os.system("python -m textblob.download_corpora")
