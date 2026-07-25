@@ -149,5 +149,10 @@ def on_startup():
             db.add(q1)
             db.add(q2)
             db.commit()
+
+        # Seed automated tests from PDF
+        import seed_tests
+        seed_tests.seed(db)
+        
     finally:
         db.close()
