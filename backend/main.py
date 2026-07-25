@@ -150,9 +150,19 @@ def on_startup():
             db.add(q2)
             db.commit()
 
+        # Import 48-day course and lessons from CSV
+        try:
+            import import_lessons
+            import_lessons.import_data(db)
+        except Exception as e:
+            print(f"Failed to import lessons: {e}")
+
         # Seed automated tests from PDF
-        import seed_tests
-        seed_tests.seed(db)
+        try:
+            import seed_tests
+            seed_tests.seed(db)
+        except Exception as e:
+            print(f"Failed to seed tests: {e}")
         
     finally:
         db.close()

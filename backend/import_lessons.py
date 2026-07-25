@@ -1,18 +1,15 @@
 import csv
-import sys
 import os
-
-# Add the backend directory to sys.path so we can import models and database
-sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
-
-from database import SessionLocal, engine
 import models
 
-def import_data():
-    models.Base.metadata.create_all(bind=engine)
-    db = SessionLocal()
-    
+def import_data(db):
     try:
+        # Check if we already imported to avoid duplicates
+        existing_lesson = db.query(models.Lesson).filter(models.Lesson.title.ilike('%NGÀY 1%')).first()
+        if existing_lesson:
+            print("Lessons already imported.")
+            return
+
         # Create the course if not exists
         course_title = "48 NGÀY LẤY GỐC TIẾNG ANH"
         course = db.query(models.Course).filter(models.Course.title == course_title).first()
@@ -30,7 +27,12 @@ def import_data():
         print(f"Course ID: {course.id}")
         
         # Read the CSV
-        with open('data.csv', 'r', encoding='utf-8') as f:
+        csv_path = os.path.join(os.path.dirname(__file__), 'data.csv')
+        if not os.path.exists(csv_path):
+            print("data.csv not found!")
+            return
+
+        with open(csv_path, 'r', encoding='utf-8') as f:
             reader = csv.reader(f)
             lines = list(reader)
             
@@ -82,8 +84,5 @@ def import_data():
             db.commit()
             print(f"Successfully imported {count} new lessons to the course.")
             
-    finally:
-        db.close()
-
-if __name__ == "__main__":
-    import_data()
+    except Exception as e:
+        print(f"Error importing lessons: {e}")
