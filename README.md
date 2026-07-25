@@ -1,47 +1,52 @@
 # Interactive English Learning Platform 🚀
 
-Một nền tảng học tiếng Anh trực tuyến tương tác toàn diện, được thiết kế với giao diện hiện đại (Modern UI) và các tính năng Game hóa (Gamification) giúp học viên duy trì động lực học tập mỗi ngày. Đồng thời, nền tảng cung cấp cho Admin hệ thống quản lý đầy đủ (Khóa học, Bài học, Flashcard, Đề thi).
+Một nền tảng học tiếng Anh trực tuyến tương tác toàn diện (LMS & Gamification), được thiết kế theo tiêu chuẩn Clean Architecture với giao diện hiện đại (Modern UI), hệ thống Game hóa (Gamification) giữ chân học viên, và hiệu suất tối ưu.
+
+Đồng thời, nền tảng cung cấp cho Admin hệ thống quản lý đầy đủ (Khóa học, Bài học, Flashcard, Đề thi, Doanh thu).
 
 ---
 
 ## 🌟 Tính năng nổi bật (Features)
 
 ### 🎓 Dành cho Học viên (Students)
-- **Hệ thống Khóa học & Bài học**: Học qua video bài giảng với giao diện thân thiện, tiến trình học được lưu lại tự động.
-- **Interactive Video & Phụ đề**: Cho phép bật/tắt phụ đề, click trực tiếp vào một từ tiếng Anh trên màn hình video để tra nghĩa nhanh chóng (Click-to-Translate).
-- **Luyện tập Flashcard (Spaced Repetition)**: Học từ vựng với thẻ lật 3D, tích hợp AI chấm điểm phát âm (Microphone) và thuật toán lặp lại ngắt quãng (SM-2) để tối ưu việc ghi nhớ.
+- **Hệ thống Khóa học & Bài học**: Học qua video bài giảng với giao diện thân thiện, tiến trình học được lưu lại tự động. Đạt điểm kiểm tra tối thiểu để mở khóa bài tiếp theo.
+- **Interactive Video & Phụ đề**: Click trực tiếp vào một từ tiếng Anh trên màn hình video (subtitles) để tra nghĩa nhanh chóng (Click-to-Translate) và tự động thêm vào sổ tay từ vựng.
+- **Luyện tập Flashcard (Spaced Repetition)**: Học từ vựng với thẻ lật 3D, tích hợp thuật toán lặp lại ngắt quãng (SM-2) trí tuệ nhân tạo để nhắc lại từ vựng đúng lúc sắp quên.
 - **Làm bài Kiểm tra (Quizzes)**: Đếm ngược thời gian làm bài, chấm điểm tự động ngay lập tức và xem lại chi tiết đáp án Đúng/Sai kèm giải thích.
 - **Hệ thống Gamification (Gây nghiện)**:
-  - **Chuỗi ngày học (Streaks)**: Giữ streak mỗi ngày bằng cách hoàn thành bài học, mua "Khiên bảo vệ" (Streak Shield) bằng điểm thưởng.
-  - **Nhiệm vụ hàng ngày (Daily Quests)**: Hệ thống nhiệm vụ ngẫu nhiên mỗi ngày giúp người dùng định hướng học tập.
-  - **Hệ thống Tiền tệ (Coins) & Cửa hàng**: Tích lũy xu từ việc học để đổi Theme (Giao diện màu sắc) hoặc các vật phẩm khác.
-- **Hồ sơ Cá nhân (Profile) & Bảng Xếp Hạng**: Xem thống kê học tập qua biểu đồ (Recharts), thành tựu (Badges) và thi đua trên Leaderboard.
+  - **Chuỗi ngày học (Daily Streaks)**: Giữ streak mỗi ngày bằng cách đăng nhập và hoàn thành bài học.
+  - **Nhiệm vụ hàng ngày (Daily Quests)**: Hệ thống nhiệm vụ ngẫu nhiên mỗi ngày giúp người dùng định hướng học tập (VD: Hoàn thành 1 bài test, Học 10 từ vựng).
+  - **Hệ thống Tiền tệ (Coins) & Cửa hàng**: Tích lũy xu từ việc học để đổi Theme (Giao diện màu sắc) hoặc mua vật phẩm "Khiên bảo vệ" (Streak Shield).
+- **Hồ sơ Cá nhân (Profile) & Bảng Xếp Hạng (Leaderboard)**: Xem thống kê học tập qua biểu đồ (Recharts), thành tựu (Badges) và thi đua điểm số với hàng ngàn học viên khác trên Bảng Vàng.
 
 ### ⚙️ Dành cho Quản trị viên (Admin)
 - **Dashboard Tổng quan**: Biểu đồ thống kê lượng người dùng mới, số khóa học, bài kiểm tra và doanh thu theo thời gian thực.
 - **Quản lý Khóa học & Bài học**: Thêm, sửa, xóa khóa học. Cấu hình điều kiện mở khóa bài học (Passing score).
 - **Quản lý Flashcard & Từ vựng**: Cập nhật ngân hàng từ vựng, quản lý phiên âm và nghĩa.
-- **Quản lý Đề thi & Câu hỏi**: Tạo và tinh chỉnh bài kiểm tra, nhập liệu đáp án trắc nghiệm nhanh chóng thông qua giao diện chuyên dụng.
+- **Quản lý Đề thi & Câu hỏi**: Tạo bài kiểm tra trắc nghiệm, nhập liệu đáp án nhanh chóng thông qua giao diện chuyên dụng.
 
 ### 🎨 Giao diện (UI/UX)
 - **True Dark Mode**: Hỗ trợ Chế độ Tối toàn diện trên mọi màn hình, giúp bảo vệ mắt khi học ban đêm.
 - **Glassmorphism**: Hiệu ứng kính mờ (backdrop-blur) cao cấp, mượt mà trên Header và Sidebar.
 - **Responsive Design**: Tương thích hoàn hảo trên cả Mobile, Tablet và Desktop. Hỗ trợ Sidebar tự động thu gọn.
+- **Code Splitting (Lazy Loading)**: Tải trang nhanh như chớp nhờ kỹ thuật chia tách các file JS.
 
 ---
 
 ## 🛠 Công nghệ sử dụng (Tech Stack)
 
-### Frontend
-- **React.js (Vite)**: Framework chính cho giao diện.
-- **Tailwind CSS v3**: Quản lý UI/UX, hỗ trợ Dark Mode và Responsive.
-- **Lucide React**: Thư viện icon.
-- **Recharts**: Vẽ biểu đồ thống kê học tập.
+### Frontend (SPA - Trải nghiệm tức thì)
+- **React.js (Vite)**: Framework chính cho giao diện tốc độ siêu cao.
+- **Tailwind CSS v3**: Quản lý UI/UX, dễ dàng mở rộng, hỗ trợ Dark Mode và Responsive.
+- **TanStack Query (React Query)**: Quản lý trạng thái server (Server State), tự động Caching dữ liệu khóa học/bảng xếp hạng trong 5 phút, tự động đồng bộ hóa dữ liệu.
+- **Lucide React**: Thư viện icon phong phú.
+- **Recharts**: Vẽ biểu đồ thống kê học tập trực quan.
 
-### Backend
-- **Python (FastAPI)**: Xử lý API tốc độ cao, bất đồng bộ (Asynchronous).
-- **SQLAlchemy (ORM)**: Truy vấn và quản lý cơ sở dữ liệu.
-- **PostgreSQL / SQLite**: Hỗ trợ SQLite cho môi trường phát triển (Local) và PostgreSQL cho môi trường sản xuất (Production).
+### Backend (Modular FastAPI - Clean Architecture)
+- **Python (FastAPI)**: API siêu tốc, bất đồng bộ (Asynchronous ASGI).
+- **Kiến trúc Modular Routers**: Phân mảnh `main.py` thành các module độc lập (`auth.py`, `users.py`, `courses.py`, `gamification.py`...) giúp dễ dàng bảo trì và mở rộng.
+- **SQLAlchemy (ORM)**: Truy vấn và quản lý cơ sở dữ liệu. Xử lý bài toán N+1 query hiệu quả bằng `joinedload`.
+- **PostgreSQL / SQLite**: SQLite cho môi trường phát triển (Local) và PostgreSQL cho môi trường sản xuất (Production).
 - **Authentication**: JWT (JSON Web Tokens) và bảo mật mã hóa mật khẩu bằng `bcrypt`.
 
 ---
@@ -74,7 +79,7 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 Backend sẽ khởi chạy tại: `http://localhost:8000`  
-Hệ thống sẽ tự động tạo cơ sở dữ liệu SQLite (`english_app.db`) và chạy **Auto-Migration** ở lần khởi động đầu tiên.
+Hệ thống sẽ tự động tạo cơ sở dữ liệu SQLite (`english_app.db`), tạo dữ liệu giả lập (Mock data) như khóa học, câu hỏi và tài khoản Admin ở lần khởi động đầu tiên.
 
 ### 2. Cài đặt Frontend (React + Vite)
 
@@ -96,20 +101,22 @@ Frontend sẽ khởi chạy tại: `http://localhost:5173`
 
 ## 🔑 Tài khoản Test mặc định
 
-Khi Backend khởi động lần đầu, hệ thống sẽ tự động tạo một tài khoản Admin để bạn có thể vào trang Quản lý:
+Khi Backend khởi động lần đầu, hệ thống sẽ tự động tạo một tài khoản Admin:
 - **Email**: `admin@englishmaster.com`
 - **Mật khẩu**: `admin`
 
-*(Lưu ý: Nếu bạn sử dụng PostgreSQL trên Production, bạn có thể thiết lập tài khoản Admin thông qua các lệnh SQL trực tiếp trên Database).*
+*(Lưu ý: Nếu bạn sử dụng PostgreSQL trên Production, bạn có thể thiết lập tài khoản Admin thông qua script hoặc thao tác DB trực tiếp).*
 
 ---
 
 ## 🌐 Triển khai (Deployment)
 
-Dự án đã được cấu hình để dễ dàng triển khai trên các nền tảng đám mây:
-- **Frontend**: Khuyên dùng **Vercel** hoặc **Netlify**. Chỉ cần trỏ thư mục gốc vào `frontend` và chạy lệnh `npm run build`.
-- **Backend**: Khuyên dùng **Render**, **Railway** hoặc **Heroku**. Sử dụng tệp `requirements.txt` và `uvicorn` để chạy app FastAPI. 
-  - Lệnh start cho Render: `uvicorn main:app --host 0.0.0.0 --port 10000`
+Dự án đã được thiết kế sẵn để đưa lên các dịch vụ đám mây chuyên nghiệp.
+- **Frontend (Static Hosting)**: Khuyên dùng **Vercel** hoặc **Netlify**. Chọn thư mục `frontend` và lệnh `npm run build`. Đã tối ưu Code Splitting nên dung lượng tải rất nhẹ.
+- **Backend (Web Service)**: Khuyên dùng **Render**, **Railway** hoặc **Heroku**. 
+  - Lệnh start cho Render/Heroku (sử dụng Gunicorn + Uvicorn workers): 
+    `gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker`
+  - Đã có sẵn file `startup.sh` để xử lý các tài nguyên phụ trợ trước khi app chạy.
 
 ---
-*Developed with ❤️ for Interactive English Learning.*
+*BGKH English - Developed with ❤️ for Interactive English Learning.*
