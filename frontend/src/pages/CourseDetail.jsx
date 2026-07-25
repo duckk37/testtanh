@@ -164,7 +164,7 @@ function CourseDetail() {
                   <p className="text-slate-600 dark:text-slate-300 mb-6">Xem video, bật phụ đề và click vào bất kỳ từ nào để tra nghĩa. Bạn cần xem hết video để làm bài kiểm tra.</p>
                   <div className="rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700 bg-slate-900">
                     <InteractiveVideoPlayer 
-                      videoId={activeLesson.youtube_id} 
+                      youtubeId={activeLesson.youtube_id} 
                       subtitles={activeLesson.subtitles ? JSON.parse(activeLesson.subtitles) : []}
                       onVideoEnd={() => setVideoEnded(true)}
                     />
