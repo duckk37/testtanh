@@ -1,23 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Medal, Flame, BookOpen, Crown } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { API_URL } from '../config';
 
 export default function Leaderboard() {
-  const [leaders, setLeaders] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(API_URL + '/users/leaderboard')
-      .then(res => res.json())
-      .then(data => {
-        setLeaders(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error fetching leaderboard:", err);
-        setLoading(false);
-      });
-  }, []);
+  const { data: leaders = [], isLoading: loading } = useQuery({
+    queryKey: ['leaderboard'],
+    queryFn: async () => {
+      const res = await fetch(API_URL + '/users/leaderboard');
+      if (!res.ok) throw new Error("Error fetching leaderboard");
+      return res.json();
+    }
+  });
 
   if (loading) {
     return (

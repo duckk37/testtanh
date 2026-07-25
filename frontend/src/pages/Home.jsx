@@ -3,28 +3,29 @@ import CourseCard from '../components/CourseCard';
 import ExamCard from '../components/ExamCard';
 import { BookOpen, Award, CheckCircle, ArrowRight } from 'lucide-react';
 import { SkeletonCard } from '../components/Skeleton';
+import { useQuery } from '@tanstack/react-query';
 import { API_URL } from '../config';
 
 function Home() {
-  const [courses, setCourses] = useState([]);
-  const [exams, setExams] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: courses = [], isLoading: loadingCourses } = useQuery({
+    queryKey: ['courses'],
+    queryFn: async () => {
+      const res = await fetch(API_URL + '/courses');
+      if (!res.ok) throw new Error("Error fetching courses");
+      return res.json();
+    }
+  });
 
-  useEffect(() => {
-    Promise.all([
-      fetch(API_URL + '/courses').then(res => res.json()),
-      fetch(API_URL + '/exams').then(res => res.json())
-    ])
-    .then(([coursesData, examsData]) => {
-      setCourses(coursesData);
-      setExams(examsData);
-      setLoading(false);
-    })
-    .catch(err => {
-      console.error("Error fetching data:", err);
-      setLoading(false);
-    });
-  }, []);
+  const { data: exams = [], isLoading: loadingExams } = useQuery({
+    queryKey: ['exams'],
+    queryFn: async () => {
+      const res = await fetch(API_URL + '/exams');
+      if (!res.ok) throw new Error("Error fetching exams");
+      return res.json();
+    }
+  });
+
+  const loading = loadingCourses || loadingExams;
 
   if (loading) {
     return (
