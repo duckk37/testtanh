@@ -17,14 +17,17 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const WritingPractice = lazy(() => import('./pages/WritingPractice'));
 
 function AppContent() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
+
+  // Add toggle function to handle state flipping instead of just forcing true
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-900 font-sans text-slate-900 dark:text-slate-100 overflow-hidden">
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
-        <Header toggleSidebar={() => setIsSidebarOpen(true)} />
+        <Header toggleSidebar={toggleSidebar} />
         
         <main className="flex-1 overflow-y-auto relative">
           <Suspense fallback={
