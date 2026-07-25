@@ -2,11 +2,8 @@ import models
 
 def seed(db):
     try:
-        # Check if the exam already exists to avoid duplicates
+        # Check if the exam already exists
         existing_exam = db.query(models.Exam).filter(models.Exam.title == "Bài kiểm tra Bài 1 (Nhập tự động)").first()
-        if existing_exam:
-            print("Tests already seeded.")
-            return
 
         # Find Lesson 1 in the 48-day course
         course = db.query(models.Course).filter(models.Course.title == "48 NGÀY LẤY GỐC TIẾNG ANH").first()
@@ -25,6 +22,13 @@ def seed(db):
             
         print(f"Seeding tests for Lesson ID: {lesson.id}")
         
+        if existing_exam:
+            print("Tests already seeded. Re-attaching to correct lesson just in case.")
+            lesson.exam_id = existing_exam.id
+            db.commit()
+            # Do not create it again
+            return
+            
         # Create an Exam for this lesson
         exam = models.Exam(
             title="Bài kiểm tra Bài 1 (Nhập tự động)",
@@ -177,11 +181,6 @@ def seed(db):
                 lesson_num = int(lesson_num_str)
                 exam_title = data["title"]
                 
-                # Check if exam exists
-                existing_exam = db.query(models.Exam).filter(models.Exam.title == exam_title).first()
-                if existing_exam:
-                    continue
-                    
                 # Find lesson
                 course = db.query(models.Course).filter(models.Course.title == "48 NGÀY LẤY GỐC TIẾNG ANH").first()
                 if not course:
@@ -195,6 +194,14 @@ def seed(db):
                 
                 if not lesson:
                     print(f"Lesson {lesson_num} not found!")
+                    continue
+                    
+                # Check if exam exists
+                existing_exam = db.query(models.Exam).filter(models.Exam.title == exam_title).first()
+                if existing_exam:
+                    print(f"Exam {exam_title} already exists. Re-attaching...")
+                    lesson.exam_id = existing_exam.id
+                    db.commit()
                     continue
                     
                 # Create exam
