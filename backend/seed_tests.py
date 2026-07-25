@@ -8,9 +8,15 @@ def seed(db):
             print("Tests already seeded.")
             return
 
-        # Find Lesson 1
+        # Find Lesson 1 in the 48-day course
+        course = db.query(models.Course).filter(models.Course.title == "48 NGÀY LẤY GỐC TIẾNG ANH").first()
+        if not course:
+            print("48 NGÀY course not found for seeding tests!")
+            return
+            
         lesson = db.query(models.Lesson).filter(
-            (models.Lesson.title.ilike('%NGÀY 1%')) | (models.Lesson.order_index == 1)
+            models.Lesson.course_id == course.id,
+            models.Lesson.order_index == 1
         ).first()
         
         if not lesson:
@@ -177,8 +183,14 @@ def seed(db):
                     continue
                     
                 # Find lesson
+                course = db.query(models.Course).filter(models.Course.title == "48 NGÀY LẤY GỐC TIẾNG ANH").first()
+                if not course:
+                    print("48 NGÀY course not found!")
+                    continue
+                    
                 lesson = db.query(models.Lesson).filter(
-                    (models.Lesson.title.ilike(f'%NGÀY {lesson_num}%')) | (models.Lesson.order_index == lesson_num)
+                    models.Lesson.course_id == course.id,
+                    models.Lesson.order_index == lesson_num
                 ).first()
                 
                 if not lesson:
