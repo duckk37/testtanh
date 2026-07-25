@@ -148,7 +148,7 @@ const Flashcard = () => {
   };
 
   if (isLoading) {
-    return <div className="text-center py-20 text-slate-500">Đang tải sổ tay...</div>;
+    return <div className="text-center py-20 text-slate-500 dark:text-slate-400">Đang tải sổ tay...</div>;
   }
 
   if (words.length === 0) {
@@ -158,7 +158,7 @@ const Flashcard = () => {
           <BookOpen size={48} className="text-green-500" />
         </div>
         <h2 className="text-3xl font-bold text-slate-800 mb-4">Hoàn thành xuất sắc!</h2>
-        <p className="text-lg text-slate-600">Bạn không còn từ vựng nào cần ôn tập hôm nay.</p>
+        <p className="text-lg text-slate-600 dark:text-slate-300">Bạn không còn từ vựng nào cần ôn tập hôm nay.</p>
       </div>
     );
   }
@@ -171,24 +171,24 @@ const Flashcard = () => {
     if (!isFront) base += "rotate-y-180 ";
     
     if (activeTheme === 'theme_dark') {
-      return base + "bg-slate-800 border-2 border-slate-700 shadow-slate-900/50 text-white hover:border-slate-500";
+      return base + "bg-slate-800 border-2 border-slate-700 shadow-slate-900/50 text-white hover:border-slate-50 dark:border-slate-8000";
     } else if (activeTheme === 'theme_neon') {
       return base + "bg-slate-900 border-2 border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)] text-white hover:shadow-[0_0_30px_rgba(168,85,247,0.7)] hover:border-fuchsia-400";
     }
     // Default
-    return base + "bg-white border-2 border-slate-100 hover:shadow-2xl hover:border-blue-200" + (isFront ? " items-center justify-center" : "");
+    return base + "bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700/50 hover:shadow-2xl hover:border-blue-200" + (isFront ? " items-center justify-center" : "");
   };
 
   const getTextColor = (isMain) => {
     if (activeTheme === 'theme_dark' || activeTheme === 'theme_neon') {
       return isMain ? "text-white" : "text-slate-300";
     }
-    return isMain ? "text-slate-800" : "text-slate-500";
+    return isMain ? "text-slate-800" : "text-slate-500 dark:text-slate-400";
   };
 
   return (
     <div className="max-w-xl mx-auto py-12 px-4">
-      <div className="mb-6 flex justify-between items-center text-slate-500 font-medium">
+      <div className="mb-6 flex justify-between items-center text-slate-500 dark:text-slate-400 font-medium">
         <span>Tiến trình hôm nay</span>
         <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
           Còn {words.length} từ
@@ -227,7 +227,7 @@ const Flashcard = () => {
             {/* AI Pronunciation Result */}
             {transcript && (
               <div className="absolute bottom-8 w-full px-8 text-center" onClick={(e) => e.stopPropagation()}>
-                <p className="text-sm text-slate-500 mb-1">Bạn vừa nói:</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Bạn vừa nói:</p>
                 <p className="font-medium text-slate-800 mb-2">"{transcript}"</p>
                 {score !== null && (
                   <div className={`inline-block px-4 py-1 rounded-full text-sm font-bold ${score >= 80 ? 'bg-green-100 text-green-700' : score >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
@@ -240,9 +240,9 @@ const Flashcard = () => {
 
           <div className={getThemeClasses(false)}>
             <div className="flex-1 overflow-y-auto">
-              <div className="flex items-baseline gap-3 mb-6 border-b border-slate-200/20 pb-4">
+              <div className="flex items-baseline gap-3 mb-6 border-b border-slate-200 dark:border-slate-700/20 pb-4">
                 <h2 className={`text-4xl font-bold ${getTextColor(true)}`}>{currentWord.word}</h2>
-                <span className={`text-lg font-mono px-2 py-1 rounded ${activeTheme !== 'default' ? 'bg-slate-700 text-slate-300' : 'bg-slate-50 text-slate-500'}`}>{currentWord.phonetic}</span>
+                <span className={`text-lg font-mono px-2 py-1 rounded ${activeTheme !== 'default' ? 'bg-slate-700 text-slate-300' : 'bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400'}`}>{currentWord.phonetic}</span>
               </div>
               
               <div className="space-y-6">
@@ -262,7 +262,7 @@ const Flashcard = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-200/20">
+            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-200 dark:border-slate-700/20">
               <button 
                 onClick={(e) => { e.stopPropagation(); handleReview(2); }}
                 className="py-3 px-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 font-medium transition-colors"

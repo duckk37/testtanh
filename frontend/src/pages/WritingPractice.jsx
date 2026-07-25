@@ -51,20 +51,20 @@ export default function WritingPractice() {
           <PenTool size={32} className="text-blue-600" />
         </div>
         <h1 className="text-3xl font-bold text-slate-800 mb-2">Luyện viết AI</h1>
-        <p className="text-slate-600">Luyện tập kỹ năng viết, AI sẽ giúp bạn kiểm tra lỗi chính tả.</p>
+        <p className="text-slate-600 dark:text-slate-300">Luyện tập kỹ năng viết, AI sẽ giúp bạn kiểm tra lỗi chính tả.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-4">
-          <div className="bg-white rounded-2xl shadow-soft border border-slate-200 overflow-hidden">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-soft dark:shadow-none border border-slate-200 dark:border-slate-700 overflow-hidden">
             <textarea
-              className="w-full h-64 p-6 focus:outline-none resize-none text-slate-700 leading-relaxed"
+              className="w-full h-64 p-6 focus:outline-none resize-none text-slate-700 dark:text-slate-200 leading-relaxed"
               placeholder="Hãy viết một đoạn văn bằng tiếng Anh về chủ đề bất kỳ..."
               value={text}
               onChange={(e) => setText(e.target.value)}
             />
-            <div className="bg-slate-50 p-4 border-t border-slate-200 flex justify-between items-center">
-              <div className="text-sm text-slate-500 font-medium">
+            <div className="bg-slate-50 dark:bg-slate-900 p-4 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center">
+              <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">
                 {text.trim().split(/\s+/).filter(x => x).length} từ
               </div>
               <button
@@ -80,22 +80,22 @@ export default function WritingPractice() {
         </div>
 
         <div className="md:col-span-1 space-y-4">
-          <div className="bg-white rounded-2xl shadow-soft border border-slate-200 p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-soft dark:shadow-none border border-slate-200 dark:border-slate-700 p-6">
             <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
               <Target size={20} className="text-blue-500" /> Kết quả phân tích
             </h2>
             
             {!result ? (
-              <p className="text-slate-500 text-sm text-center py-8">Hãy viết và bấm kiểm tra để xem kết quả.</p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm text-center py-8">Hãy viết và bấm kiểm tra để xem kết quả.</p>
             ) : (
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-3 text-center">
-                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <p className="text-xs text-slate-500 font-bold uppercase mb-1">Độ phong phú</p>
+                  <div className="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase mb-1">Độ phong phú</p>
                     <p className="text-xl font-bold text-blue-600">{result.stats.lexical_diversity}%</p>
                   </div>
-                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <p className="text-xs text-slate-500 font-bold uppercase mb-1">Số lỗi</p>
+                  <div className="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase mb-1">Số lỗi</p>
                     <p className={`text-xl font-bold ${result.mistakes.length === 0 ? 'text-green-500' : 'text-red-500'}`}>
                       {result.mistakes.length}
                     </p>
@@ -103,7 +103,7 @@ export default function WritingPractice() {
                 </div>
 
                 <div>
-                  <h3 className="font-bold text-slate-700 mb-3 flex items-center gap-2">
+                  <h3 className="font-bold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
                     <AlertTriangle size={16} className={result.mistakes.length > 0 ? "text-amber-500" : "text-green-500"} /> 
                     {result.mistakes.length > 0 ? "Gợi ý sửa lỗi" : "Hoàn hảo! Không có lỗi."}
                   </h3>
@@ -112,10 +112,10 @@ export default function WritingPractice() {
                     <div className="space-y-3">
                       {result.mistakes.map((m, idx) => (
                         <div key={idx} className="bg-amber-50 border border-amber-100 rounded-xl p-3 text-sm">
-                          <p className="mb-2">Sai: <span className="line-through text-slate-500">{m.original}</span> ➔ <strong className="text-emerald-600">{m.suggestion}</strong></p>
+                          <p className="mb-2">Sai: <span className="line-through text-slate-500 dark:text-slate-400">{m.original}</span> ➔ <strong className="text-emerald-600">{m.suggestion}</strong></p>
                           <button 
                             onClick={() => applySuggestion(m.original, m.suggestion)}
-                            className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 py-1 px-3 rounded-lg text-xs font-bold w-full transition-colors"
+                            className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 py-1 px-3 rounded-lg text-xs font-bold w-full transition-colors"
                           >
                             Áp dụng sửa
                           </button>

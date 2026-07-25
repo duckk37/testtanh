@@ -108,25 +108,25 @@ export default function TranslatableText({ text, className }) {
 
       {showPopup && (
         <div 
-          className="absolute z-50 bg-white rounded-xl shadow-2xl border border-slate-200 p-4 w-72 transform -translate-x-1/2 mt-2"
+          className="absolute z-50 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-4 w-72 transform -translate-x-1/2 mt-2"
           style={{ left: popupPos.x, top: popupPos.y }}
         >
           {loading ? (
-            <div className="text-slate-500 text-sm text-center py-4">Đang tra từ...</div>
+            <div className="text-slate-500 dark:text-slate-400 text-sm text-center py-4">Đang tra từ...</div>
           ) : definition && !definition.error ? (
             <div>
-              <div className="flex justify-between items-start mb-2 border-b border-slate-100 pb-2">
+              <div className="flex justify-between items-start mb-2 border-b border-slate-100 dark:border-slate-700/50 pb-2">
                 <div>
                   <h4 className="font-bold text-slate-800 text-lg capitalize">{definition.word}</h4>
-                  <p className="text-slate-500 font-mono text-sm">{definition.phonetic}</p>
+                  <p className="text-slate-500 dark:text-slate-400 font-mono text-sm">{definition.phonetic}</p>
                 </div>
                 <button onClick={playAudio} className="p-2 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors">
                   <Volume2 size={16} />
                 </button>
               </div>
-              <div className="text-sm text-slate-700 mb-3 max-h-32 overflow-y-auto">
+              <div className="text-sm text-slate-700 dark:text-slate-200 mb-3 max-h-32 overflow-y-auto">
                 <p><strong>Nghĩa:</strong> {definition.meaning}</p>
-                {definition.example && <p className="mt-1 italic text-slate-500 text-xs">Ví dụ: {definition.example}</p>}
+                {definition.example && <p className="mt-1 italic text-slate-500 dark:text-slate-400 text-xs">Ví dụ: {definition.example}</p>}
               </div>
               <button 
                 onClick={saveToFlashcards}
@@ -136,7 +136,7 @@ export default function TranslatableText({ text, className }) {
               </button>
             </div>
           ) : (
-            <div className="text-slate-500 text-sm text-center py-2">
+            <div className="text-slate-500 dark:text-slate-400 text-sm text-center py-2">
               {definition?.error || 'Không thể lấy dữ liệu'}
             </div>
           )}

@@ -4,13 +4,13 @@ import { Home } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-sm p-10 max-w-md w-full text-center border border-slate-100">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-10 max-w-md w-full text-center border border-slate-100 dark:border-slate-700/50">
         <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <span className="text-4xl font-bold text-blue-600">404</span>
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">Trang không tồn tại</h1>
-        <p className="text-slate-600 mb-8">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">Trang không tồn tại</h1>
+        <p className="text-slate-600 dark:text-slate-300 mb-8">
           Đường dẫn bạn đang cố truy cập không tồn tại hoặc đã bị gỡ bỏ.
         </p>
         <Link 

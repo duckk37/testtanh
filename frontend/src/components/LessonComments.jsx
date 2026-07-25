@@ -61,7 +61,7 @@ const LessonComments = ({ lessonId }) => {
   };
 
   return (
-    <div className="mt-8 border-t border-slate-200 pt-8">
+    <div className="mt-8 border-t border-slate-200 dark:border-slate-700 pt-8">
       <div className="flex items-center gap-2 mb-6">
         <MessageCircle size={24} className="text-blue-600" />
         <h3 className="text-xl font-bold text-slate-800">Thảo luận ({comments.length})</h3>
@@ -85,15 +85,15 @@ const LessonComments = ({ lessonId }) => {
       </form>
 
       {isLoading ? (
-        <div className="text-slate-500 text-center py-4">Đang tải bình luận...</div>
+        <div className="text-slate-500 dark:text-slate-400 text-center py-4">Đang tải bình luận...</div>
       ) : (
         <div className="space-y-6">
           {comments.map((comment) => (
             <div key={comment.id} className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold uppercase shrink-0">
+              <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold uppercase shrink-0">
                 {comment.username.charAt(0)}
               </div>
-              <div className="flex-1 bg-slate-50 rounded-2xl rounded-tl-none p-4 border border-slate-100">
+              <div className="flex-1 bg-slate-50 dark:bg-slate-900 rounded-2xl rounded-tl-none p-4 border border-slate-100 dark:border-slate-700/50">
                 <div className="flex justify-between items-baseline mb-1">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-slate-800">{comment.username}</span>
@@ -105,12 +105,12 @@ const LessonComments = ({ lessonId }) => {
                   </div>
                   <span className="text-xs text-slate-400">{formatDate(comment.created_at)}</span>
                 </div>
-                <TranslatableText text={comment.content} className="text-slate-700 whitespace-pre-line" />
+                <TranslatableText text={comment.content} className="text-slate-700 dark:text-slate-200 whitespace-pre-line" />
               </div>
             </div>
           ))}
           {comments.length === 0 && (
-            <div className="text-center text-slate-500 py-4">Chưa có bình luận nào. Hãy là người đầu tiên thảo luận!</div>
+            <div className="text-center text-slate-500 dark:text-slate-400 py-4">Chưa có bình luận nào. Hãy là người đầu tiên thảo luận!</div>
           )}
         </div>
       )}

@@ -27,7 +27,7 @@ export default function UsersTab() {
     }
   };
 
-  if (loading) return <div className="text-center p-10 text-slate-500">Đang tải dữ liệu...</div>;
+  if (loading) return <div className="text-center p-10 text-slate-500 dark:text-slate-400">Đang tải dữ liệu...</div>;
 
   return (
     <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4">
@@ -37,10 +37,10 @@ export default function UsersTab() {
         <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
           <thead className="bg-slate-50 dark:bg-slate-900/50">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Học viên</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Email</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Vai trò</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Chăm chỉ</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Học viên</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Email</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Vai trò</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Chăm chỉ</th>
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700">
@@ -75,7 +75,7 @@ export default function UsersTab() {
             ))}
             {users.length === 0 && (
               <tr>
-                <td colSpan="4" className="px-6 py-10 text-center text-slate-500">Chưa có người dùng nào.</td>
+                <td colSpan="4" className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">Chưa có người dùng nào.</td>
               </tr>
             )}
           </tbody>

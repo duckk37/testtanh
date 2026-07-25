@@ -119,7 +119,7 @@ export default function ExamsTab() {
 
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
         {loading ? (
-          <div className="text-center p-10 text-slate-500">Đang tải dữ liệu...</div>
+          <div className="text-center p-10 text-slate-500 dark:text-slate-400">Đang tải dữ liệu...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
             {exams.map(item => (
@@ -157,7 +157,7 @@ export default function ExamsTab() {
             ))}
             
             {exams.length === 0 && (
-              <div className="col-span-full text-center py-10 text-slate-500">
+              <div className="col-span-full text-center py-10 text-slate-500 dark:text-slate-400">
                 Chưa có đề thi nào. Hãy tạo mới!
               </div>
             )}

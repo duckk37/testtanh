@@ -154,7 +154,7 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd, subtitles: rawSubtitles
           />
         </div>
         
-        <div className="mt-6 text-xl md:text-2xl text-center min-h-[80px] font-medium text-slate-700 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 w-full flex items-center justify-center">
+        <div className="mt-6 text-xl md:text-2xl text-center min-h-[80px] font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 w-full flex items-center justify-center">
           {activeSubtitle ? (
             <div>{renderInteractiveSubtitle(activeSubtitle.text)}</div>
           ) : (
@@ -163,10 +163,10 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd, subtitles: rawSubtitles
         </div>
       </div>
 
-      <div className="w-full lg:w-1/3 bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col h-[600px]">
-        <div className="p-4 border-b border-slate-100 bg-slate-50 rounded-t-2xl">
+      <div className="w-full lg:w-1/3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 flex flex-col h-[600px]">
+        <div className="p-4 border-b border-slate-100 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900 rounded-t-2xl">
           <h3 className="font-bold text-slate-800">Transcript (Phụ đề)</h3>
-          <p className="text-xs text-slate-500">Bấm vào câu để tua video, bấm vào từ để tra nghĩa</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Bấm vào câu để tua video, bấm vào từ để tra nghĩa</p>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {subtitles.length > 0 ? subtitles.map((sub, idx) => {
@@ -175,25 +175,25 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd, subtitles: rawSubtitles
               <div 
                 key={idx} 
                 onClick={() => seekTo(sub.start)}
-                className={`p-3 rounded-xl cursor-pointer transition-colors ${isActive ? 'bg-blue-50 border-l-4 border-blue-500 shadow-sm' : 'hover:bg-slate-50'}`}
+                className={`p-3 rounded-xl cursor-pointer transition-colors ${isActive ? 'bg-blue-50 border-l-4 border-blue-500 shadow-sm' : 'hover:bg-slate-50 dark:bg-slate-900'}`}
               >
                 <div className="text-xs text-slate-400 font-mono mb-1">{new Date(sub.start * 1000).toISOString().substr(14, 5)}</div>
-                <div className={`text-sm ${isActive ? 'text-blue-800 font-medium' : 'text-slate-600'}`}>
+                <div className={`text-sm ${isActive ? 'text-blue-800 font-medium' : 'text-slate-600 dark:text-slate-300'}`}>
                   {renderInteractiveSubtitle(sub.text)}
                 </div>
               </div>
             );
           }) : (
-            <p className="text-sm text-slate-500 text-center mt-10">Video này chưa có phụ đề.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 text-center mt-10">Video này chưa có phụ đề.</p>
           )}
         </div>
       </div>
 
       {dictionaryData && (
-        <div className="mt-6 p-6 bg-white shadow-xl rounded-2xl border border-slate-100 w-full relative transform transition-all animate-in fade-in slide-in-from-bottom-4">
+        <div className="mt-6 p-6 bg-white dark:bg-slate-800 shadow-xl rounded-2xl border border-slate-100 dark:border-slate-700/50 w-full relative transform transition-all animate-in fade-in slide-in-from-bottom-4">
           <button 
             onClick={() => setDictionaryData(null)}
-            className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-2 rounded-full hover:bg-slate-100 transition-colors"
+            className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:text-slate-200 p-2 rounded-full hover:bg-slate-100 transition-colors"
             title="Đóng"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -208,8 +208,8 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd, subtitles: rawSubtitles
           ) : (
             <div className="pr-8">
               <div className="flex items-baseline gap-3 mb-2">
-                <h3 className="text-3xl font-bold text-slate-900">{dictionaryData.word}</h3>
-                <span className="text-lg text-slate-500 font-mono bg-slate-100 px-2 py-1 rounded">
+                <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{dictionaryData.word}</h3>
+                <span className="text-lg text-slate-500 dark:text-slate-400 font-mono bg-slate-100 px-2 py-1 rounded">
                   {dictionaryData.phonetic}
                 </span>
               </div>
@@ -220,11 +220,11 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd, subtitles: rawSubtitles
                     <p className="text-sm font-semibold text-blue-600 uppercase tracking-wider mb-1">
                       {meaning.partOfSpeech}
                     </p>
-                    <p className="text-slate-700 text-lg">
+                    <p className="text-slate-700 dark:text-slate-200 text-lg">
                       {meaning.definitions[0]?.definition}
                     </p>
                     {meaning.definitions[0]?.example && (
-                      <p className="text-slate-500 mt-2 italic flex gap-2">
+                      <p className="text-slate-500 dark:text-slate-400 mt-2 italic flex gap-2">
                         <span className="text-blue-300">"</span>
                         {meaning.definitions[0].example}
                         <span className="text-blue-300">"</span>

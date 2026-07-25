@@ -31,8 +31,8 @@ export default function OverviewTab() {
     }
   };
 
-  if (loading) return <div className="text-center p-10 text-slate-500">Đang tải dữ liệu...</div>;
-  if (!stats) return <div className="text-center p-10 text-slate-500">Lỗi tải dữ liệu.</div>;
+  if (loading) return <div className="text-center p-10 text-slate-500 dark:text-slate-400">Đang tải dữ liệu...</div>;
+  if (!stats) return <div className="text-center p-10 text-slate-500 dark:text-slate-400">Lỗi tải dữ liệu.</div>;
 
   return (
     <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4">

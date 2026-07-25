@@ -122,7 +122,7 @@ export default function ExamQuestionManager({ exam, onBack }) {
   return (
     <div className="animate-in fade-in slide-in-from-right-4">
       <div className="mb-6">
-        <button onClick={onBack} className="flex items-center gap-2 text-slate-500 hover:text-slate-800 dark:hover:text-white mb-4 transition-colors">
+        <button onClick={onBack} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white mb-4 transition-colors">
           <ArrowLeft size={16} /> Quay lại danh sách Bài kiểm tra
         </button>
         <div className="flex justify-between items-end border-b border-slate-200 dark:border-slate-700 pb-4">
@@ -137,7 +137,7 @@ export default function ExamQuestionManager({ exam, onBack }) {
       </div>
 
       {loading ? (
-        <div className="text-center p-12 text-slate-500">Đang tải danh sách câu hỏi...</div>
+        <div className="text-center p-12 text-slate-500 dark:text-slate-400">Đang tải danh sách câu hỏi...</div>
       ) : (
         <div className="space-y-4">
           {questions.map((q, index) => (
@@ -247,7 +247,7 @@ export default function ExamQuestionManager({ exam, onBack }) {
                     <label key={opt} className={`flex-1 flex justify-center items-center gap-2 py-3 rounded-xl border-2 cursor-pointer transition-all ${
                       form.correct_option === opt 
                         ? 'border-green-500 bg-green-50 text-green-700 font-bold' 
-                        : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'
+                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300'
                     }`}>
                       <input 
                         type="radio" 

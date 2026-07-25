@@ -43,10 +43,10 @@ function Auth() {
         
         <div className="text-center mb-8">
           <p className="text-blue-600 text-xs font-bold tracking-widest uppercase mb-2">Bài giảng khóa học</p>
-          <h2 className="text-[24px] font-bold text-slate-900 mb-2">
+          <h2 className="text-[24px] font-bold text-slate-900 dark:text-slate-100 mb-2">
             {isLogin ? 'Chào mừng trở lại' : 'Tạo tài khoản học viên'}
           </h2>
-          <p className="text-[14.5px] text-slate-500">
+          <p className="text-[14.5px] text-slate-500 dark:text-slate-400">
             {isLogin ? 'Đăng nhập để tiếp tục học tập trên hệ thống BGKH' : 'Bắt đầu hành trình học tập cùng BGKH'}
           </p>
         </div>
@@ -106,7 +106,7 @@ function Auth() {
           {isLogin && (
             <div className="flex items-center gap-2 mt-2 mb-4 cursor-pointer">
               <input type="checkbox" id="remember" className="w-[18px] h-[18px] accent-blue-600 cursor-pointer" defaultChecked />
-              <label htmlFor="remember" className="text-[13.5px] text-slate-500 cursor-pointer">Ghi nhớ đăng nhập (30 ngày)</label>
+              <label htmlFor="remember" className="text-[13.5px] text-slate-500 dark:text-slate-400 cursor-pointer">Ghi nhớ đăng nhập (30 ngày)</label>
             </div>
           )}
 
@@ -118,7 +118,7 @@ function Auth() {
           </div>
         </form>
 
-        <div className="text-center mt-6 text-[13.5px] text-slate-500">
+        <div className="text-center mt-6 text-[13.5px] text-slate-500 dark:text-slate-400">
           {isLogin ? 'Chưa có tài khoản? ' : 'Đã có tài khoản? '}
           <button
             onClick={() => setIsLogin(!isLogin)}
@@ -128,7 +128,7 @@ function Auth() {
           </button>
         </div>
 
-        <div className="flex justify-center items-center gap-2 flex-wrap mt-8 pt-6 border-t border-slate-100 text-[11.5px] font-bold text-slate-400">
+        <div className="flex justify-center items-center gap-2 flex-wrap mt-8 pt-6 border-t border-slate-100 dark:border-slate-700/50 text-[11.5px] font-bold text-slate-400">
           <span>BGKH</span>
           <div className="w-[3px] h-[3px] rounded-full bg-slate-300"></div>
           <span>Bảo mật học viên</span>

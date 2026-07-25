@@ -137,7 +137,7 @@ export default function CoursesTab() {
     }
   };
 
-  if (loading) return <div className="text-center p-10 text-slate-500">Đang tải dữ liệu...</div>;
+  if (loading) return <div className="text-center p-10 text-slate-500 dark:text-slate-400">Đang tải dữ liệu...</div>;
 
   if (managingCourse) {
     return <CourseContentManager course={managingCourse} onBack={() => setManagingCourse(null)} />;
@@ -162,10 +162,10 @@ export default function CoursesTab() {
         <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
           <thead className="bg-slate-50 dark:bg-slate-900/50">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Khóa học</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Mô tả ngắn</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Giá bán</th>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Hành động</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Khóa học</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Mô tả ngắn</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Giá bán</th>
+              <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Hành động</th>
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700">
@@ -210,7 +210,7 @@ export default function CoursesTab() {
             ))}
             {courses.length === 0 && (
               <tr>
-                <td colSpan="4" className="px-6 py-10 text-center text-slate-500">Chưa có khóa học nào.</td>
+                <td colSpan="4" className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">Chưa có khóa học nào.</td>
               </tr>
             )}
           </tbody>

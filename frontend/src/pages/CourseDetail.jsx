@@ -74,7 +74,7 @@ function CourseDetail() {
 
   if (loading) {
     return (
-      <div className="flex flex-col md:flex-row h-[calc(100vh-64px)] bg-slate-50">
+      <div className="flex flex-col md:flex-row h-[calc(100vh-64px)] bg-slate-50 dark:bg-slate-900">
         <SkeletonSidebar />
         <SkeletonVideo />
       </div>
@@ -82,38 +82,38 @@ function CourseDetail() {
   }
 
   if (lessons.length === 0) {
-    return <div className="p-10 text-center text-slate-500">Khóa học này chưa có bài học nào.</div>;
+    return <div className="p-10 text-center text-slate-500 dark:text-slate-400">Khóa học này chưa có bài học nào.</div>;
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-[calc(100vh-64px)] bg-slate-50 font-sans">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-64px)] bg-slate-50 dark:bg-slate-900 font-sans">
       {/* Sidebar - Lesson List */}
-      <div className="w-full md:w-80 bg-white border-r border-slate-200 flex flex-col h-full z-10">
-        <div className="p-4 border-b border-slate-200">
-          <Link to="/" className="flex items-center text-sm text-slate-500 hover:text-blue-600 mb-4 transition-colors">
+      <div className="w-full md:w-80 bg-white dark:bg-slate-800/50 backdrop-blur-md border-r border-slate-200 dark:border-slate-800 flex flex-col h-full z-10">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800">
+          <Link to="/" className="flex items-center text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 mb-4 transition-colors">
             <ChevronLeft size={16} />
             Quay lại trang chủ
           </Link>
-          <h2 className="font-bold text-lg text-slate-900">Danh sách bài học</h2>
+          <h2 className="font-bold text-lg text-slate-900 dark:text-slate-100">Danh sách bài học</h2>
         </div>
         
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto p-2">
           {lessons.map((lesson, index) => (
             <div 
               key={lesson.id}
               onClick={() => handleLessonSelect(lesson)}
-              className={`p-4 mx-3 my-2 rounded-xl flex items-start gap-3 transition-all ${
-                !lesson.is_unlocked ? 'opacity-50 cursor-not-allowed bg-slate-50' : 'cursor-pointer hover:bg-slate-50 hover:shadow-sm'
-              } ${activeLesson?.id === lesson.id ? 'bg-blue-50 border border-blue-200 shadow-sm' : 'border border-transparent'}`}
+              className={`p-4 mx-2 my-2 rounded-xl flex items-start gap-3 transition-all ${
+                !lesson.is_unlocked ? 'opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-800' : 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:shadow-sm'
+              } ${activeLesson?.id === lesson.id ? 'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 shadow-sm' : 'border border-transparent'}`}
             >
-              <div className={`mt-0.5 ${!lesson.is_unlocked ? 'text-slate-400' : lesson.is_completed ? 'text-green-500' : activeLesson?.id === lesson.id ? 'text-blue-600' : 'text-slate-400'}`}>
+              <div className={`mt-0.5 ${!lesson.is_unlocked ? 'text-slate-400 dark:text-slate-500 dark:text-slate-400' : lesson.is_completed ? 'text-green-500' : activeLesson?.id === lesson.id ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500 dark:text-slate-400'}`}>
                 {!lesson.is_unlocked ? <Lock size={20} /> : lesson.is_completed ? <CheckCircle2 size={20} /> : <PlayCircle size={20} />}
               </div>
               <div>
-                <p className={`text-sm font-medium ${activeLesson?.id === lesson.id ? 'text-blue-700' : 'text-slate-700'}`}>
+                <p className={`text-sm font-medium ${activeLesson?.id === lesson.id ? 'text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-300'}`}>
                   {index + 1}. {lesson.title}
                 </p>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                   {!lesson.is_unlocked ? 'Đã khóa' : lesson.is_completed ? 'Đã hoàn thành' : 'Đang học'}
                 </p>
               </div>
@@ -123,19 +123,19 @@ function CourseDetail() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto bg-slate-100">
+      <div className="flex-1 overflow-y-auto bg-transparent">
         <div className="p-4 md:p-8">
           <div className="max-w-5xl mx-auto">
             {/* Header Area */}
-            <div className="bg-white p-6 rounded-t-2xl shadow-soft border border-slate-100 border-b-0">
-              <h1 className="text-2xl font-bold text-slate-900 mb-4">{activeLesson?.title}</h1>
+            <div className="bg-white dark:bg-slate-800/80 backdrop-blur-md p-6 rounded-t-2xl shadow-soft dark:shadow-none border border-slate-100 dark:border-slate-700/50 border-b-0">
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">{activeLesson?.title}</h1>
               
               {/* Tabs */}
-              <div className="flex space-x-4 border-b border-slate-200">
+              <div className="flex space-x-4 border-b border-slate-200 dark:border-slate-700">
                 <button
                   onClick={() => setActiveTab('video')}
                   className={`pb-3 px-2 flex items-center gap-2 font-medium text-sm transition-colors relative ${
-                    activeTab === 'video' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-700'
+                    activeTab === 'video' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                   }`}
                 >
                   <Video size={18} /> Video Bài Giảng
@@ -146,7 +146,7 @@ function CourseDetail() {
                 <button
                   onClick={() => setActiveTab('test')}
                   className={`pb-3 px-2 flex items-center gap-2 font-medium text-sm transition-colors relative ${
-                    activeTab === 'test' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-700'
+                    activeTab === 'test' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                   }`}
                 >
                   <FileText size={18} /> Bài Kiểm Tra
@@ -157,17 +157,18 @@ function CourseDetail() {
               </div>
             </div>
             
-            {/* Tab Content */}
-            <div className="bg-white shadow-soft border border-slate-100 rounded-b-2xl overflow-hidden p-6 mb-8">
+            {/* Content Area */}
+            <div className="bg-white dark:bg-slate-800/50 backdrop-blur-md p-6 rounded-b-2xl shadow-soft dark:shadow-none border border-slate-100 dark:border-slate-700/50 border-t-0 min-h-[500px]">
               {activeTab === 'video' && activeLesson && (
-                <>
-                  <p className="text-slate-600 mb-6">Xem video, bật phụ đề và click vào bất kỳ từ nào để tra nghĩa. Bạn cần xem hết video để làm bài kiểm tra.</p>
-                  <InteractiveVideoPlayer 
-                    key={`video-${activeLesson.id}`} 
-                    youtubeId={activeLesson.youtube_id}
-                    subtitles={activeLesson.subtitles}
-                    onVideoEnd={() => setVideoEnded(true)}
-                  />
+                <div className="animate-in fade-in duration-500">
+                  <p className="text-slate-600 dark:text-slate-300 mb-6">Xem video, bật phụ đề và click vào bất kỳ từ nào để tra nghĩa. Bạn cần xem hết video để làm bài kiểm tra.</p>
+                  <div className="rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700 bg-slate-900">
+                    <InteractiveVideoPlayer 
+                      videoId={activeLesson.youtube_id} 
+                      subtitles={activeLesson.subtitles ? JSON.parse(activeLesson.subtitles) : []}
+                      onVideoEnd={() => setVideoEnded(true)}
+                    />
+                  </div>
                   
                   {(videoEnded || activeLesson.is_completed) && (
                     <div className="mt-8 flex justify-end">
@@ -181,7 +182,7 @@ function CourseDetail() {
                   )}
                   
                   <LessonComments lessonId={activeLesson.id} />
-                </>
+                </div>
               )}
 
               {activeTab === 'test' && activeLesson && (

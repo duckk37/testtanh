@@ -53,7 +53,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
-                <item.icon size={20} className={isActive ? 'text-blue-600 dark:text-blue-400' : (item.iconColor || 'text-slate-400 dark:text-slate-500')} />
+                <item.icon size={20} className={isActive ? 'text-blue-600 dark:text-blue-400' : (item.iconColor || 'text-slate-400 dark:text-slate-500 dark:text-slate-400')} />
                 {item.label}
               </Link>
             );
@@ -72,7 +72,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               </div>
               <div className="flex-1 overflow-hidden">
                 <p className="text-sm font-bold truncate dark:text-slate-200">{user.username}</p>
-                <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
               </div>
             </Link>
             <button

@@ -98,7 +98,7 @@ export default function CourseContentManager({ course, onBack }) {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 max-w-7xl mx-auto">
       <div className="mb-8">
-        <button onClick={onBack} className="flex items-center gap-2 text-slate-500 hover:text-slate-800 dark:hover:text-white mb-4 transition-colors">
+        <button onClick={onBack} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white mb-4 transition-colors">
           <ArrowLeft size={16} /> Quay lại danh sách khóa học
         </button>
         <div className="flex items-end gap-6 border-b border-slate-200 dark:border-slate-700 pb-4">
@@ -123,16 +123,16 @@ export default function CourseContentManager({ course, onBack }) {
         </div>
 
         {loading ? (
-          <div className="text-center p-10 text-slate-500">Đang tải dữ liệu...</div>
+          <div className="text-center p-10 text-slate-500 dark:text-slate-400">Đang tải dữ liệu...</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
               <thead className="bg-slate-50 dark:bg-slate-900/50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">STT</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Tiêu đề</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Video URL</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Hành động</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">STT</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Tiêu đề</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Video URL</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Hành động</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -153,7 +153,7 @@ export default function CourseContentManager({ course, onBack }) {
                 ))}
                 {lessons.length === 0 && (
                   <tr>
-                    <td colSpan="4" className="px-4 py-8 text-center text-slate-500">Chưa có bài học nào.</td>
+                    <td colSpan="4" className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">Chưa có bài học nào.</td>
                   </tr>
                 )}
               </tbody>

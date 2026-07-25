@@ -129,18 +129,18 @@ export default function LessonTest({ lesson, onTestPassed }) {
   };
 
   if (!lesson.exam_id) {
-    return <div className="p-10 text-center text-slate-500">Bài học này không có bài kiểm tra.</div>;
+    return <div className="p-10 text-center text-slate-500 dark:text-slate-400">Bài học này không có bài kiểm tra.</div>;
   }
 
   if (loading) {
-    return <div className="p-10 text-center text-slate-500 flex items-center justify-center gap-2">
+    return <div className="p-10 text-center text-slate-500 dark:text-slate-400 flex items-center justify-center gap-2">
       <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
       Đang tải dữ liệu bài kiểm tra...
     </div>;
   }
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
       
       {/* Result View */}
       {result ? (
@@ -153,11 +153,11 @@ export default function LessonTest({ lesson, onTestPassed }) {
           <h3 className="text-3xl font-extrabold mb-3 text-slate-800">
             {result.is_passed ? 'Tuyệt vời! Bạn đã vượt qua' : 'Rất tiếc! Bạn chưa đạt'}
           </h3>
-          <p className="text-xl text-slate-600 mb-6">Điểm của bạn: <span className={`font-black text-4xl ${result.is_passed ? 'text-green-600' : 'text-red-600'}`}>{result.score}%</span></p>
+          <p className="text-xl text-slate-600 dark:text-slate-300 mb-6">Điểm của bạn: <span className={`font-black text-4xl ${result.is_passed ? 'text-green-600' : 'text-red-600'}`}>{result.score}%</span></p>
           
-          <div className="flex justify-center gap-6 text-sm text-slate-500 mb-8">
-            <span className="bg-slate-50 px-4 py-2 rounded-lg border border-slate-100 shadow-sm">Điểm yêu cầu: <strong className="text-slate-800">{lesson.passing_score_required}%</strong></span>
-            <span className="bg-slate-50 px-4 py-2 rounded-lg border border-slate-100 shadow-sm">Kỷ lục của bạn: <strong className="text-slate-800">{result.highest_score}%</strong></span>
+          <div className="flex justify-center gap-6 text-sm text-slate-500 dark:text-slate-400 mb-8">
+            <span className="bg-slate-50 dark:bg-slate-900 px-4 py-2 rounded-lg border border-slate-100 dark:border-slate-700/50 shadow-sm">Điểm yêu cầu: <strong className="text-slate-800">{lesson.passing_score_required}%</strong></span>
+            <span className="bg-slate-50 dark:bg-slate-900 px-4 py-2 rounded-lg border border-slate-100 dark:border-slate-700/50 shadow-sm">Kỷ lục của bạn: <strong className="text-slate-800">{result.highest_score}%</strong></span>
           </div>
           
           {result.is_passed ? (
@@ -173,10 +173,10 @@ export default function LessonTest({ lesson, onTestPassed }) {
             </button>
           )}
 
-          <div className="mt-8 border-t border-slate-100 pt-8">
+          <div className="mt-8 border-t border-slate-100 dark:border-slate-700/50 pt-8">
             <button 
               onClick={() => setShowReview(!showReview)}
-              className="px-6 py-2 border-2 border-slate-200 text-slate-600 rounded-lg font-medium hover:bg-slate-50 transition-colors"
+              className="px-6 py-2 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-lg font-medium hover:bg-slate-50 dark:bg-slate-900 transition-colors"
             >
               {showReview ? 'Ẩn chi tiết bài làm' : 'Xem lại chi tiết bài làm'}
             </button>
@@ -189,21 +189,21 @@ export default function LessonTest({ lesson, onTestPassed }) {
                   const isCorrect = selectedOpt === correctOpt;
                   
                   return (
-                    <div key={q.id} className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <div key={q.id} className="bg-slate-50 dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
                       <h4 className="font-bold text-slate-800 mb-4 flex gap-2">
-                        <span className="text-slate-500">Câu {idx + 1}:</span> {q.content}
+                        <span className="text-slate-500 dark:text-slate-400">Câu {idx + 1}:</span> {q.content}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {['A', 'B', 'C', 'D'].map(opt => {
                           const optText = q[`option_${opt.toLowerCase()}`];
-                          let optClass = "border-slate-200 bg-white text-slate-600";
+                          let optClass = "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300";
                           
                           if (opt === correctOpt) {
                             optClass = "border-green-500 bg-green-50 text-green-700 font-bold ring-2 ring-green-200";
                           } else if (opt === selectedOpt && !isCorrect) {
                             optClass = "border-red-500 bg-red-50 text-red-700 font-bold ring-2 ring-red-200";
                           } else if (opt !== selectedOpt && opt !== correctOpt) {
-                            optClass = "border-slate-200 bg-slate-50 text-slate-400 opacity-60";
+                            optClass = "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-400 opacity-60";
                           }
                           
                           return (
@@ -267,7 +267,7 @@ export default function LessonTest({ lesson, onTestPassed }) {
                       className={`p-2 rounded-lg transition-colors ml-4 shrink-0 border ${
                         flags[questions[currentQuestionIndex].id] 
                           ? 'bg-orange-50 border-orange-200 text-orange-500' 
-                          : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'
+                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-slate-50 dark:bg-slate-900'
                       }`}
                       title="Cắm cờ xem lại"
                     >
@@ -287,14 +287,14 @@ export default function LessonTest({ lesson, onTestPassed }) {
                           onClick={() => handleOptionSelect(q.id, opt)}
                           className={`text-left px-6 py-4 border-2 rounded-xl cursor-pointer transition-all duration-200 group flex items-center gap-4 ${
                             isSelected 
-                              ? 'bg-blue-50/50 border-blue-500 text-slate-900 shadow-sm' 
-                              : 'bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-700'
+                              ? 'bg-blue-50/50 border-blue-500 text-slate-900 dark:text-slate-100 shadow-sm' 
+                              : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-300 text-slate-700 dark:text-slate-200'
                           }`}
                         >
                           <span className={`w-8 h-8 flex items-center justify-center rounded-lg border-2 text-sm font-bold transition-colors shrink-0 ${
                             isSelected 
                               ? 'border-blue-500 bg-blue-500 text-white' 
-                              : 'border-slate-300 text-slate-500 group-hover:border-slate-400'
+                              : 'border-slate-300 text-slate-500 dark:text-slate-400 group-hover:border-slate-400'
                           }`}>
                               {opt}
                           </span>
@@ -306,11 +306,11 @@ export default function LessonTest({ lesson, onTestPassed }) {
                 </div>
 
                 {/* Navigation Buttons */}
-                <div className="flex justify-between items-center pt-6 border-t border-slate-100">
+                <div className="flex justify-between items-center pt-6 border-t border-slate-100 dark:border-slate-700/50">
                   <button
                     onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
                     disabled={currentQuestionIndex === 0}
-                    className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
+                    className="flex items-center gap-1 px-4 py-2.5 rounded-xl font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
                   >
                     <ChevronLeft size={20} /> Trước
                   </button>
@@ -337,21 +337,21 @@ export default function LessonTest({ lesson, onTestPassed }) {
           </div>
 
           {/* Right Sidebar (Timer & Grid) */}
-          <div className="w-full lg:w-72 shrink-0 border-t lg:border-t-0 lg:border-l border-slate-200 pt-6 lg:pt-0 lg:pl-8 flex flex-col gap-6">
+          <div className="w-full lg:w-72 shrink-0 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-700 pt-6 lg:pt-0 lg:pl-8 flex flex-col gap-6">
             
             {/* Timer Desktop */}
-            <div className="hidden lg:flex bg-slate-50 border border-slate-200 rounded-2xl p-6 flex-col items-center justify-center shadow-sm">
-              <span className="text-sm font-medium text-slate-500 mb-2 uppercase tracking-wider">Thời gian còn lại</span>
+            <div className="hidden lg:flex bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 flex-col items-center justify-center shadow-sm">
+              <span className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">Thời gian còn lại</span>
               <div className={`font-mono text-4xl font-black ${timeLeft <= 60 && timeLeft !== null ? 'text-red-500 animate-pulse' : 'text-slate-800'}`}>
                 {timeLeft !== null ? formatTime(timeLeft) : '--:--'}
               </div>
             </div>
 
             {/* Question Grid */}
-            <div className="bg-white lg:bg-slate-50 lg:border border-slate-200 rounded-2xl lg:p-5 flex-1">
+            <div className="bg-white dark:bg-slate-800 lg:bg-slate-50 dark:bg-slate-900 lg:border border-slate-200 dark:border-slate-700 rounded-2xl lg:p-5 flex-1">
               <div className="flex items-center gap-2 mb-4">
-                <LayoutGrid size={18} className="text-slate-500" />
-                <h3 className="font-bold text-slate-700">Danh sách câu hỏi</h3>
+                <LayoutGrid size={18} className="text-slate-500 dark:text-slate-400" />
+                <h3 className="font-bold text-slate-700 dark:text-slate-200">Danh sách câu hỏi</h3>
               </div>
               
               <div className="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-5 gap-2">
@@ -369,7 +369,7 @@ export default function LessonTest({ lesson, onTestPassed }) {
                       } ${
                         isAnswered 
                           ? 'bg-blue-100 text-blue-700 border-blue-200' 
-                          : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'
+                          : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:bg-slate-900'
                       }`}
                     >
                       {idx + 1}
@@ -383,19 +383,19 @@ export default function LessonTest({ lesson, onTestPassed }) {
               </div>
 
               {/* Legend */}
-              <div className="mt-6 space-y-2 text-xs font-medium text-slate-500">
+              <div className="mt-6 space-y-2 text-xs font-medium text-slate-500 dark:text-slate-400">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-blue-100 border border-blue-200"></div> Đã trả lời
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-white border border-slate-200"></div> Chưa trả lời
+                  <div className="w-3 h-3 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></div> Chưa trả lời
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-orange-500 border border-white"></div> Cắm cờ xem lại
                 </div>
               </div>
               
-              <div className="mt-6 pt-4 border-t border-slate-200/60 lg:hidden">
+              <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700/60 lg:hidden">
                 <button
                   onClick={() => handleSubmit(false)}
                   disabled={submitting}

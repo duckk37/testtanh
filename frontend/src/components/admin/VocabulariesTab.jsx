@@ -113,16 +113,16 @@ export default function VocabulariesTab() {
 
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
         {loading ? (
-          <div className="text-center p-10 text-slate-500">Đang tải dữ liệu...</div>
+          <div className="text-center p-10 text-slate-500 dark:text-slate-400">Đang tải dữ liệu...</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
               <thead className="bg-slate-50 dark:bg-slate-900/50">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">Từ vựng</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">Phát âm</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase">Ý nghĩa</th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase">Hành động</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Từ vựng</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Phát âm</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Ý nghĩa</th>
+                  <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Hành động</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -143,7 +143,7 @@ export default function VocabulariesTab() {
                 ))}
                 {vocabularies.length === 0 && (
                   <tr>
-                    <td colSpan="4" className="px-6 py-8 text-center text-slate-500">Chưa có từ vựng nào.</td>
+                    <td colSpan="4" className="px-6 py-8 text-center text-slate-500 dark:text-slate-400">Chưa có từ vựng nào.</td>
                   </tr>
                 )}
               </tbody>
