@@ -177,3 +177,16 @@ class LearningPath(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     user = relationship("User")
+
+class Order(Base):
+    __tablename__ = "orders"
+    id = Column(String, primary_key=True, default=generate_uuid)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    course_id = Column(String, ForeignKey("courses.id", ondelete="SET NULL"), nullable=True, index=True)
+    amount = Column(Float, default=0.0)
+    status = Column(String, default="completed")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    user = relationship("User")
+    course = relationship("Course")
+

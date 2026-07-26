@@ -45,6 +45,23 @@ def check_and_update_streak(user: models.User, db: Session):
         # Consecutive day
         user.streak_count += 1
         user.last_activity_date = now
+        
+        # Check for 30-day streak badge
+        if user.streak_count >= 30:
+            badge = db.query(models.Badge).filter(models.Badge.name == "30-Day Streak").first()
+            if not badge:
+                badge = models.Badge(name="30-Day Streak", description="Học liên tục 30 ngày", icon="🔥")
+                db.add(badge)
+                db.flush()
+                
+            has_badge = db.query(models.UserBadge).filter(
+                models.UserBadge.user_id == user.id, 
+                models.UserBadge.badge_id == badge.id
+            ).first()
+            if not has_badge:
+                db.add(models.UserBadge(user_id=user.id, badge_id=badge.id))
+                user.coins = (user.coins or 0) + 100 # Reward 100 coins
+                
     elif delta_days > 1:
         # Streak broken, check shields
         missed_days = delta_days - 1

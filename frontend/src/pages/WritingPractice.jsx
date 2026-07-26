@@ -1,11 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PenTool, CheckCircle, RefreshCcw, AlertTriangle, Target } from 'lucide-react';
 import { API_URL } from '../config';
 
 export default function WritingPractice() {
-  const [text, setText] = useState('');
+  const [text, setText] = useState(() => {
+    return localStorage.getItem('writing_draft') || '';
+  });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+
+  // Auto-save draft
+  useEffect(() => {
+    localStorage.setItem('writing_draft', text);
+  }, [text]);
+
+  // Calculations
+  const wordCount = text.trim().split(/\s+/).filter(x => x).length;
+  const charCount = text.length;
+  const readingTime = Math.ceil(wordCount / 150); // assuming 150 words per minute
 
   const handleCheck = async () => {
     if (!text.trim()) return;
@@ -64,8 +76,10 @@ export default function WritingPractice() {
               onChange={(e) => setText(e.target.value)}
             />
             <div className="bg-slate-50 dark:bg-slate-900 p-4 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center">
-              <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-                {text.trim().split(/\s+/).filter(x => x).length} từ
+              <div className="flex gap-4 text-sm text-slate-500 dark:text-slate-400 font-medium">
+                <span>{wordCount} từ</span>
+                <span>{charCount} ký tự</span>
+                <span>Đọc ~{readingTime} phút</span>
               </div>
               <button
                 onClick={handleCheck}

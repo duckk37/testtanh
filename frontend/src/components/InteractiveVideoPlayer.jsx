@@ -15,6 +15,10 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd, subtitles: rawSubtitles
   const [dictionaryData, setDictionaryData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   
+  const [isRecording, setIsRecording] = useState(false);
+  const [speechTranscript, setSpeechTranscript] = useState('');
+  const [speechScore, setSpeechScore] = useState(null);
+  
   const timeUpdateInterval = useRef(null);
 
   const subtitles = useMemo(() => {
@@ -117,6 +121,76 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd, subtitles: rawSubtitles
     }
   };
 
+  const stringSimilarity = (s1, s2) => {
+    let longer = s1.toLowerCase();
+    let shorter = s2.toLowerCase();
+    if (s1.length < s2.length) {
+      longer = s2.toLowerCase();
+      shorter = s1.toLowerCase();
+    }
+    let longerLength = longer.length;
+    if (longerLength === 0) return 1.0;
+    
+    let costs = new Array();
+    for (let i = 0; i <= shorter.length; i++) {
+      let lastValue = i;
+      for (let j = 0; j <= longer.length; j++) {
+        if (i == 0) costs[j] = j;
+        else {
+          if (j > 0) {
+            let newValue = costs[j - 1];
+            if (longer.charAt(j - 1) != shorter.charAt(i - 1))
+              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+            costs[j - 1] = lastValue;
+            lastValue = newValue;
+          }
+        }
+      }
+      if (i > 0) costs[shorter.length] = lastValue;
+    }
+    return (longerLength - costs[shorter.length]) / parseFloat(longerLength);
+  };
+
+  const startPronunciationTest = (e, targetSentence) => {
+    e.stopPropagation();
+    if (player) player.pauseVideo();
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Trình duyệt của bạn không hỗ trợ tính năng này. Hãy thử Chrome hoặc Edge nhé.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+      setSpeechTranscript('');
+      setSpeechScore(null);
+    };
+
+    recognition.onresult = (event) => {
+      const speechResult = event.results[0][0].transcript;
+      setSpeechTranscript(speechResult);
+      
+      const cleanTarget = targetSentence.replace(/[^a-zA-Z0-9]/g, '');
+      const cleanResult = speechResult.replace(/[^a-zA-Z0-9]/g, '');
+      
+      const similarity = stringSimilarity(cleanTarget, cleanResult);
+      setSpeechScore(Math.round(similarity * 100));
+    };
+
+    recognition.onend = () => setIsRecording(false);
+    recognition.onerror = (e) => {
+        console.error(e);
+        setIsRecording(false);
+    };
+    
+    recognition.start();
+  };
+
   const renderInteractiveSubtitle = (text) => {
     return text.split(' ').map((word, index) => (
       <span 
@@ -154,9 +228,30 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd, subtitles: rawSubtitles
           />
         </div>
         
-        <div className="mt-6 text-xl md:text-2xl text-center min-h-[80px] font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 w-full flex items-center justify-center">
+        <div className="mt-6 text-xl md:text-2xl text-center min-h-[80px] font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 w-full flex flex-col items-center justify-center relative">
           {activeSubtitle ? (
-            <div>{renderInteractiveSubtitle(activeSubtitle.text)}</div>
+            <>
+              <div>{renderInteractiveSubtitle(activeSubtitle.text)}</div>
+              <button 
+                onClick={(e) => startPronunciationTest(e, activeSubtitle.text)}
+                className={`mt-4 text-sm px-4 py-2 rounded-full font-medium transition-colors flex items-center gap-2 ${isRecording ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50'}`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                {isRecording ? 'Đang nghe...' : 'Luyện phát âm câu này'}
+              </button>
+              
+              {speechTranscript && (
+                <div className="mt-4 text-sm bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl w-full text-left border border-slate-100 dark:border-slate-700 shadow-inner">
+                  <p className="text-slate-500 dark:text-slate-400 mb-1">Bạn đọc là:</p>
+                  <p className="font-medium text-slate-800 dark:text-slate-200 mb-3">"{speechTranscript}"</p>
+                  {speechScore !== null && (
+                    <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${speechScore >= 80 ? 'bg-green-100 text-green-700' : speechScore >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
+                      Độ chính xác: {speechScore}%
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-slate-300">...</div>
           )}

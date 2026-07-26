@@ -22,6 +22,7 @@ from routers import analytics as analytics_router
 from routers import video as video_router
 from routers import ai as ai_router
 from routers import learning_path as learning_path_router
+from routers import certificates as certificates_router
 
 # Create tables
 models.Base.metadata.create_all(bind=engine)
@@ -43,6 +44,7 @@ app.include_router(analytics_router.router)
 app.include_router(video_router.router)
 app.include_router(ai_router.router)
 app.include_router(learning_path_router.router)
+app.include_router(certificates_router.router)
 
 # Add Gzip Compression for large responses (Video transcripts, roadmaps, etc)
 app.add_middleware(GZipMiddleware, minimum_size=500)

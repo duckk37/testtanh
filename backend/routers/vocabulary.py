@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from datetime import datetime
 from pydantic import BaseModel
-from textblob import TextBlob
-
+import os
+import json
+import google.generativeai as genai
 import models
 from database import get_db
 from auth import get_current_user
@@ -167,36 +168,63 @@ class WritingRequest(BaseModel):
 
 @router.post("/api/check-writing")
 def check_writing(req: WritingRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
-    blob = TextBlob(req.text)
+    word_count = len(req.text.split())
+    if word_count == 0:
+        return {"corrected_text": "", "mistakes": [], "stats": {"word_count": 0, "lexical_diversity": 0, "mistake_count": 0}}
+        
+    GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+    if not GEMINI_API_KEY:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail="Gemini API Key is not configured")
+        
+    genai.configure(api_key=GEMINI_API_KEY)
+    model = genai.GenerativeModel('gemini-2.5-flash')
     
-    corrected_text = str(blob.correct())
+    prompt = f"""
+    You are an expert IELTS/TOEIC examiner. Review the following English text.
+    Return a raw JSON object with NO markdown formatting, NO backticks.
+    Format exactly like this:
+    {{
+        "corrected_text": "The completely rewritten text that sounds natural and fixes all grammar.",
+        "mistakes": [
+            {{"original": "wrong word", "suggestion": "correct word"}}
+        ],
+        "stats": {{
+            "lexical_diversity": 85
+        }}
+    }}
     
-    original_words = blob.words
-    corrected_words = TextBlob(corrected_text).words
+    Text to check:
+    {req.text}
+    """
     
-    mistakes = []
-    for i in range(min(len(original_words), len(corrected_words))):
-        if original_words[i].lower() != corrected_words[i].lower():
-            mistakes.append({
-                "original": str(original_words[i]),
-                "suggestion": str(corrected_words[i])
-            })
-            
-    word_count = len(original_words)
-    unique_words = len(set(word.lower() for word in original_words))
-    diversity = round((unique_words / word_count * 100), 1) if word_count > 0 else 0
-    
+    try:
+        response = model.generate_content(prompt)
+        text_resp = response.text.strip()
+        if text_resp.startswith("```json"):
+            text_resp = text_resp[7:]
+        if text_resp.startswith("```"):
+            text_resp = text_resp[3:]
+        if text_resp.endswith("```"):
+            text_resp = text_resp[:-3]
+        
+        data = json.loads(text_resp.strip())
+    except Exception as e:
+        print(f"AI Check Error: {e}")
+        data = {"corrected_text": req.text, "mistakes": [], "stats": {"lexical_diversity": 50}}
+        
+    mistakes = data.get("mistakes", [])
     if word_count >= 50 and len(mistakes) == 0:
         update_quest_progress(current_user.id, "perfect_score", 1, db)
     if word_count > 0:
         check_and_update_streak(current_user, db)
         
     return {
-        "corrected_text": corrected_text,
+        "corrected_text": data.get("corrected_text", req.text),
         "mistakes": mistakes,
         "stats": {
             "word_count": word_count,
-            "lexical_diversity": diversity,
+            "lexical_diversity": data.get("stats", {}).get("lexical_diversity", 0),
             "mistake_count": len(mistakes)
         }
     }

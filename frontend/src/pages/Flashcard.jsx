@@ -20,6 +20,35 @@ const Flashcard = () => {
     fetchReviewWords();
   }, []);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't trigger if user is typing in an input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (words.length === 0 || isLoading) return;
+
+      const currentWord = words[currentIndex];
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (!isFlipped) setIsFlipped(true);
+      } else if (e.key === '1' && isFlipped) {
+        handleReview(2);
+      } else if (e.key === '2' && isFlipped) {
+        handleReview(4);
+      } else if (e.key === '3' && isFlipped) {
+        handleReview(5);
+      } else if (e.key.toLowerCase() === 's') {
+        const utterance = new SpeechSynthesisUtterance(currentWord.word);
+        utterance.lang = 'en-US';
+        window.speechSynthesis.speak(utterance);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFlipped, currentIndex, words, isLoading]);
+
   const fetchReviewWords = async () => {
     const token = localStorage.getItem('access_token');
     if (!token) return;
@@ -203,7 +232,7 @@ const Flashcard = () => {
           
           <div className={getThemeClasses(true) + (activeTheme === 'default' ? " items-center justify-center" : "")}>
             <h2 className={`text-5xl font-bold ${getTextColor(true)}`}>{currentWord.word}</h2>
-            <p className={`${getTextColor(false)} mt-6 font-medium tracking-widest uppercase text-sm mb-8`}>Chạm để lật thẻ</p>
+            <p className={`${getTextColor(false)} mt-6 font-medium tracking-widest uppercase text-sm mb-8`}>Chạm hoặc bấm Space để lật thẻ</p>
             
             <div className="flex justify-center gap-4">
               {/* AI Pronunciation Button on Front */}
@@ -267,19 +296,19 @@ const Flashcard = () => {
                 onClick={(e) => { e.stopPropagation(); handleReview(2); }}
                 className="py-3 px-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 font-medium transition-colors"
               >
-                Khó (Học lại)
+                Khó <span className="hidden md:inline text-xs text-red-400 font-bold bg-white px-1.5 py-0.5 rounded ml-1">[1]</span>
               </button>
               <button 
                 onClick={(e) => { e.stopPropagation(); handleReview(4); }}
                 className="py-3 px-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 font-medium transition-colors"
               >
-                Nhớ (Tốt)
+                Nhớ <span className="hidden md:inline text-xs text-blue-400 font-bold bg-white px-1.5 py-0.5 rounded ml-1">[2]</span>
               </button>
               <button 
                 onClick={(e) => { e.stopPropagation(); handleReview(5); }}
                 className="py-3 px-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 font-medium transition-colors"
               >
-                Rất dễ
+                Rất dễ <span className="hidden md:inline text-xs text-green-400 font-bold bg-white px-1.5 py-0.5 rounded ml-1">[3]</span>
               </button>
             </div>
           </div>

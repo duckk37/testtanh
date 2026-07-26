@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Youtube, Play, Volume2 } from 'lucide-react';
+import YouTube from 'react-youtube';
 import { API_URL } from '../config';
 
 // A utility to extract video ID from various YouTube URL formats
@@ -14,7 +15,32 @@ export default function VideoPlayer() {
   const [inputUrl, setInputUrl] = useState('https://www.youtube.com/watch?v=sY0F8Z2wR88');
   const [videoId, setVideoId] = useState('sY0F8Z2wR88');
   const [currentTime, setCurrentTime] = useState(0);
-  const playerRef = useRef(null);
+  const [player, setPlayer] = useState(null);
+  
+  // Update time periodically when playing
+  useEffect(() => {
+    let interval;
+    if (player) {
+      interval = setInterval(async () => {
+        try {
+          const time = await player.getCurrentTime();
+          setCurrentTime(time);
+        } catch(e) {}
+      }, 500);
+    }
+    return () => clearInterval(interval);
+  }, [player]);
+
+  const handleReady = (event) => {
+    setPlayer(event.target);
+  };
+
+  const handleSeek = (time) => {
+    if (player) {
+      player.seekTo(time);
+      setCurrentTime(time);
+    }
+  };
 
   const fetchTranscript = async (id) => {
     if (!id) return [];
@@ -75,19 +101,18 @@ export default function VideoPlayer() {
         <div className="lg:col-span-2 space-y-4">
           <div className="aspect-video bg-black rounded-2xl overflow-hidden shadow-lg relative">
             {videoId ? (
-              // Note: Using iframe API or standard iframe with some polling for time
-              // For a production app, we'd use react-youtube to sync time precisely.
-              // For simplicity, we just embed it.
-              <iframe
-                id="ytplayer"
-                type="text/html"
-                width="100%"
-                height="100%"
-                src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1`}
-                frameBorder="0"
-                allowFullScreen
-                className="w-full h-full"
-              ></iframe>
+              <YouTube
+                videoId={videoId}
+                onReady={handleReady}
+                opts={{
+                  width: '100%',
+                  height: '100%',
+                  playerVars: {
+                    autoplay: 1,
+                  },
+                }}
+                className="w-full h-full absolute inset-0"
+              />
             ) : (
               <div className="flex items-center justify-center h-full text-slate-500">
                 Chưa có video nào được chọn
@@ -109,7 +134,7 @@ export default function VideoPlayer() {
             )}
           </div>
           <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl text-blue-700 dark:text-blue-300 text-sm">
-            <strong>Lưu ý:</strong> Bản demo này tải thành công dữ liệu phụ đề từ YouTube API. Để đồng bộ phụ đề chạy theo video, hệ thống cần tích hợp thư viện <code>react-youtube</code> để bắt sự kiện <code>onStateChange</code> và lấy <code>currentTime</code>.
+            <strong>Mẹo:</strong> Click vào một câu phụ đề ở danh sách bên phải để tự động tua video đến thời điểm đó!
           </div>
         </div>
 
@@ -124,16 +149,27 @@ export default function VideoPlayer() {
             {isLoading ? (
               <p className="text-slate-500 text-center py-4">Đang tải...</p>
             ) : transcript.length > 0 ? (
-              transcript.map((item, idx) => (
-                <div key={idx} className="flex gap-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 p-2 rounded-lg cursor-pointer transition-colors">
-                  <span className="text-blue-500 font-mono text-sm pt-0.5 shrink-0">
-                    {Math.floor(item.start / 60)}:{(Math.floor(item.start % 60)).toString().padStart(2, '0')}
-                  </span>
-                  <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    {item.text}
-                  </p>
-                </div>
-              ))
+              transcript.map((item, idx) => {
+                const isCurrent = currentTime >= item.start && currentTime <= (item.start + item.duration);
+                return (
+                  <div 
+                    key={idx} 
+                    onClick={() => handleSeek(item.start)}
+                    className={`flex gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
+                      isCurrent 
+                        ? 'bg-blue-100 dark:bg-blue-900/60 ring-2 ring-blue-400' 
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                    }`}
+                  >
+                    <span className="text-blue-500 font-mono text-sm pt-0.5 shrink-0 w-12">
+                      {Math.floor(item.start / 60)}:{(Math.floor(item.start % 60)).toString().padStart(2, '0')}
+                    </span>
+                    <p className={`text-sm leading-relaxed ${isCurrent ? 'text-blue-900 dark:text-blue-100 font-bold' : 'text-slate-700 dark:text-slate-300'}`}>
+                      {item.text}
+                    </p>
+                  </div>
+                );
+              })
             ) : (
               <p className="text-slate-500 text-center py-4">Không có dữ liệu phụ đề.</p>
             )}

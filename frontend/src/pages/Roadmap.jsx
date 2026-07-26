@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
-import { Map, CheckCircle, Circle, ArrowRight, BrainCircuit } from 'lucide-react';
+import { Map, CheckCircle, Circle, ArrowRight, BrainCircuit, Sparkles } from 'lucide-react';
 import { API_URL } from '../config';
 
 export default function Roadmap() {
@@ -45,7 +45,7 @@ export default function Roadmap() {
     );
   }
 
-  const { level, current_day, roadmap } = data;
+  const { level, current_day, roadmap, recommended_course_id } = data;
 
   return (
     <div className="max-w-3xl mx-auto p-6 md:p-8 mt-4">
@@ -61,6 +61,23 @@ export default function Roadmap() {
           <span className="uppercase text-blue-600 dark:text-blue-400">{level}</span>
         </div>
       </div>
+
+      {recommended_course_id && (
+        <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl p-6 text-white shadow-lg mb-12 flex flex-col md:flex-row items-center justify-between">
+          <div>
+            <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
+              <Sparkles size={24} className="text-yellow-300" />
+              Khóa học đề xuất cho bạn
+            </h3>
+            <p className="text-emerald-50 max-w-md">
+              AI nhận thấy khóa học này phù hợp nhất để khắc phục các điểm yếu của bạn.
+            </p>
+          </div>
+          <Link to={`/courses/${recommended_course_id}`} className="mt-4 md:mt-0 bg-white text-emerald-600 hover:bg-emerald-50 font-bold py-3 px-6 rounded-xl transition-colors shadow-sm whitespace-nowrap">
+            Khám phá ngay
+          </Link>
+        </div>
+      )}
 
       <div className="relative border-l-4 border-slate-200 dark:border-slate-700 ml-6 md:ml-12 space-y-12 pb-12">
         {roadmap && roadmap.map((dayData, index) => {

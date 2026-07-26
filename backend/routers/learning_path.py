@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import os
@@ -67,18 +67,25 @@ def generate_learning_path(
     else:
         level = "Advanced"
 
+    # Get courses to recommend
+    courses = db.query(models.Course).all()
+    course_list = ", ".join([f"ID {c.id}: {c.title}" for c in courses])
+    
     # Call AI to generate roadmap
     prompt = f"""
     You are an expert English teacher. 
     A student has taken a placement test. Their level is determined as {level} (Score: {score}/5).
     They are weak in the following grammar/vocabulary areas: {', '.join(weaknesses) if weaknesses else 'None. They did perfectly.'}.
     
+    Available courses in the system: {course_list}
+    
     Generate a 7-day personalized study roadmap in JSON format.
-    The JSON should be an array of exactly 7 objects (one for each day).
-    Each object must have:
-    - "day": integer (1 to 7)
-    - "title": string (A catchy title for the day's focus)
-    - "tasks": an array of strings (3 specific tasks for that day, tailored to their weaknesses and level).
+    The JSON should be an object with two keys:
+    1. "roadmap": an array of exactly 7 objects (one for each day). Each object must have:
+       - "day": integer (1 to 7)
+       - "title": string (A catchy title for the day's focus)
+       - "tasks": an array of strings (3 specific tasks for that day, tailored to their weaknesses and level).
+    2. "recommended_course_id": string (Select the most appropriate course ID from the available courses above based on their weaknesses. If none fits, use an empty string).
     
     Return ONLY valid JSON. Do not include markdown blocks like ```json.
     """
@@ -130,12 +137,21 @@ def get_current_learning_path(current_user: models.User = Depends(get_current_us
         return {"exists": False}
         
     try:
-        roadmap = json.loads(path.roadmap_json)
+        roadmap_data = json.loads(path.roadmap_json)
+        # Handle both old array format and new object format
+        if isinstance(roadmap_data, list):
+            roadmap = roadmap_data
+            recommended_course_id = None
+        else:
+            roadmap = roadmap_data.get("roadmap", [])
+            recommended_course_id = roadmap_data.get("recommended_course_id")
+            
         return {
             "exists": True,
             "level": path.level,
             "current_day": path.current_day,
-            "roadmap": roadmap
+            "roadmap": roadmap,
+            "recommended_course_id": recommended_course_id
         }
     except:
         return {"exists": False, "error": "Invalid JSON data in database"}

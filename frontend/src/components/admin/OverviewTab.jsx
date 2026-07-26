@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, TrendingUp, BookOpen, Layers } from 'lucide-react';
+import { Users, TrendingUp, BookOpen, Layers, Wallet } from 'lucide-react';
 import { API_URL } from '../../config';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -38,7 +38,7 @@ export default function OverviewTab() {
     <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4">
       <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">Tổng quan hệ thống</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4">
           <div className="w-14 h-14 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
             <Users className="text-blue-600 dark:text-blue-400" size={28} />
@@ -78,6 +78,16 @@ export default function OverviewTab() {
             <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.totals.exams}</p>
           </div>
         </div>
+        
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4">
+          <div className="w-14 h-14 rounded-full bg-pink-50 dark:bg-pink-900/30 flex items-center justify-center">
+            <Wallet className="text-pink-600 dark:text-pink-400" size={28} />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Doanh Thu</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">{(stats.totals.revenue || 0).toLocaleString()}đ</p>
+          </div>
+        </div>
       </div>
       
       {/* Charts */}
@@ -100,18 +110,19 @@ export default function OverviewTab() {
         </div>
 
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-          <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6">Biểu đồ (Bar) người dùng mới</h3>
+          <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6">Doanh thu 7 ngày qua</h3>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.user_growth} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+              <BarChart data={stats.revenue_growth} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b'}} width={80} tickFormatter={(value) => `${(value/1000).toLocaleString()}k`} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  formatter={(value) => [`${value.toLocaleString()} ₫`, 'Doanh thu']}
                   cursor={{fill: 'transparent'}}
                 />
-                <Bar dataKey="users" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="revenue" fill="#ec4899" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

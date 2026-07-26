@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { BookOpen, Flame, Activity, Brain } from 'lucide-react';
 import { API_URL } from '../config';
 
@@ -80,25 +80,27 @@ export default function Analytics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Activity Chart */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-6">Mức độ hoạt động (30 ngày)</h2>
-          <div className="h-64 w-full">
+        {/* Skills Radar Chart */}
+        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col items-center">
+          <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2 self-start">Đánh giá 4 Kỹ năng</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 self-start">Biểu đồ mạng nhện đánh giá mức độ toàn diện của bạn.</p>
+          <div className="h-72 w-full max-w-md">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={overview?.heatmap || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="date" tick={{fontSize: 12, fill: '#94a3b8'}} tickFormatter={(str) => str.substring(8, 10)} axisLine={false} tickLine={false} />
-                <YAxis tick={{fontSize: 12, fill: '#94a3b8'}} axisLine={false} tickLine={false} />
+              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={[
+                { subject: 'Nghe (Listening)', A: overview?.skills?.listening || 65, fullMark: 100 },
+                { subject: 'Nói (Speaking)', A: overview?.skills?.speaking || 50, fullMark: 100 },
+                { subject: 'Đọc (Reading)', A: overview?.skills?.reading || 85, fullMark: 100 },
+                { subject: 'Viết (Writing)', A: overview?.skills?.writing || 70, fullMark: 100 },
+              ]}>
+                <PolarGrid stroke="#e2e8f0" />
+                <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 13, fontWeight: 600 }} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                <Radar name="Kỹ năng" dataKey="A" stroke="#10b981" fill="#10b981" fillOpacity={0.5} />
                 <Tooltip 
-                  cursor={{fill: 'transparent'}}
-                  contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}}
+                  contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}}
+                  formatter={(value) => [`${value}/100`, "Điểm"]}
                 />
-                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                  {(overview?.heatmap || []).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.count > 0 ? '#3b82f6' : '#e2e8f0'} />
-                  ))}
-                </Bar>
-              </BarChart>
+              </RadarChart>
             </ResponsiveContainer>
           </div>
         </div>
