@@ -10,33 +10,38 @@
   [![TailwindCSS](https://img.shields.io/badge/Tailwind-3.0-38B2AC.svg)](https://tailwindcss.com/)
   [![FastAPI](https://img.shields.io/badge/FastAPI-0.100-009688.svg)](https://fastapi.tiangolo.com/)
   [![Gemini AI](https://img.shields.io/badge/AI-Google_Gemini-FF6F00.svg)](https://ai.google.dev/)
+  [![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791.svg)](https://www.postgresql.org/)
   [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 </div>
 
 ---
 
-**EnglishMaster** là một hệ thống quản lý học tập (LMS) toàn diện được thiết kế để thay đổi cách chúng ta học Tiếng Anh. Kết hợp sức mạnh của **Trí tuệ nhân tạo (AI)**, hệ thống **Game hóa (Gamification)**, và **Giao diện hiện đại (Framer Motion)**, nền tảng giúp học viên không bao giờ cảm thấy nhàm chán khi học ngôn ngữ.
+**EnglishMaster** là một hệ thống quản lý học tập (LMS) toàn diện được thiết kế để thay đổi cách chúng ta học Tiếng Anh. Phiên bản mới nhất mang đến sự kết hợp sức mạnh của **Trí tuệ nhân tạo (Advanced AI)**, hệ thống **Game hóa (Gamification)**, và **Tối ưu Trải nghiệm (UX/UI)**, giúp học viên học tập hiệu quả, mượt mà và không bao giờ nhàm chán.
 
 ## ✨ Tính năng Nổi bật (Core Features)
 
-### 🧑‍🎓 Trải nghiệm Học viên Cực đỉnh
-*   **🤖 AI Chat Widget Thông minh:** Trợ lý AI tích hợp sẵn dưới dạng pop-up góc màn hình. Gọi AI 24/7 để sửa lỗi ngữ pháp, tra từ vựng, luyện giao tiếp tự nhiên với hiệu ứng gõ phím sinh động (typing indicator).
-*   **🎯 Bài Kiểm Tra Đầu Vào AI (Placement Test):** Đánh giá trình độ người dùng qua các câu hỏi trắc nghiệm mượt mà. AI tự động phân tích điểm yếu và sinh ra **Lộ trình học cá nhân hóa 7 ngày** chỉ dành riêng cho bạn.
-*   **🎬 Học qua Video YouTube:** Dán link YouTube bất kỳ, hệ thống sẽ tự động bóc tách phụ đề (Transcript) và đồng bộ hóa dòng thời gian (Time-sync). Vừa xem video, vừa học từ mới qua phụ đề hiển thị realtime.
-*   **🗂️ Flashcard 3D (Spaced Repetition):** Ôn tập từ vựng khoa học dựa trên thuật toán lặp lại ngắt quãng. Giao diện lật thẻ 3D trực quan và ghi nhớ các từ "khó nhằn" tự động.
-*   **🎮 Hệ thống Gamification Gây nghiện:** 
-    *   **Chuỗi ngày học (Daily Streak):** Thắp sáng ngọn lửa học tập mỗi ngày.
-    *   **Nhiệm vụ (Quests):** Hệ thống nhiệm vụ phong phú tặng thưởng Xu (Coins).
-    *   **Cửa hàng (Store):** Dùng Xu để mua "Khiên bảo vệ Streak" hoặc các hình nền hiếm. Mua Xu qua API Thanh toán hoặc nhận miễn phí khi hoàn thành bài.
-    *   **Bảng xếp hạng (Leaderboard):** Đua TOP kinh nghiệm (XP) với người dùng khác.
-*   **📈 Thống kê & Phân tích:** Báo cáo chi tiết biểu đồ hoạt động trong 30 ngày và độ hiệu quả khi học.
-*   **🌗 True Dark Mode & Animations:** Giao diện hỗ trợ Chế độ Tối hoàn chỉnh, kết hợp các hiệu ứng trượt mượt mà (Framer Motion).
+### 🤖 Trí tuệ Nhân tạo Cao cấp (Advanced AI)
+* **AI Giám khảo IELTS:** Tích hợp **Google Gemini** thay vì thuật toán thông thường. AI tự động đọc hiểu ngữ cảnh bài viết luận, phát hiện lỗi ngữ pháp, chấm điểm độ phong phú từ vựng (Lexical Diversity) và đưa ra bản gợi ý sửa lỗi hoàn hảo.
+* **Gia sư Roleplay bằng Giọng nói:** Tích hợp Web Speech API vào Chatbot. Học viên có thể bật Micro để luyện nói tiếng Anh trực tiếp với AI thay vì chỉ gõ phím.
+* **AI Thiết kế Lộ trình thật:** Bài kiểm tra đầu vào (Placement Test) tự động đánh giá điểm yếu và gửi dữ liệu cho AI để sinh ra lộ trình 7 ngày, **đồng thời đối chiếu với Database để đề xuất khóa học phù hợp nhất**.
+
+### 🏆 Tương tác & Cộng đồng (Gamification)
+* **Hệ thống Chứng chỉ Tự động:** Tích hợp thư viện `reportlab` tự động vẽ và cấp phát file **Chứng chỉ PDF** mang tên người dùng khi hoàn thành khóa học.
+* **Đua TOP Bảng Xếp Hạng (Leaderboard):** Tự động phát thưởng Xu (Coins) vào cuối tuần cho Top 3 học viên xuất sắc nhất.
+* **Huy hiệu Chuỗi Ngày Học (Badges):** Tự động trao tặng Huy hiệu vinh danh (Badge) và phần thưởng khi học viên đạt được Streak học 30 ngày liên tiếp.
+* **Hệ thống Kinh tế Ảo:** Làm nhiệm vụ, học bài để kiếm Xu. Dùng Xu để mua Theme giao diện mới hoặc "Khiên bảo vệ" giữ Streak.
+
+### 🧑‍🎓 Tối ưu Trải nghiệm Học viên (UX/UI Optimizations)
+* **Video Tương tác Thông minh (Karaoke Effect):** Nhúng `react-youtube`. Phụ đề được đồng bộ hóa với video, tự động bôi màu câu đang phát và **hỗ trợ tua video (seek)** ngay khi click vào dòng phụ đề.
+* **Flashcard Siêu tốc bằng Phím tắt:** Sử dụng phím `Space` để lật thẻ, phím `1, 2, 3` để đánh giá độ khó và phím `S` để nghe phát âm, không cần đụng đến chuột.
+* **Luyện Viết An Toàn (Auto-save):** Bài viết tự động lưu nháp vào trình duyệt, kèm theo phân tích chi tiết số lượng từ, số ký tự và ước lượng thời gian đọc.
+* **Báo cáo Học tập (Radar Chart):** Báo cáo cá nhân hóa sử dụng Biểu đồ Mạng nhện trực quan để đánh giá độ đồng đều của 4 kỹ năng (Nghe, Nói, Đọc, Viết).
+* **True Dark Mode:** Giao diện tối hoàn chỉnh.
 
 ### 🛡️ Quản trị viên Toàn năng (Admin Dashboard)
-*   **Thống kê thời gian thực:** Xem tổng quan số lượng user, khóa học, doanh thu, và dữ liệu truy cập.
-*   **Quản lý Khóa học & Bài học:** Tùy biến toàn bộ nội dung giáo án. Tự động bóc tách và phân tích ngữ pháp từ File PDF (Auto-Seed Tests).
-*   **Quản lý Ngân hàng Từ vựng:** Thêm, sửa, xóa các từ vựng cho Flashcard.
-*   **Quản lý Người dùng:** Chặn/Mở khóa tài khoản, phân quyền quản trị.
+* **Theo dõi Doanh thu & Người dùng:** Bảng điều khiển xem doanh thu, biểu đồ người dùng đăng ký mới trực quan.
+* **Khóa tài khoản (Ban/Unban):** Quản lý trạng thái hoạt động của thành viên.
+* **Quản lý Khóa học:** Thêm/sửa khóa học, bài học, bài kiểm tra và ngân hàng từ vựng.
 
 ---
 
@@ -44,19 +49,17 @@
 
 | Mảng | Công nghệ |
 | :--- | :--- |
-| **Frontend** | React 18, Vite, Tailwind CSS v3, Framer Motion, TanStack Query, React Router DOM, Recharts, Lucide React |
-| **Backend** | Python 3.10+, FastAPI (ASGI), SQLAlchemy (ORM) |
-| **Database** | PostgreSQL / SQLite (Development) |
-| **AI Integration**| Google Generative AI (Gemini Pro) |
+| **Frontend** | React 18, Vite, Tailwind CSS v3, Framer Motion, TanStack Query, React Router DOM, Recharts, Lucide React, React-YouTube |
+| **Backend** | Python 3.10+, FastAPI (ASGI), SQLAlchemy (ORM), ReportLab (PDF) |
+| **Database** | PostgreSQL (Production) / SQLite (Development) |
+| **AI Integration**| Google Generative AI (Gemini Flash) |
 | **Infrastructure**| Docker, Docker Compose, Nginx |
-
-Dự án được triển khai theo **Clean Architecture** ở Backend (Modular Routers) và tổ chức component siêu tái sử dụng ở Frontend, đảm bảo hiệu năng và dễ dàng bảo trì.
 
 ---
 
 ## 🚀 Hướng dẫn Cài đặt Môi trường (Local Setup)
 
-Dự án được chia thành hai nhánh độc lập: `frontend` (React) và `backend` (FastAPI).
+Dự án được chia thành hai thư mục độc lập: `frontend` (React) và `backend` (FastAPI).
 
 ### Bước 1: Khởi chạy Backend (API Server)
 
@@ -67,15 +70,16 @@ python -m venv venv
 # Trên macOS/Linux: source venv/bin/activate
 
 pip install -r requirements.txt
-pip install youtube-transcript-api google-generativeai
+pip install youtube-transcript-api google-generativeai reportlab psycopg2-binary
 
-# Tạo file .env ở thư mục backend và dán API Key Gemini của bạn:
+# Tạo file .env ở thư mục backend và cấu hình Database + AI:
+# DATABASE_URL=postgresql://user:pass@localhost/dbname
 # GEMINI_API_KEY=AIzaSy...
 
 uvicorn main:app --reload
 ```
 > Server Backend sẽ chạy tại: **http://localhost:8000**
-> Khi chạy lần đầu, Backend sẽ tự động tạo cơ sở dữ liệu `english_app.db`, Seed Bài kiểm tra mẫu và **Tài khoản Admin mặc định**.
+> Tự động tạo cơ sở dữ liệu và **Tài khoản Admin mặc định** trong lần chạy đầu tiên.
 
 ### Bước 2: Khởi chạy Frontend (Giao diện)
 
@@ -92,33 +96,27 @@ npm run dev
 
 ## 🐳 Triển khai lên Máy chủ (Docker / DigitalOcean / VPS)
 
-Dự án đã được đóng gói hoàn chỉnh bằng **Docker Compose**. Dễ dàng triển khai lên máy chủ thực tế (VPS như DigitalOcean, Linode, AWS) chỉ với vài lệnh:
+Dự án đã được cấu hình hoàn chỉnh bằng **Docker Compose** bao gồm cả Container cho PostgreSQL. 
 
 ```bash
 # 1. Clone Source Code về máy chủ
 git clone https://github.com/duckk37/testtanh.git
 cd testtanh
 
-# 2. Tạo sẵn file SQLite Database (Để Docker mount vào)
-mkdir -p backend
-touch backend/english_app.db
-
-# 3. Chạy toàn bộ hệ thống bằng Docker
+# 2. Chạy toàn bộ hệ thống bằng Docker
 docker compose up -d --build
 ```
-> **Mẹo Tối Ưu Cho VPS Giá Rẻ (RAM < 1GB):**
-> Frontend Vite khi build cần nhiều RAM. Hãy tạo file **Swap 2GB** trên máy chủ trước khi chạy lệnh `docker compose build` để tránh lỗi Out of Memory.
-> App sẽ chạy trên **Cổng 80 (HTTP)**, bạn có thể trỏ tên miền trực tiếp về IP của VPS!
+> App sẽ được expose tự động qua Nginx trên cổng 80 (HTTP).
 
 ---
 
 ## 🔑 Tài khoản Truy cập Mặc định
 
 - **Admin Account**: `admin@englishmaster.com` | Pass: `admin`
-- Các tài khoản học viên (Student) có thể được đăng ký trực tiếp trên giao diện Đăng ký của trang web.
+- Học viên có thể tự do đăng ký tài khoản từ giao diện trang chủ.
 
 ---
 
 <div align="center">
-  <i>Được thiết kế cho thế hệ tương lai. Phát triển với niềm đam mê nâng tầm giáo dục.</i> ❤️
+  <i>Học tiếng Anh không còn là gánh nặng khi bạn có AI làm bạn đồng hành!</i> 🚀
 </div>
