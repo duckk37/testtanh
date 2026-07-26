@@ -67,11 +67,8 @@ def get_lessons(course_id: str, db: Session = Depends(get_db), current_user: mod
     
     for idx, lesson in enumerate(lessons):
         is_completed = lesson.id in completed_lesson_ids
-        is_unlocked = is_previous_completed or is_completed
+        is_unlocked = True # Luôn mở khóa theo yêu cầu
         
-        if is_admin:
-            is_unlocked = True
-            
         result.append(LessonResponse(
             id=lesson.id,
             course_id=lesson.course_id,
