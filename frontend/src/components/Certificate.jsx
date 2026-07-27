@@ -1,6 +1,4 @@
 import React, { useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import { Download } from 'lucide-react';
 import { API_URL } from '../config';
 
@@ -24,17 +22,26 @@ const Certificate = ({ courseId }) => {
       // Allow React to render the hidden certificate div
       setTimeout(async () => {
         if (certificateRef.current) {
-          const canvas = await html2canvas(certificateRef.current, { scale: 2 });
-          const imgData = canvas.toDataURL('image/png');
-          
-          const pdf = new jsPDF({
-            orientation: 'landscape',
-            unit: 'px',
-            format: [canvas.width, canvas.height]
-          });
-          
-          pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-          pdf.save(`Certificate_${data.course_title}.pdf`);
+          try {
+            // Dynamically import heavy libraries only when downloading
+            const html2canvas = (await import('html2canvas')).default;
+            const { jsPDF } = await import('jspdf');
+
+            const canvas = await html2canvas(certificateRef.current, { scale: 2 });
+            const imgData = canvas.toDataURL('image/png');
+            
+            const pdf = new jsPDF({
+              orientation: 'landscape',
+              unit: 'px',
+              format: [canvas.width, canvas.height]
+            });
+            
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save(`Certificate_${data.course_title}.pdf`);
+          } catch (importErr) {
+            console.error('Failed to load PDF libraries:', importErr);
+            alert('Lỗi khi tải công cụ tạo PDF!');
+          }
         }
         setLoading(false);
       }, 500);
