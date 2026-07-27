@@ -194,11 +194,13 @@ def delete_exam(exam_id: str, db: Session = Depends(get_db), admin: models.User 
 class QuestionCreateUpdate(BaseModel):
     exam_id: str
     content: str
-    option_a: str
-    option_b: str
-    option_c: str
-    option_d: str
+    option_a: str | None = None
+    option_b: str | None = None
+    option_c: str | None = None
+    option_d: str | None = None
     correct_option: str
+    image_url: str | None = None
+    question_type: str = "multiple_choice"
 
 @router.post("/questions")
 def create_question(question: QuestionCreateUpdate, db: Session = Depends(get_db), admin: models.User = Depends(require_admin)):

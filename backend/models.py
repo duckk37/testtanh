@@ -101,7 +101,9 @@ class Question(Base):
     option_b = Column(String)
     option_c = Column(String)
     option_d = Column(String)
-    correct_option = Column(String) # A, B, C, or D
+    correct_option = Column(String) # A, B, C, D, or text for fill_in_blank
+    image_url = Column(String, nullable=True)
+    question_type = Column(String, default="multiple_choice") # multiple_choice, fill_in_blank
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     exam = relationship("Exam", back_populates="questions")

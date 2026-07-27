@@ -41,3 +41,13 @@ def apply_migrations(engine):
             if 'passing_score_required' not in columns:
                 conn.execute(text("ALTER TABLE lessons ADD COLUMN passing_score_required INTEGER DEFAULT 80"))
                 logger.info("Added passing_score_required to lessons")
+
+        # Check questions table
+        if inspector.has_table('questions'):
+            columns = [col['name'] for col in inspector.get_columns('questions')]
+            if 'image_url' not in columns:
+                conn.execute(text("ALTER TABLE questions ADD COLUMN image_url VARCHAR"))
+                logger.info("Added image_url to questions")
+            if 'question_type' not in columns:
+                conn.execute(text("ALTER TABLE questions ADD COLUMN question_type VARCHAR DEFAULT 'multiple_choice'"))
+                logger.info("Added question_type to questions")

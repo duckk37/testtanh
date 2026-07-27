@@ -11,3 +11,6 @@ python-dotenv
 requests
 youtube-transcript-api
 rich
+PyMuPDF
+google-generativeai
+Pillow

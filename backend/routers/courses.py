@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import BaseModel
+import re
 
 import models
 from database import get_db
@@ -38,11 +39,13 @@ class QuestionResponse(BaseModel):
     id: str
     exam_id: str
     content: str
-    option_a: str
-    option_b: str
-    option_c: str
-    option_d: str
+    option_a: str | None = None
+    option_b: str | None = None
+    option_c: str | None = None
+    option_d: str | None = None
     correct_option: str
+    image_url: str | None = None
+    question_type: str = "multiple_choice"
 
 class SubmitTestRequest(BaseModel):
     answers: dict # {question_id: selected_option}
@@ -95,8 +98,19 @@ def submit_lesson_test(lesson_id: str, req: SubmitTestRequest, db: Session = Dep
         
     correct_count = 0
     for q in questions:
-        if req.answers.get(q.id) == q.correct_option:
-            correct_count += 1
+        user_answer = req.answers.get(q.id)
+        if user_answer is None:
+            continue
+            
+        if q.question_type == 'fill_in_blank':
+            # Clean answers: remove punctuation, lowercase, remove extra spaces
+            clean_user = re.sub(r'[^\w\s]', '', str(user_answer)).strip().lower()
+            clean_correct = re.sub(r'[^\w\s]', '', str(q.correct_option)).strip().lower()
+            if clean_user == clean_correct:
+                correct_count += 1
+        else:
+            if str(user_answer).strip().upper() == str(q.correct_option).strip().upper():
+                correct_count += 1
             
     score = (correct_count / len(questions)) * 100 if questions else 0
     is_passed = score >= lesson.passing_score_required

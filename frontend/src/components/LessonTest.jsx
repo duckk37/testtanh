@@ -194,31 +194,45 @@ export default function LessonTest({ lesson, onTestPassed }) {
                         <span className="text-slate-500 dark:text-slate-400">Câu {idx + 1}:</span> {q.content}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {['A', 'B', 'C', 'D'].map(opt => {
-                          const optText = q[`option_${opt.toLowerCase()}`];
-                          let optClass = "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300";
-                          
-                          if (opt === correctOpt) {
-                            optClass = "border-green-500 bg-green-50 text-green-700 font-bold ring-2 ring-green-200";
-                          } else if (opt === selectedOpt && !isCorrect) {
-                            optClass = "border-red-500 bg-red-50 text-red-700 font-bold ring-2 ring-red-200";
-                          } else if (opt !== selectedOpt && opt !== correctOpt) {
-                            optClass = "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-400 opacity-60";
-                          }
-                          
-                          return (
-                            <div key={opt} className={`px-4 py-3 rounded-lg border-2 flex items-center gap-3 ${optClass}`}>
-                              <span className={`w-6 h-6 rounded flex items-center justify-center text-xs border font-bold ${
-                                opt === correctOpt ? 'bg-green-500 border-green-600 text-white' :
-                                opt === selectedOpt && !isCorrect ? 'bg-red-500 border-red-600 text-white' :
-                                'bg-slate-100 border-slate-300'
-                              }`}>{opt}</span>
-                              <span className="text-sm">{optText}</span>
+                        {q.question_type === 'fill_in_blank' ? (
+                          <div className="col-span-full">
+                            <div className="px-4 py-3 rounded-lg border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                              <span className="text-sm font-bold text-slate-500 mr-2">Câu trả lời của bạn:</span>
+                              <span className="text-slate-800 dark:text-slate-200">{selectedOpt || '(Bỏ trống)'}</span>
                             </div>
-                          );
-                        })}
+                            <div className="mt-2 px-4 py-3 rounded-lg border-2 border-green-500 bg-green-50">
+                              <span className="text-sm font-bold text-green-700 mr-2">Đáp án đúng:</span>
+                              <span className="text-green-800 font-medium">{correctOpt}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          ['A', 'B', 'C', 'D'].map(opt => {
+                            const optText = q[`option_${opt.toLowerCase()}`];
+                            if (!optText) return null;
+                            let optClass = "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300";
+                            
+                            if (opt === correctOpt) {
+                              optClass = "border-green-500 bg-green-50 text-green-700 font-bold ring-2 ring-green-200";
+                            } else if (opt === selectedOpt && !isCorrect) {
+                              optClass = "border-red-500 bg-red-50 text-red-700 font-bold ring-2 ring-red-200";
+                            } else if (opt !== selectedOpt && opt !== correctOpt) {
+                              optClass = "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-400 opacity-60";
+                            }
+                            
+                            return (
+                              <div key={opt} className={`px-4 py-3 rounded-lg border-2 flex items-center gap-3 ${optClass}`}>
+                                <span className={`w-6 h-6 rounded flex items-center justify-center text-xs border font-bold ${
+                                  opt === correctOpt ? 'bg-green-500 border-green-600 text-white' :
+                                  opt === selectedOpt && !isCorrect ? 'bg-red-500 border-red-600 text-white' :
+                                  'bg-slate-100 border-slate-300'
+                                }`}>{opt}</span>
+                                <span className="text-sm">{optText}</span>
+                              </div>
+                            );
+                          })
+                        )}
                       </div>
-                      {!isCorrect && (
+                      {!isCorrect && q.question_type !== 'fill_in_blank' && (
                         <div className="mt-3 text-sm text-red-600 flex items-center gap-1">
                           <AlertCircle size={16} /> Bạn đã chọn sai. Đáp án đúng là {correctOpt}.
                         </div>
@@ -260,8 +274,18 @@ export default function LessonTest({ lesson, onTestPassed }) {
                       <span className="text-blue-600 bg-blue-50 px-3 py-1 rounded-lg shrink-0">
                         Câu {currentQuestionIndex + 1}
                       </span>
-                      <span className="mt-1 leading-relaxed">{questions[currentQuestionIndex].content}</span>
+                      <span className="mt-1 leading-relaxed whitespace-pre-line">{questions[currentQuestionIndex].content}</span>
                     </h3>
+                    
+                    {questions[currentQuestionIndex].image_url && (
+                      <div className="mb-6 flex justify-center bg-slate-50 rounded-xl p-4">
+                        <img 
+                          src={`${API_URL}${questions[currentQuestionIndex].image_url}`} 
+                          alt="Question" 
+                          className="max-h-64 object-contain rounded-lg shadow-sm border border-slate-200"
+                        />
+                      </div>
+                    )}
                     <button 
                       onClick={() => toggleFlag(questions[currentQuestionIndex].id)}
                       className={`p-2 rounded-lg transition-colors ml-4 shrink-0 border ${
@@ -275,34 +299,47 @@ export default function LessonTest({ lesson, onTestPassed }) {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-4 mb-8">
-                    {['A', 'B', 'C', 'D'].map(opt => {
-                      const q = questions[currentQuestionIndex];
-                      const optionText = q[`option_${opt.toLowerCase()}`];
-                      const isSelected = answers[q.id] === opt;
-                      
-                      return (
-                        <button 
-                          key={opt}
-                          onClick={() => handleOptionSelect(q.id, opt)}
-                          className={`text-left px-6 py-4 border-2 rounded-xl cursor-pointer transition-all duration-200 group flex items-center gap-4 ${
-                            isSelected 
-                              ? 'bg-blue-50/50 border-blue-500 text-slate-900 dark:text-slate-100 shadow-sm' 
-                              : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-300 text-slate-700 dark:text-slate-200'
-                          }`}
-                        >
-                          <span className={`w-8 h-8 flex items-center justify-center rounded-lg border-2 text-sm font-bold transition-colors shrink-0 ${
-                            isSelected 
-                              ? 'border-blue-500 bg-blue-500 text-white' 
-                              : 'border-slate-300 text-slate-500 dark:text-slate-400 group-hover:border-slate-400'
-                          }`}>
-                              {opt}
-                          </span>
-                          <span className="text-[1.05rem] leading-relaxed">{optionText}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {questions[currentQuestionIndex].question_type === 'fill_in_blank' ? (
+                    <div className="mb-8">
+                      <input 
+                        type="text" 
+                        value={answers[questions[currentQuestionIndex].id] || ''}
+                        onChange={(e) => handleOptionSelect(questions[currentQuestionIndex].id, e.target.value)}
+                        placeholder="Nhập câu trả lời của bạn..."
+                        className="w-full px-6 py-4 text-lg border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 outline-none transition-all shadow-sm"
+                      />
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-4 mb-8">
+                      {['A', 'B', 'C', 'D'].map(opt => {
+                        const q = questions[currentQuestionIndex];
+                        const optionText = q[`option_${opt.toLowerCase()}`];
+                        if (!optionText) return null;
+                        const isSelected = answers[q.id] === opt;
+                        
+                        return (
+                          <button 
+                            key={opt}
+                            onClick={() => handleOptionSelect(q.id, opt)}
+                            className={`text-left px-6 py-4 border-2 rounded-xl cursor-pointer transition-all duration-200 group flex items-center gap-4 ${
+                              isSelected 
+                                ? 'bg-blue-50/50 border-blue-500 text-slate-900 dark:text-slate-100 shadow-sm' 
+                                : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-300 text-slate-700 dark:text-slate-200'
+                            }`}
+                          >
+                            <span className={`w-8 h-8 flex items-center justify-center rounded-lg border-2 text-sm font-bold transition-colors shrink-0 ${
+                              isSelected 
+                                ? 'border-blue-500 bg-blue-500 text-white' 
+                                : 'border-slate-300 text-slate-500 dark:text-slate-400 group-hover:border-slate-400'
+                            }`}>
+                                {opt}
+                            </span>
+                            <span className="text-[1.05rem] leading-relaxed">{optionText}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {/* Navigation Buttons */}
