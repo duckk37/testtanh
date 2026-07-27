@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Edit, Trash2, X, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, X, CheckCircle2, UploadCloud, Loader2 } from 'lucide-react';
 import { API_URL } from '../../config';
 
 export default function ExamQuestionManager({ exam, onBack }) {
@@ -8,6 +8,9 @@ export default function ExamQuestionManager({ exam, onBack }) {
 
   // Modal states
   const [showModal, setShowModal] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [pdfFile, setPdfFile] = useState(null);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   
   // Form state
@@ -119,6 +122,40 @@ export default function ExamQuestionManager({ exam, onBack }) {
     setShowModal(true);
   };
 
+  const handlePdfUpload = async (e) => {
+    e.preventDefault();
+    if (!pdfFile) {
+      alert("Vui lòng chọn file PDF");
+      return;
+    }
+    
+    setUploadingPdf(true);
+    const formData = new FormData();
+    formData.append("file", pdfFile);
+    
+    try {
+      const res = await fetch(API_URL + `/admin/exams/${exam.id}/upload-pdf`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        },
+        body: formData
+      });
+      if (res.ok) {
+        alert("File đã được tải lên và AI đang xử lý ngầm. Vui lòng tải lại trang sau 1-2 phút để xem kết quả.");
+        setShowPdfModal(false);
+        setPdfFile(null);
+      } else {
+        const errorData = await res.json();
+        alert("Lỗi: " + (errorData.detail || "Không thể tải file lên"));
+      }
+    } catch (err) {
+      alert("Lỗi kết nối.");
+    } finally {
+      setUploadingPdf(false);
+    }
+  };
+
   return (
     <div className="animate-in fade-in slide-in-from-right-4">
       <div className="mb-6">
@@ -130,9 +167,14 @@ export default function ExamQuestionManager({ exam, onBack }) {
             <span className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1 block">Quản lý câu hỏi</span>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{exam.title}</h2>
           </div>
-          <button onClick={openAddModal} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm">
-            <Plus size={18} /> Thêm Câu hỏi
-          </button>
+          <div className="flex gap-3">
+            <button onClick={() => setShowPdfModal(true)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm">
+              <UploadCloud size={18} /> Nhập từ PDF (AI)
+            </button>
+            <button onClick={openAddModal} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm">
+              <Plus size={18} /> Thêm Câu hỏi
+            </button>
+          </div>
         </div>
       </div>
 
@@ -277,6 +319,44 @@ export default function ExamQuestionManager({ exam, onBack }) {
                 Lưu Câu Hỏi
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* PDF Upload Modal */}
+      {showPdfModal && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg shadow-xl overflow-hidden">
+            <div className="flex justify-between items-center p-6 border-b border-slate-200 dark:border-slate-700">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Nhập từ PDF bằng AI</h2>
+              <button onClick={() => setShowPdfModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><X size={24} /></button>
+            </div>
+            
+            <form onSubmit={handlePdfUpload} className="p-6">
+              <div className="mb-6">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                  Tính năng này sử dụng AI (Google Gemini Vision) để tự động đọc nội dung PDF, bóc tách câu hỏi và hình ảnh.
+                  Quá trình có thể mất từ 1-2 phút tùy vào độ dài của đề thi.
+                </p>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Chọn file PDF đề thi</label>
+                <input 
+                  type="file" 
+                  accept=".pdf"
+                  onChange={(e) => setPdfFile(e.target.files[0])}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl"
+                  required
+                />
+              </div>
+              
+              <div className="flex justify-end gap-3 mt-8">
+                <button type="button" onClick={() => setShowPdfModal(false)} className="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl font-medium transition-colors">
+                  Hủy
+                </button>
+                <button type="submit" disabled={uploadingPdf} className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center gap-2">
+                  {uploadingPdf ? <><Loader2 size={18} className="animate-spin"/> Đang tải lên...</> : 'Bắt đầu xử lý'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

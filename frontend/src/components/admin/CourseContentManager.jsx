@@ -4,6 +4,7 @@ import { API_URL } from '../../config';
 
 export default function CourseContentManager({ course, onBack }) {
   const [lessons, setLessons] = useState([]);
+  const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Modal states
@@ -11,11 +12,26 @@ export default function CourseContentManager({ course, onBack }) {
   const [editingItem, setEditingItem] = useState(null);
   
   // Forms
-  const [lessonForm, setLessonForm] = useState({ title: '', content: '', order_num: 1, video_url: '' });
+  const [lessonForm, setLessonForm] = useState({ title: '', content: '', order_num: 1, video_url: '', exam_id: '' });
 
   useEffect(() => {
     fetchLessons();
+    fetchExams();
   }, []);
+
+  const fetchExams = async () => {
+    try {
+      const res = await fetch(API_URL + '/exams', {
+        headers: getAuthHeaders()
+      });
+      if (res.ok) {
+        const json = await res.json();
+        setExams(json);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchLessons = async () => {
     setLoading(true);
@@ -49,11 +65,14 @@ export default function CourseContentManager({ course, onBack }) {
       : `/admin/courses/${course.id}/lessons`;
     const method = editingItem ? 'PUT' : 'POST';
 
+    const payload = { ...lessonForm };
+    payload.youtube_id = payload.video_url; // Map video_url to youtube_id for backend
+    
     try {
       const res = await fetch(API_URL + endpoint, {
         method,
         headers: getAuthHeaders(),
-        body: JSON.stringify(lessonForm)
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         setShowModal(false);
@@ -85,13 +104,19 @@ export default function CourseContentManager({ course, onBack }) {
 
   const openAddModal = () => {
     setEditingItem(null);
-    setLessonForm({ title: '', content: '', order_num: lessons.length + 1, video_url: '' });
+    setLessonForm({ title: '', content: '', order_num: lessons.length + 1, video_url: '', exam_id: '' });
     setShowModal(true);
   };
 
   const openEditModal = (item) => {
     setEditingItem(item);
-    setLessonForm({ title: item.title, content: item.content, order_num: item.order_num, video_url: item.video_url || '' });
+    setLessonForm({ 
+      title: item.title, 
+      content: item.content, 
+      order_num: item.order_num, 
+      video_url: item.video_url || '',
+      exam_id: item.exam_id || ''
+    });
     setShowModal(true);
   };
 
@@ -187,9 +212,29 @@ export default function CourseContentManager({ course, onBack }) {
                     <input type="text" required value={lessonForm.title} onChange={e => setLessonForm({...lessonForm, title: e.target.value})} className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500" />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">YouTube/Video URL (Tùy chọn)</label>
-                  <input type="text" value={lessonForm.video_url} onChange={e => setLessonForm({...lessonForm, video_url: e.target.value})} className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500" placeholder="https://youtube.com/..." />
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Video URL (YouTube/Vimeo)</label>
+                  <input 
+                    type="text" 
+                    value={lessonForm.video_url} 
+                    onChange={e => setLessonForm({...lessonForm, video_url: e.target.value})}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg"
+                  />
+                </div>
+                
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Bài kiểm tra đính kèm</label>
+                  <select
+                    value={lessonForm.exam_id}
+                    onChange={e => setLessonForm({...lessonForm, exam_id: e.target.value})}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                  >
+                    <option value="">Không có bài kiểm tra</option>
+                    {exams.map(exam => (
+                      <option key={exam.id} value={exam.id}>{exam.title}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-slate-500 mt-1">Học viên sẽ phải hoàn thành bài kiểm tra này sau khi học xong.</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nội dung chi tiết (Text/Markdown)</label>

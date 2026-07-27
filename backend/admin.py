@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks
+import shutil
+import os
+import import_pdf_ai
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
@@ -67,9 +70,11 @@ def update_course(course_id: str, course_in: CourseCreate, db: Session = Depends
 class LessonCreate(BaseModel):
     course_id: str
     title: str
-    youtube_id: str
+    youtube_id: str = None
     order_index: int
     passing_score_required: int = 80
+    exam_id: str = None
+    content: str = None
 
 @router.post("/lessons")
 def create_lesson(lesson: LessonCreate, db: Session = Depends(get_db), admin: models.User = Depends(require_admin)):
@@ -99,9 +104,11 @@ def reorder_lessons(course_id: str, req: ReorderRequest, db: Session = Depends(g
 
 class LessonUpdate(BaseModel):
     title: str
-    youtube_id: str
+    youtube_id: str = None
     order_index: int
     passing_score_required: int = 80
+    exam_id: str = None
+    content: str = None
 
 @router.put("/lessons/{lesson_id}")
 def update_lesson(lesson_id: str, lesson_in: LessonUpdate, db: Session = Depends(get_db), admin: models.User = Depends(require_admin)):
@@ -109,9 +116,14 @@ def update_lesson(lesson_id: str, lesson_in: LessonUpdate, db: Session = Depends
     if not lesson:
         raise HTTPException(status_code=404, detail="Lesson not found")
     lesson.title = lesson_in.title
-    lesson.youtube_id = lesson_in.youtube_id
+    if lesson_in.youtube_id is not None:
+        lesson.youtube_id = lesson_in.youtube_id
     lesson.order_index = lesson_in.order_index
     lesson.passing_score_required = lesson_in.passing_score_required
+    if lesson_in.exam_id == "":
+        lesson.exam_id = None
+    elif lesson_in.exam_id is not None:
+        lesson.exam_id = lesson_in.exam_id
     db.commit()
     db.refresh(lesson)
     return lesson
@@ -190,6 +202,25 @@ def delete_exam(exam_id: str, db: Session = Depends(get_db), admin: models.User 
     db.delete(exam)
     db.commit()
     return {"message": "Exam deleted"}
+
+@router.post("/exams/{exam_id}/upload-pdf")
+async def upload_pdf_to_exam(
+    exam_id: str,
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    admin: models.User = Depends(require_admin)
+):
+    if not file.filename.lower().endswith('.pdf'):
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+        
+    os.makedirs("temp", exist_ok=True)
+    file_path = os.path.join("temp", f"{exam_id}_{file.filename}")
+    
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    background_tasks.add_task(import_pdf_ai.process_pdf, file_path, exam_id)
+    return {"message": "File uploaded and is being processed by AI"}
 
 class QuestionCreateUpdate(BaseModel):
     exam_id: str
