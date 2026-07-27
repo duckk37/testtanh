@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Flame, MoreVertical, CircleDollarSign, Trash2, ShieldAlert, X } from 'lucide-react';
 import { API_URL } from '../../config';
 import { useAuth } from '../../context/AuthContext';
@@ -101,13 +101,13 @@ export default function UsersTab() {
 
     try {
       const token = localStorage.getItem('access_token');
-      const res = await fetch(`${API_URL}/admin/users/${selectedUser.id}/CircleDollarSign`, {
+      const res = await fetch(`${API_URL}/admin/users/${selectedUser.id}/coins`, {
         method: 'PUT',
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ CircleDollarSign: coinAmount })
+        body: JSON.stringify({ coins: coinAmount })
       });
       
       if (res.ok) {
@@ -160,7 +160,7 @@ export default function UsersTab() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-300">{u.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-yellow-600 dark:text-yellow-500 font-bold flex items-center gap-1">
-                      <CircleDollarSign size={14} /> {u.CircleDollarSign || 0}
+                      <CircleDollarSign size={14} /> {u.coins || 0}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
