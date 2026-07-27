@@ -156,6 +156,7 @@ export default function CourseContentManager({ course, onBack }) {
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">STT</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Tiêu đề</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Bài kiểm tra</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Video URL</th>
                   <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Hành động</th>
                 </tr>
@@ -165,7 +166,16 @@ export default function CourseContentManager({ course, onBack }) {
                   <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                     <td className="px-4 py-3 text-sm font-medium text-slate-900 dark:text-white">{item.order_num}</td>
                     <td className="px-4 py-3 text-sm text-slate-900 dark:text-white">{item.title}</td>
-                    <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400 line-clamp-1 max-w-[200px]">{item.video_url}</td>
+                    <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
+                      {item.exam_id ? (
+                        <span className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-xs font-medium border border-indigo-100">
+                          Có đính kèm
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 text-xs italic">-</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400 line-clamp-1 max-w-[200px]">{item.video_url || item.youtube_id}</td>
                     <td className="px-4 py-3 text-right">
                       <button onClick={() => openEditModal(item)} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-2 rounded-lg transition-colors mr-2">
                         <Edit size={16} />
