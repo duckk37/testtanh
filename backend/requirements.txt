@@ -6,9 +6,7 @@ PyJWT
 passlib[bcrypt]
 bcrypt==3.2.2
 python-multipart
-psycopg2-binary
 textblob
 python-dotenv
-google-generativeai
+requests
 youtube-transcript-api
-openpyxl

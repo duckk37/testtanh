@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import os
 import json
-import google.generativeai as genai
+import requests
 from typing import List, Dict, Any
 from auth import get_current_user
 import models
@@ -13,8 +13,6 @@ router = APIRouter(tags=["Learning Path"])
 
 # Config API Key
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
 
 class PlacementAnswer(BaseModel):
     answers: dict # {question_index: selected_option}
@@ -91,11 +89,18 @@ def generate_learning_path(
     """
     
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        response = model.generate_content(prompt)
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}]
+        }
+        
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        data = response.json()
         
         # Clean up output if AI wrapped in markdown
-        output_text = response.text.strip()
+        output_text = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
         if output_text.startswith("```json"):
             output_text = output_text[7:]
         if output_text.startswith("```"):

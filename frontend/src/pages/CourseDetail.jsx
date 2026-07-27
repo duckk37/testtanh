@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import InteractiveVideoPlayer from '../components/InteractiveVideoPlayer';
 import LessonTest from '../components/LessonTest';
 import LessonComments from '../components/LessonComments';
+import Certificate from '../components/Certificate';
 import { ChevronLeft, PlayCircle, Lock, CheckCircle2, FileText, Video } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { SkeletonSidebar, SkeletonVideo } from '../components/Skeleton';
@@ -128,7 +129,10 @@ function CourseDetail() {
           <div className="max-w-5xl mx-auto">
             {/* Header Area */}
             <div className="bg-white dark:bg-slate-800/80 backdrop-blur-md p-6 rounded-t-2xl shadow-soft dark:shadow-none border border-slate-100 dark:border-slate-700/50 border-b-0">
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">{activeLesson?.title}</h1>
+              <div className="flex justify-between items-center mb-4">
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{activeLesson?.title}</h1>
+                <Certificate courseId={courseId} />
+              </div>
               
               {/* Tabs */}
               <div className="flex space-x-4 border-b border-slate-200 dark:border-slate-700">

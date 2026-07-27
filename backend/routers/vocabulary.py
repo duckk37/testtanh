@@ -4,7 +4,7 @@ from datetime import datetime
 from pydantic import BaseModel
 import os
 import json
-import google.generativeai as genai
+import requests
 import models
 from database import get_db
 from auth import get_current_user
@@ -176,9 +176,6 @@ def check_writing(req: WritingRequest, db: Session = Depends(get_db), current_us
     if not GEMINI_API_KEY:
         from fastapi import HTTPException
         raise HTTPException(status_code=500, detail="Gemini API Key is not configured")
-        
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-2.5-flash')
     
     prompt = f"""
     You are an expert IELTS/TOEIC examiner. Review the following English text.
@@ -199,8 +196,17 @@ def check_writing(req: WritingRequest, db: Session = Depends(get_db), current_us
     """
     
     try:
-        response = model.generate_content(prompt)
-        text_resp = response.text.strip()
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}]
+        }
+        
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        res_data = response.json()
+        
+        text_resp = res_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
         if text_resp.startswith("```json"):
             text_resp = text_resp[7:]
         if text_resp.startswith("```"):
