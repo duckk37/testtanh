@@ -104,7 +104,9 @@ export default function ExamQuestionManager({ exam, onBack }) {
       option_b: '', 
       option_c: '', 
       option_d: '', 
-      correct_option: 'A' 
+      correct_option: 'A',
+      question_type: 'multiple_choice',
+      image_url: ''
     });
     setShowModal(true);
   };
@@ -115,9 +117,11 @@ export default function ExamQuestionManager({ exam, onBack }) {
       content: item.content, 
       option_a: item.option_a, 
       option_b: item.option_b, 
-      option_c: item.option_c, 
-      option_d: item.option_d, 
-      correct_option: item.correct_option 
+      option_c: item.option_c || '', 
+      option_d: item.option_d || '', 
+      correct_option: item.correct_option || '',
+      question_type: item.question_type || 'multiple_choice',
+      image_url: item.image_url || ''
     });
     setShowModal(true);
   };
@@ -259,56 +263,97 @@ export default function ExamQuestionManager({ exam, onBack }) {
                   placeholder="Nhập nội dung câu hỏi..."
                 />
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {['A', 'B', 'C', 'D'].map(opt => {
-                  const key = `option_${opt.toLowerCase()}`;
-                  return (
-                    <div key={opt}>
-                      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-2">
-                        <span className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs">{opt}</span>
-                        Đáp án {opt}
-                      </label>
-                      <input 
-                        type="text" 
-                        required 
-                        value={form[key]} 
-                        onChange={e => setForm({...form, [key]: e.target.value})} 
-                        className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500" 
-                        placeholder={`Nhập đáp án ${opt}...`}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
 
-              <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Chọn Đáp án đúng</label>
-                <div className="flex gap-4">
-                  {['A', 'B', 'C', 'D'].map(opt => (
-                    <label key={opt} className={`flex-1 flex justify-center items-center gap-2 py-3 rounded-xl border-2 cursor-pointer transition-all ${
-                      form.correct_option === opt 
-                        ? 'border-green-500 bg-green-50 text-green-700 font-bold' 
-                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300'
-                    }`}>
-                      <input 
-                        type="radio" 
-                        name="correct_option" 
-                        value={opt} 
-                        checked={form.correct_option === opt}
-                        onChange={(e) => setForm({...form, correct_option: e.target.value})}
-                        className="hidden"
-                      />
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${
-                        form.correct_option === opt ? 'border-green-500 bg-green-500 text-white' : 'border-slate-300'
-                      }`}>
-                        {form.correct_option === opt && <CheckCircle2 size={14} />}
-                      </span>
-                      Đáp án {opt}
-                    </label>
-                  ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Loại câu hỏi</label>
+                  <select
+                    value={form.question_type}
+                    onChange={(e) => setForm({...form, question_type: e.target.value})}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="multiple_choice">Trắc nghiệm (A, B, C, D)</option>
+                    <option value="fill_in_blank">Điền từ (Điền vào chỗ trống)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">URL Hình ảnh (Tùy chọn)</label>
+                  <input
+                    type="text"
+                    value={form.image_url}
+                    onChange={(e) => setForm({...form, image_url: e.target.value})}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    placeholder="https://... (Link ảnh nếu có)"
+                  />
                 </div>
               </div>
+              
+              {form.question_type === 'multiple_choice' ? (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {['A', 'B', 'C', 'D'].map(opt => {
+                      const key = `option_${opt.toLowerCase()}`;
+                      return (
+                        <div key={opt}>
+                          <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-2">
+                            <span className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs">{opt}</span>
+                            Đáp án {opt}
+                          </label>
+                          <input 
+                            type="text" 
+                            required 
+                            value={form[key]} 
+                            onChange={e => setForm({...form, [key]: e.target.value})} 
+                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500" 
+                            placeholder={`Nhập đáp án ${opt}...`}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Chọn Đáp án đúng</label>
+                    <div className="flex gap-4">
+                      {['A', 'B', 'C', 'D'].map(opt => (
+                        <label key={opt} className={`flex-1 flex justify-center items-center gap-2 py-3 rounded-xl border-2 cursor-pointer transition-all ${
+                          form.correct_option === opt 
+                            ? 'border-green-500 bg-green-50 text-green-700 font-bold' 
+                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300'
+                        }`}>
+                          <input 
+                            type="radio" 
+                            name="correct_option" 
+                            value={opt} 
+                            checked={form.correct_option === opt}
+                            onChange={(e) => setForm({...form, correct_option: e.target.value})}
+                            className="hidden"
+                          />
+                          <span className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${
+                            form.correct_option === opt ? 'border-green-500 bg-green-500 text-white' : 'border-slate-300'
+                          }`}>
+                            {form.correct_option === opt && <CheckCircle2 size={14} />}
+                          </span>
+                          Đáp án {opt}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Từ/Câu trả lời chính xác cần điền</label>
+                  <input
+                    type="text"
+                    required
+                    value={form.correct_option}
+                    onChange={(e) => setForm({...form, correct_option: e.target.value})}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    placeholder="VD: is, are, am..."
+                  />
+                  <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Gợi ý: Dùng dấu gạch dưới (___) trong Nội dung câu hỏi để tạo chỗ trống.</p>
+                </div>
+              )}
             </form>
 
             <div className="p-5 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3 bg-white dark:bg-slate-800">
