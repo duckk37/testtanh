@@ -7,6 +7,11 @@ from auth import get_password_hash
 import admin
 import migrations
 from dotenv import load_dotenv
+import time
+from rich.console import Console
+from rich.panel import Panel
+
+console = Console()
 
 # Load environment variables from .env file
 load_dotenv()
@@ -59,9 +64,27 @@ app.add_middleware(
     max_age=600,
 )
 
+@app.middleware("http")
+async def log_requests(request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = (time.time() - start_time) * 1000
+    
+    status_color = "green" if response.status_code < 400 else "red"
+    method = request.method
+    path = request.url.path
+    
+    # Hide noisy static requests
+    if not path.startswith("/static"):
+        console.print(f"[bold blue]⚡ [{method}][/bold blue] [cyan]{path}[/cyan] -> [{status_color}]{response.status_code}[/{status_color}] ({process_time:.2f}ms)")
+        
+    return response
+
 # Create Database Tables and Seed Mock Data
 @app.on_event("startup")
 def on_startup():
+    console.print(Panel.fit("[bold green]🚀 EnglishMaster Server Started Successfully![/bold green]\n[cyan]Listening on http://0.0.0.0:8000[/cyan]", border_style="green"))
+    console.print("[yellow]System Status:[/yellow] [green]OK[/green] | [yellow]Database:[/yellow] [green]Connected[/green]")
     models.Base.metadata.create_all(bind=engine)
     
     # Seed Mock Data

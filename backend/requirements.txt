@@ -10,3 +10,4 @@ textblob
 python-dotenv
 requests
 youtube-transcript-api
+rich
