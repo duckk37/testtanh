@@ -5,7 +5,6 @@ from fastapi.middleware.gzip import GZipMiddleware
 from database import engine, SessionLocal
 import models
 from auth import get_password_hash
-import admin
 import migrations
 from dotenv import load_dotenv
 import time
@@ -29,6 +28,14 @@ from routers import video as video_router
 from routers import ai as ai_router
 from routers import learning_path as learning_path_router
 from routers import certificates as certificates_router
+from routers import checkout as checkout_router
+
+# Admin routers
+from routers.admin import users as admin_users_router
+from routers.admin import courses as admin_courses_router
+from routers.admin import exams as admin_exams_router
+from routers.admin import vocabularies as admin_vocabularies_router
+from routers.admin import stats as admin_stats_router
 
 # Create tables
 models.Base.metadata.create_all(bind=engine)
@@ -43,7 +50,11 @@ import os
 os.makedirs(os.path.join(os.path.dirname(__file__), "static", "images"), exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-app.include_router(admin.router)
+app.include_router(admin_users_router.router)
+app.include_router(admin_courses_router.router)
+app.include_router(admin_exams_router.router)
+app.include_router(admin_vocabularies_router.router)
+app.include_router(admin_stats_router.router)
 app.include_router(auth_router.router)
 app.include_router(users_router.router)
 app.include_router(courses_router.router)
@@ -55,6 +66,7 @@ app.include_router(video_router.router)
 app.include_router(ai_router.router)
 app.include_router(learning_path_router.router)
 app.include_router(certificates_router.router)
+app.include_router(checkout_router.router)
 
 # Add Gzip Compression for large responses (Video transcripts, roadmaps, etc)
 app.add_middleware(GZipMiddleware, minimum_size=500)
@@ -75,22 +87,34 @@ async def log_requests(request, call_next):
     response = await call_next(request)
     process_time = (time.time() - start_time) * 1000
     
-    status_color = "green" if response.status_code < 400 else "red"
     method = request.method
     path = request.url.path
     
     # Hide noisy static requests
-    if not path.startswith("/static"):
-        console.print(f"[bold blue]⚡ [{method}][/bold blue] [cyan]{path}[/cyan] -> [{status_color}]{response.status_code}[/{status_color}] ({process_time:.2f}ms)")
+    if not path.startswith("/static") and path != "/":
+        method_padded = f"{method:<7}"
+        
+        status_color = "green"
+        icon = "[OK]"
+        if response.status_code >= 500:
+            status_color = "red bold"
+            icon = "[ERR]"
+        elif response.status_code >= 400:
+            status_color = "yellow"
+            icon = "[ERR]"
+        else:
+            status_color = "bold green"
+            icon = "[OK]"
+            
+        console.print(f"{icon} [{status_color}]{method_padded}[/] │ [cyan]{path:<45}[/] │ [{status_color}]{response.status_code}[/] │ [magenta]{process_time:>7.2f} ms[/]")
         
     return response
 
 # Create Database Tables and Seed Mock Data
 @app.on_event("startup")
-def on_startup():
-    console.print(Panel.fit("[bold green]🚀 EnglishMaster Server Started Successfully![/bold green]\n[cyan]Listening on http://0.0.0.0:8000[/cyan]", border_style="green"))
+async def startup_event():
+    console.print(Panel.fit("[bold green]EnglishMaster Server Started Successfully![/bold green]\n[cyan]Listening on http://0.0.0.0:8000[/cyan]", border_style="green"))
     console.print("[yellow]System Status:[/yellow] [green]OK[/green] | [yellow]Database:[/yellow] [green]Connected[/green]")
-    models.Base.metadata.create_all(bind=engine)
     
     # Seed Mock Data
     db = SessionLocal()

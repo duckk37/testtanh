@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Edit, Trash2, X, CheckCircle2, UploadCloud, Loader2 } from 'lucide-react';
+import api from '../../services/api';
 import { API_URL } from '../../config';
 
 export default function ExamQuestionManager({ exam, onBack }) {
@@ -30,11 +31,8 @@ export default function ExamQuestionManager({ exam, onBack }) {
   const fetchQuestions = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/exams/${exam.id}/questions`);
-      if (res.ok) {
-        const data = await res.json();
-        setQuestions(data);
-      }
+      const res = await api.get(`/exams/${exam.id}/questions`);
+      setQuestions(res.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -42,20 +40,11 @@ export default function ExamQuestionManager({ exam, onBack }) {
     }
   };
 
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('access_token');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
-  };
-
   const handleSave = async (e) => {
     e.preventDefault();
     const endpoint = editingItem 
       ? `/admin/questions/${editingItem.id}` 
       : `/admin/questions`;
-    const method = editingItem ? 'PUT' : 'POST';
 
     const payload = {
       ...form,
@@ -63,36 +52,25 @@ export default function ExamQuestionManager({ exam, onBack }) {
     };
 
     try {
-      const res = await fetch(API_URL + endpoint, {
-        method,
-        headers: getAuthHeaders(),
-        body: JSON.stringify(payload)
-      });
-      if (res.ok) {
-        setShowModal(false);
-        fetchQuestions();
+      if (editingItem) {
+        await api.put(endpoint, payload);
       } else {
-        alert("Có lỗi xảy ra khi lưu câu hỏi.");
+        await api.post(endpoint, payload);
       }
+      setShowModal(false);
+      fetchQuestions();
     } catch (err) {
-      alert("Lỗi kết nối.");
+      alert("Lỗi kết nối hoặc có lỗi xảy ra khi lưu câu hỏi.");
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa câu hỏi này?")) return;
     try {
-      const res = await fetch(`${API_URL}/admin/questions/${id}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
-      if (res.ok) {
-        fetchQuestions();
-      } else {
-        alert("Lỗi khi xóa câu hỏi.");
-      }
+      await api.delete(`/admin/questions/${id}`);
+      fetchQuestions();
     } catch (err) {
-      alert("Lỗi kết nối.");
+      alert("Lỗi kết nối hoặc lỗi khi xóa câu hỏi.");
     }
   };
 
@@ -138,23 +116,13 @@ export default function ExamQuestionManager({ exam, onBack }) {
     formData.append("file", pdfFile);
     
     try {
-      const res = await fetch(API_URL + `/admin/exams/${exam.id}/upload-pdf`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        },
-        body: formData
-      });
-      if (res.ok) {
-        alert("File đã được tải lên và AI đang xử lý ngầm. Vui lòng tải lại trang sau 1-2 phút để xem kết quả.");
-        setShowPdfModal(false);
-        setPdfFile(null);
-      } else {
-        const errorData = await res.json();
-        alert("Lỗi: " + (errorData.detail || "Không thể tải file lên"));
-      }
+      await api.post(`/admin/exams/${exam.id}/upload-pdf`, formData);
+      alert("File đã được tải lên và AI đang xử lý ngầm. Vui lòng tải lại trang sau 1-2 phút để xem kết quả.");
+      setShowPdfModal(false);
+      setPdfFile(null);
     } catch (err) {
-      alert("Lỗi kết nối.");
+      const errorDetail = err.response?.data?.detail || "Không thể tải file lên";
+      alert("Lỗi: " + errorDetail);
     } finally {
       setUploadingPdf(false);
     }

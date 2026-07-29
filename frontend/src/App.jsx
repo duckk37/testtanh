@@ -24,6 +24,9 @@ const Analytics = lazy(() => import('./pages/Analytics'));
 const VideoPlayer = lazy(() => import('./pages/VideoPlayer'));
 const Roadmap = lazy(() => import('./pages/Roadmap'));
 const PlacementTest = lazy(() => import('./pages/PlacementTest'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const Guide = lazy(() => import('./pages/Guide'));
+const PaymentReturn = lazy(() => import('./pages/PaymentReturn'));
 
 const pageVariants = {
   initial: { opacity: 0, y: 10 },
@@ -59,6 +62,9 @@ function AnimatedRoutes() {
           <Route path="/video" element={<VideoPlayer />} />
           <Route path="/roadmap" element={<Roadmap />} />
           <Route path="/placement-test" element={<PlacementTest />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/payment-return" element={<PaymentReturn />} />
+          <Route path="/guide" element={<Guide />} />
           <Route path="/courses/:courseId" element={<CourseDetail />} />
           <Route path="/exams/:examId" element={<ExamDetail />} />
           <Route path="*" element={<NotFound />} />

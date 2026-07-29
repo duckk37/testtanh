@@ -7,7 +7,7 @@ import Certificate from '../components/Certificate';
 import { ChevronLeft, PlayCircle, Lock, CheckCircle2, FileText, Video } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { SkeletonSidebar, SkeletonVideo } from '../components/Skeleton';
-import { API_URL } from '../config';
+import api from '../services/api';
 
 function CourseDetail() {
   const { courseId } = useParams();
@@ -15,6 +15,7 @@ function CourseDetail() {
   const { user } = useAuth();
   
   const [lessons, setLessons] = useState([]);
+  const [course, setCourse] = useState(null);
   const [activeLesson, setActiveLesson] = useState(null);
   const [activeTab, setActiveTab] = useState('video'); // 'video' | 'test'
   const [loading, setLoading] = useState(true);
@@ -27,19 +28,13 @@ function CourseDetail() {
       return;
     }
 
-    fetch(`${API_URL}/courses/${courseId}/lessons`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-      .then(res => {
-        if (!res.ok) {
-          if (res.status === 401) navigate('/login');
-          throw new Error('Failed to fetch');
-        }
-        return res.json();
-      })
-      .then(data => {
+    Promise.all([
+      api.get(`/courses/${courseId}`),
+      api.get(`/courses/${courseId}/lessons`)
+    ])
+      .then(([courseRes, lessonsRes]) => {
+        setCourse(courseRes.data);
+        const data = lessonsRes.data;
         setLessons(data);
         if (data.length > 0 && !activeLesson) {
           setActiveLesson(data[0]);
@@ -47,7 +42,8 @@ function CourseDetail() {
         setLoading(false);
       })
       .catch(err => {
-        console.error("Error fetching lessons:", err);
+        if (err.response?.status === 401) navigate('/login');
+        console.error("Error fetching data:", err);
         setLoading(false);
       });
   };
@@ -62,9 +58,13 @@ function CourseDetail() {
       setActiveTab('video');
       setVideoEnded(false);
     } else {
-      const prevLesson = lessons.find(l => l.order_index === lesson.order_index - 1);
-      const reqScore = prevLesson ? prevLesson.passing_score_required : 80;
-      alert(`Bạn cần hoàn thành ${prevLesson ? prevLesson.title : 'bài trước đó'} và đạt ${reqScore}% để mở khóa bài này!`);
+      if (course && course.price > 0 && !course.is_purchased) {
+        navigate(`/checkout?type=course&itemId=${course.id}`);
+      } else {
+        const prevLesson = lessons.find(l => l.order_index === lesson.order_index - 1);
+        const reqScore = prevLesson ? prevLesson.passing_score_required : 80;
+        alert(`Bạn cần hoàn thành ${prevLesson ? prevLesson.title : 'bài trước đó'} và đạt ${reqScore}% để mở khóa bài này!`);
+      }
     }
   };
 
@@ -128,10 +128,32 @@ function CourseDetail() {
         <div className="p-4 md:p-8">
           <div className="max-w-5xl mx-auto">
             {/* Header Area */}
+            {course && course.price > 0 && !course.is_purchased && (
+              <div className="bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm animate-in fade-in slide-in-from-top-4">
+                <div>
+                  <h3 className="font-bold text-amber-900 dark:text-amber-100 text-lg flex items-center gap-2">
+                    <Lock size={18} /> Khóa học Premium
+                  </h3>
+                  <p className="text-amber-700 dark:text-amber-300 text-sm mt-1">
+                    Bạn đang xem bài học thử miễn phí. Mua khóa học để mở khóa toàn bộ lộ trình và làm bài kiểm tra.
+                  </p>
+                </div>
+                <button 
+                  onClick={() => navigate(`/checkout?type=course&itemId=${course.id}`)}
+                  className="bg-amber-500 hover:bg-amber-600 text-white font-medium px-6 py-2.5 rounded-xl transition-colors whitespace-nowrap shadow-sm hover:shadow"
+                >
+                  Mua ngay ({course.price.toLocaleString('vi-VN')}đ)
+                </button>
+              </div>
+            )}
+
             <div className="bg-white dark:bg-slate-800/80 backdrop-blur-md p-6 rounded-t-2xl shadow-soft dark:shadow-none border border-slate-100 dark:border-slate-700/50 border-b-0">
               <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{activeLesson?.title}</h1>
-                <Certificate courseId={courseId} />
+                <Certificate 
+                  courseId={courseId} 
+                  isEligible={lessons.length > 0 && lessons.every(l => l.is_completed)} 
+                />
               </div>
               
               {/* Tabs */}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Mic, Volume2 } from 'lucide-react';
-import { API_URL } from '../config';
+import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const Flashcard = () => {
@@ -54,13 +54,8 @@ const Flashcard = () => {
     if (!token) return;
 
     try {
-      const response = await fetch(API_URL + '/vocabularies/review', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setWords(data);
-      }
+      const response = await api.get('/vocabularies/review');
+      setWords(response.data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -145,17 +140,9 @@ const Flashcard = () => {
 
   const handleReview = async (quality) => {
     const currentWord = words[currentIndex];
-    const token = localStorage.getItem('access_token');
     
     try {
-      await fetch(`${API_URL}/vocabularies/${currentWord.id}/review`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ quality })
-      });
+      await api.post(`/vocabularies/${currentWord.id}/review`, { quality });
       
       setIsFlipped(false);
       

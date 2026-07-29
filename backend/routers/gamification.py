@@ -8,35 +8,11 @@ from auth import get_current_user
 
 router = APIRouter(tags=["Gamification & Store"])
 
+from utils import ensure_daily_quests
+
 @router.get("/users/me/quests")
 def get_daily_quests(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    today_str = datetime.utcnow().date().isoformat()
-    
-    quests = db.query(models.DailyQuest).filter(
-        models.DailyQuest.user_id == current_user.id,
-        models.DailyQuest.date == today_str
-    ).all()
-    
-    if not quests:
-        quest_templates = [
-            {"type": "learn_words", "target": 10, "reward": 20},
-            {"type": "perfect_score", "target": 1, "reward": 50},
-            {"type": "complete_lesson", "target": 1, "reward": 30}
-        ]
-        
-        for q in quest_templates:
-            new_q = models.DailyQuest(
-                user_id=current_user.id,
-                quest_type=q["type"],
-                target_value=q["target"],
-                reward_coins=q["reward"],
-                date=today_str
-            )
-            db.add(new_q)
-            quests.append(new_q)
-        db.commit()
-        
-    return quests
+    return ensure_daily_quests(current_user.id, db)
 
 def get_store_items():
     return [

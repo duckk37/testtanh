@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MessageCircle, Send, User } from 'lucide-react';
 import TranslatableText from './TranslatableText';
-import { API_URL } from '../config';
+import api from '../services/api';
 
 const LessonComments = ({ lessonId }) => {
   const [comments, setComments] = useState([]);
@@ -14,11 +14,8 @@ const LessonComments = ({ lessonId }) => {
 
   const fetchComments = async () => {
     try {
-      const response = await fetch(`${API_URL}/lessons/${lessonId}/comments`);
-      if (response.ok) {
-        const data = await response.json();
-        setComments(data);
-      }
+      const response = await api.get(`/lessons/${lessonId}/comments`);
+      setComments(response.data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -34,19 +31,9 @@ const LessonComments = ({ lessonId }) => {
     if (!token) return alert('Vui lòng đăng nhập để bình luận');
 
     try {
-      const response = await fetch(`${API_URL}/lessons/${lessonId}/comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ content: newComment })
-      });
-      
-      if (response.ok) {
-        setNewComment('');
-        fetchComments(); // Reload comments
-      }
+      await api.post(`/lessons/${lessonId}/comments`, { content: newComment });
+      setNewComment('');
+      fetchComments(); // Reload comments
     } catch (error) {
       console.error(error);
     }

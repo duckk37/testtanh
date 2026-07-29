@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, ArrowRight, Brain, CheckCircle2 } from 'lucide-react';
-import { API_URL } from '../config';
+import api from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const loadingTexts = [
@@ -20,12 +20,8 @@ export default function PlacementTest() {
   const [loadingTextIndex, setLoadingTextIndex] = useState(0);
 
   const fetchQuestions = async () => {
-    const token = localStorage.getItem('access_token');
-    const res = await fetch(`${API_URL}/learning-path/placement-questions`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!res.ok) throw new Error('Failed to fetch questions');
-    return res.json();
+    const res = await api.get('/learning-path/placement-questions');
+    return res.data;
   };
 
   const { data: questions = [], isLoading } = useQuery({
@@ -35,20 +31,12 @@ export default function PlacementTest() {
 
   const generateMutation = useMutation({
     mutationFn: async (submitAnswers) => {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch(`${API_URL}/learning-path/generate`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
-        },
-        body: JSON.stringify({ answers: submitAnswers })
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || 'Generation failed');
+      try {
+        const res = await api.post('/learning-path/generate', { answers: submitAnswers });
+        return res.data;
+      } catch (error) {
+        throw new Error(error.response?.data?.detail || 'Generation failed');
       }
-      return res.json();
     },
     onSuccess: (data) => {
       navigate('/roadmap', { state: { level: data.level } });

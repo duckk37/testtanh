@@ -6,56 +6,57 @@ import re
 
 import models
 from database import get_db
-from auth import get_current_user
+from auth import get_current_user, get_current_user_optional
 from utils import check_and_update_streak, update_quest_progress
 
 router = APIRouter(tags=["Courses & Exams"])
 
-class CourseResponse(BaseModel):
-    id: str
-    title: str
-    description: str
-    thumbnail: str
-    price: float
+import schemas
 
-class LessonResponse(BaseModel):
-    id: str
-    course_id: str
-    title: str
-    youtube_id: str
-    exam_id: Optional[str] = None
-    passing_score_required: int = 80
-    order_index: int
-    is_unlocked: bool = False
-    is_completed: bool = False
-
-class ExamResponse(BaseModel):
-    id: str
-    title: str
-    description: str
-    duration_minutes: int
-
-class QuestionResponse(BaseModel):
-    id: str
-    exam_id: str
-    content: str
-    option_a: str | None = None
-    option_b: str | None = None
-    option_c: str | None = None
-    option_d: str | None = None
-    correct_option: str
-    image_url: str | None = None
-    question_type: str = "multiple_choice"
-
-class SubmitTestRequest(BaseModel):
-    answers: dict # {question_id: selected_option}
-
-@router.get("/courses", response_model=List[CourseResponse])
+@router.get("/courses", response_model=List[schemas.CourseResponse])
 def get_courses(db: Session = Depends(get_db)):
     return db.query(models.Course).all()
 
-@router.get("/courses/{course_id}/lessons", response_model=List[LessonResponse])
+@router.get("/courses/{course_id}", response_model=schemas.CourseResponse)
+def get_course(course_id: str, db: Session = Depends(get_db), current_user: Optional[models.User] = Depends(get_current_user_optional)):
+    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+        
+    is_purchased = False
+    if course.price == 0:
+        is_purchased = True
+    elif current_user:
+        order = db.query(models.Order).filter(
+            models.Order.user_id == current_user.id,
+            models.Order.course_id == course_id,
+            models.Order.status == 'completed'
+        ).first()
+        if order:
+            is_purchased = True
+            
+    response_data = schemas.CourseResponse.from_orm(course)
+    response_data.is_purchased = is_purchased
+    return response_data
+
+@router.get("/courses/{course_id}/lessons", response_model=List[schemas.LessonResponse])
 def get_lessons(course_id: str, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+        
+    is_purchased = False
+    if course.price == 0:
+        is_purchased = True
+    else:
+        order = db.query(models.Order).filter(
+            models.Order.user_id == current_user.id,
+            models.Order.course_id == course_id,
+            models.Order.status == 'completed'
+        ).first()
+        if order:
+            is_purchased = True
+
     lessons = db.query(models.Lesson).filter(models.Lesson.course_id == course_id).order_by(models.Lesson.order_index).all()
     
     progress_records = db.query(models.UserLessonProgress).filter(
@@ -70,9 +71,14 @@ def get_lessons(course_id: str, db: Session = Depends(get_db), current_user: mod
     
     for idx, lesson in enumerate(lessons):
         is_completed = lesson.id in completed_lesson_ids
-        is_unlocked = True # Luôn mở khóa theo yêu cầu
         
-        result.append(LessonResponse(
+        if is_admin or is_purchased:
+            is_unlocked = True
+        else:
+            # Lesson 1 is always unlocked as trial
+            is_unlocked = (idx == 0)
+        
+        result.append(schemas.LessonResponse(
             id=lesson.id,
             course_id=lesson.course_id,
             title=lesson.title,
@@ -80,14 +86,16 @@ def get_lessons(course_id: str, db: Session = Depends(get_db), current_user: mod
             exam_id=lesson.exam_id,
             order_index=lesson.order_index,
             is_completed=is_completed,
-            is_unlocked=is_unlocked
+            is_unlocked=is_unlocked,
+            subtitles=lesson.subtitles,
+            content=lesson.content
         ))
         is_previous_completed = is_completed
         
     return result
 
 @router.post("/lessons/{lesson_id}/submit-test")
-def submit_lesson_test(lesson_id: str, req: SubmitTestRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def submit_lesson_test(lesson_id: str, req: schemas.SubmitTestRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     lesson = db.query(models.Lesson).filter(models.Lesson.id == lesson_id).first()
     if not lesson or not lesson.exam_id:
         raise HTTPException(status_code=404, detail="Lesson or exam not found")
@@ -167,17 +175,17 @@ def submit_lesson_test(lesson_id: str, req: SubmitTestRequest, db: Session = Dep
         "attempts": progress.attempts
     }
 
-@router.get("/exams", response_model=List[ExamResponse])
+@router.get("/exams", response_model=List[schemas.ExamResponse])
 def get_exams(db: Session = Depends(get_db)):
     return db.query(models.Exam).all()
 
-@router.get("/exams/{exam_id}", response_model=ExamResponse)
+@router.get("/exams/{exam_id}", response_model=schemas.ExamResponse)
 def get_exam(exam_id: str, db: Session = Depends(get_db)):
     exam = db.query(models.Exam).filter(models.Exam.id == exam_id).first()
     if not exam:
         raise HTTPException(status_code=404, detail="Exam not found")
     return exam
 
-@router.get("/exams/{exam_id}/questions", response_model=List[QuestionResponse])
+@router.get("/exams/{exam_id}/questions", response_model=List[schemas.QuestionResponse])
 def get_questions(exam_id: str, db: Session = Depends(get_db)):
     return db.query(models.Question).filter(models.Question.exam_id == exam_id).all()

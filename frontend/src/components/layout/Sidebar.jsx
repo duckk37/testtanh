@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Home, BookOpen, PenTool, Trophy, User, Settings, LogOut, Target, ShoppingCart, BarChart2, Youtube, MessageSquare, Map } from 'lucide-react';
+import { Home, BookOpen, PenTool, Trophy, User, Settings, LogOut, Target, ShoppingCart, BarChart2, Youtube, MessageSquare, Map, HelpCircle } from 'lucide-react';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const { user, logout } = useAuth();
@@ -16,7 +16,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { path: '/store', label: 'Cửa hàng', icon: ShoppingCart, iconColor: 'text-fuchsia-500' },
     { path: '/analytics', label: 'Thống kê', icon: BarChart2, iconColor: 'text-cyan-500' },
     { path: '/video', label: 'Học qua Video', icon: Youtube, iconColor: 'text-red-500' },
-    { path: '/leaderboard', label: 'BXH', icon: Trophy, iconColor: 'text-yellow-500' }
+    { path: '/leaderboard', label: 'BXH', icon: Trophy, iconColor: 'text-yellow-500' },
+    { path: '/guide', label: 'Hướng dẫn', icon: HelpCircle, iconColor: 'text-green-500' }
   ];
 
   if (user && user.role === 'admin') {
@@ -63,6 +64,25 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               </Link>
             );
           })}
+        </div>
+
+        <div className="px-4 mb-4">
+          <button 
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-xl font-bold transition-colors border border-indigo-100 dark:border-indigo-800"
+            onClick={() => {
+              if (window.deferredPrompt) {
+                window.deferredPrompt.prompt();
+                window.deferredPrompt.userChoice.then(() => {
+                  window.deferredPrompt = null;
+                });
+              } else {
+                alert("Bạn có thể cài đặt ứng dụng này từ menu của trình duyệt (Install App / Add to Home Screen).");
+              }
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Tải App
+          </button>
         </div>
 
         {user ? (

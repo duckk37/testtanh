@@ -1,16 +1,12 @@
-﻿import React from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Target, CheckCircle, Clock } from 'lucide-react';
-import { API_URL } from '../config';
+import api from '../services/api';
 
 export default function Quests() {
   const fetchQuests = async () => {
-    const token = localStorage.getItem('access_token');
-    const res = await fetch(`${API_URL}/users/me/quests`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!res.ok) throw new Error('Failed to fetch quests');
-    return res.json();
+    const res = await api.get('/users/me/quests');
+    return res.data;
   };
 
   const { data: quests = [], isLoading } = useQuery({

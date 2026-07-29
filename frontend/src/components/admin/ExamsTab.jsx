@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, X, FileQuestion, Clock, Target } from 'lucide-react';
-import { API_URL } from '../../config';
+import api from '../../services/api';
 import ExamQuestionManager from './ExamQuestionManager';
 
 export default function ExamsTab() {
@@ -19,15 +19,9 @@ export default function ExamsTab() {
   const fetchExams = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
       // The frontend can just use /exams since it's a public endpoint or admin
-      const res = await fetch(API_URL + '/exams', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const json = await res.json();
-        setExams(json);
-      }
+      const res = await api.get('/exams');
+      setExams(res.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -35,13 +29,7 @@ export default function ExamsTab() {
     }
   };
 
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('access_token');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
-  };
+
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -51,17 +39,9 @@ export default function ExamsTab() {
     const method = editingItem ? 'PUT' : 'POST';
 
     try {
-      const res = await fetch(API_URL + endpoint, {
-        method,
-        headers: getAuthHeaders(),
-        body: JSON.stringify(examForm)
-      });
-      if (res.ok) {
-        setShowModal(false);
-        fetchExams();
-      } else {
-        alert("Có lỗi xảy ra.");
-      }
+      await (method === 'PUT' ? api.put(endpoint, examForm) : api.post(endpoint, examForm));
+      setShowModal(false);
+      fetchExams();
     } catch (err) {
       alert("Lỗi kết nối.");
     }
@@ -70,15 +50,8 @@ export default function ExamsTab() {
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa?")) return;
     try {
-      const res = await fetch(API_URL + `/admin/exams/${id}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
-      if (res.ok) {
-        fetchExams();
-      } else {
-        alert("Lỗi khi xóa.");
-      }
+      await api.delete(`/admin/exams/${id}`);
+      fetchExams();
     } catch (err) {
       alert("Lỗi kết nối.");
     }

@@ -11,17 +11,10 @@ from utils import check_and_update_streak
 
 router = APIRouter(tags=["Authentication"])
 
-class UserCreate(BaseModel):
-    username: str
-    email: str
-    password: str
+import schemas
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-@router.post("/register", response_model=Token)
-def register(user: UserCreate, db: Session = Depends(get_db)):
+@router.post("/register", response_model=schemas.Token)
+def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(models.User.email == user.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -41,7 +34,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     access_token = create_access_token(data={"sub": new_user.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=schemas.Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):

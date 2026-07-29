@@ -1,58 +1,76 @@
-﻿import React, { memo } from 'react';
+import React, { memo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { Menu, Moon, Sun, Flame } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const Header = ({ toggleSidebar }) => {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   
   return (
-    <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/60 shadow-sm dark:shadow-none transition-colors duration-200 h-16 shrink-0">
-      <div className="flex items-center justify-between h-full px-4 sm:px-6 lg:px-8">
+    <motion.header 
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="sticky top-0 z-30 bg-white/70 dark:bg-slate-900/50 backdrop-blur-xl border-b border-border shadow-glass transition-all duration-300 h-[72px] shrink-0"
+    >
+      <div className="flex items-center justify-between h-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         
         {/* Menu button */}
-        <button 
+        <motion.button 
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={toggleSidebar}
-          className="p-2 -ml-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
+          className="p-2.5 -ml-2 rounded-2xl text-slate-500 hover:bg-primary/10 hover:text-primary dark:text-slate-400 dark:hover:bg-primary/20 transition-colors"
         >
           <Menu size={24} />
-        </button>
+        </motion.button>
 
         {/* Empty div for flex spacing on desktop if needed, or page title */}
-        <div className="hidden md:block font-bold text-slate-800 dark:text-slate-200">
+        <div className="hidden md:block font-display font-bold text-lg text-slate-800 dark:text-slate-200 tracking-tight">
           {/* We can put page title here later using context or router */}
         </div>
 
         {/* Right side actions */}
-        <div className="flex items-center space-x-3 ml-auto">
+        <div className="flex items-center space-x-4 ml-auto">
           {user && (
             <>
-              <div className="flex items-center space-x-1.5 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/30 dark:to-amber-900/30 px-3 py-1.5 rounded-xl text-orange-600 dark:text-orange-400 font-bold border border-orange-100 dark:border-orange-800/50 shadow-sm">
-                <Flame size={18} className="text-orange-500" />
+              <motion.div 
+                whileHover={{ y: -2 }}
+                className="flex items-center space-x-1.5 bg-gradient-to-r from-orange-500/10 to-amber-500/10 dark:from-orange-500/20 dark:to-amber-500/20 px-3.5 py-2 rounded-2xl text-orange-600 dark:text-orange-400 font-bold border border-orange-500/20 shadow-sm"
+              >
+                <Flame size={18} className="text-orange-500 drop-shadow-md" />
                 <span>{user.streak_count || 0}</span>
                 {user.streak_shields > 0 && (
-                  <span className="ml-1 px-1.5 py-0.5 bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 rounded-md text-xs flex items-center" title="Khiên bảo vệ">
+                  <span className="ml-1.5 px-1.5 py-0.5 bg-blue-500/20 text-blue-600 dark:bg-blue-500/30 dark:text-blue-400 rounded-lg text-xs flex items-center shadow-sm" title="Khiên bảo vệ">
                     🛡️ {user.streak_shields}
                   </span>
                 )}
-              </div>
-              <div className="flex items-center space-x-1.5 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/30 dark:to-amber-900/30 px-3 py-1.5 rounded-xl text-yellow-600 dark:text-yellow-400 font-bold border border-yellow-100 dark:border-yellow-800/50 shadow-sm">
-                <span className="text-yellow-500">🪙</span>
+              </motion.div>
+              
+              <motion.div 
+                whileHover={{ y: -2 }}
+                className="flex items-center space-x-1.5 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 dark:from-yellow-500/20 dark:to-amber-500/20 px-3.5 py-2 rounded-2xl text-yellow-600 dark:text-yellow-400 font-bold border border-yellow-500/20 shadow-sm"
+              >
+                <span className="text-yellow-500 drop-shadow-md">🪙</span>
                 <span>{user.CircleDollarSign || 0}</span>
-              </div>
+              </motion.div>
             </>
           )}
-          <button 
+          
+          <motion.button 
+            whileHover={{ scale: 1.1, rotate: 15 }}
+            whileTap={{ scale: 0.9 }}
             onClick={toggleTheme}
-            className="p-2 rounded-xl text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-2.5 rounded-2xl text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-sm"
             title="Giao diện Sáng/Tối"
           >
-            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
+            {theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-slate-600" />}
+          </motion.button>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 };
 

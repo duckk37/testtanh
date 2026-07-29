@@ -75,6 +75,7 @@ class Lesson(Base):
     passing_score_required = Column(Integer, default=80)
     title = Column(String)
     youtube_id = Column(String)
+    content = Column(String, nullable=True)
     subtitles = Column(String, nullable=True) # JSON array of {time: float, text: str}
     order_index = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)

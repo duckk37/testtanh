@@ -21,16 +21,20 @@ import { useAuth } from '../context/AuthContext';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
+  const { user, loading, isAdmin, isTeacher, isAssistant } = useAuth();
+  const [activeTab, setActiveTab] = useState('vocabularies'); // default safe tab
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     if (!loading) {
-      if (!user || user.role !== 'admin') {
+      if (!user || !isAssistant()) {
         navigate('/login');
         return;
       }
+      
+      // Set initial tab based on role if it's the first load
+      if (isAdmin() && activeTab === 'vocabularies') setActiveTab('overview');
+      else if (isTeacher() && !isAdmin() && activeTab === 'vocabularies') setActiveTab('courses');
     }
 
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -55,60 +59,70 @@ export default function AdminDashboard() {
         </div>
         
         <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
-          <button 
-            onClick={() => setActiveTab('overview')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-              activeTab === 'overview' ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-blue-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <LayoutDashboard size={20} />
-            <span className="font-medium">Tổng quan</span>
-            {activeTab === 'overview' && <ChevronRight size={16} className="ml-auto" />}
-          </button>
+          {isAdmin() && (
+            <button 
+              onClick={() => setActiveTab('overview')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                activeTab === 'overview' ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-blue-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <LayoutDashboard size={20} />
+              <span className="font-medium">Tổng quan</span>
+              {activeTab === 'overview' && <ChevronRight size={16} className="ml-auto" />}
+            </button>
+          )}
           
-          <button 
-            onClick={() => setActiveTab('courses')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-              activeTab === 'courses' ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-blue-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <BookOpen size={20} />
-            <span className="font-medium">Khóa học</span>
-            {activeTab === 'courses' && <ChevronRight size={16} className="ml-auto" />}
-          </button>
+          {isTeacher() && (
+            <button 
+              onClick={() => setActiveTab('courses')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                activeTab === 'courses' ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-blue-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <BookOpen size={20} />
+              <span className="font-medium">Khóa học</span>
+              {activeTab === 'courses' && <ChevronRight size={16} className="ml-auto" />}
+            </button>
+          )}
 
-          <button 
-            onClick={() => setActiveTab('vocabularies')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-              activeTab === 'vocabularies' ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-blue-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <BookOpen size={20} />
-            <span className="font-medium">Từ vựng</span>
-            {activeTab === 'vocabularies' && <ChevronRight size={16} className="ml-auto" />}
-          </button>
+          {isAssistant() && (
+            <>
+              <button 
+                onClick={() => setActiveTab('vocabularies')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  activeTab === 'vocabularies' ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-blue-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <BookOpen size={20} />
+                <span className="font-medium">Từ vựng</span>
+                {activeTab === 'vocabularies' && <ChevronRight size={16} className="ml-auto" />}
+              </button>
 
-          <button 
-            onClick={() => setActiveTab('exams')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-              activeTab === 'exams' ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-blue-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <TrendingUp size={20} />
-            <span className="font-medium">Đề thi</span>
-            {activeTab === 'exams' && <ChevronRight size={16} className="ml-auto" />}
-          </button>
+              <button 
+                onClick={() => setActiveTab('exams')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  activeTab === 'exams' ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-blue-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <TrendingUp size={20} />
+                <span className="font-medium">Đề thi</span>
+                {activeTab === 'exams' && <ChevronRight size={16} className="ml-auto" />}
+              </button>
+            </>
+          )}
           
-          <button 
-            onClick={() => setActiveTab('users')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-              activeTab === 'users' ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-blue-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <Users size={20} />
-            <span className="font-medium">Người dùng</span>
-            {activeTab === 'users' && <ChevronRight size={16} className="ml-auto" />}
-          </button>
+          {isAdmin() && (
+            <button 
+              onClick={() => setActiveTab('users')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                activeTab === 'users' ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-blue-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <Users size={20} />
+              <span className="font-medium">Người dùng</span>
+              {activeTab === 'users' && <ChevronRight size={16} className="ml-auto" />}
+            </button>
+          )}
         </nav>
         
         <div className="p-4 border-t border-slate-200 dark:border-slate-800">
@@ -121,11 +135,11 @@ export default function AdminDashboard() {
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto p-8">
-        {activeTab === 'overview' && <OverviewTab />}
-        {activeTab === 'courses' && <CoursesTab />}
-        {activeTab === 'vocabularies' && <VocabulariesTab />}
-        {activeTab === 'exams' && <ExamsTab />}
-        {activeTab === 'users' && <UsersTab />}
+        {activeTab === 'overview' && isAdmin() && <OverviewTab />}
+        {activeTab === 'courses' && isTeacher() && <CoursesTab />}
+        {activeTab === 'vocabularies' && isAssistant() && <VocabulariesTab />}
+        {activeTab === 'exams' && isAssistant() && <ExamsTab />}
+        {activeTab === 'users' && isAdmin() && <UsersTab />}
       </div>
     </div>
   );

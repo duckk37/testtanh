@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { API_URL } from '../config';
+import api from '../services/api';
 
 const AuthContext = createContext();
 
@@ -10,17 +10,9 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (token) {
-      fetch(API_URL + '/users/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      api.get('/users/me')
       .then(res => {
-        if (res.ok) return res.json();
-        throw new Error('Invalid token');
-      })
-      .then(data => {
-        setUser(data);
+        setUser(res.data);
       })
       .catch(() => {
         localStorage.removeItem('access_token');
@@ -36,53 +28,33 @@ export function AuthProvider({ children }) {
     formData.append('username', email); // OAuth2 expects 'username' field
     formData.append('password', password);
 
-    const res = await fetch(API_URL + '/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: formData
-    });
-
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.detail || 'Login failed');
+    try {
+      const res = await api.post('/login', formData, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+      const data = res.data;
+      localStorage.setItem('access_token', data.access_token);
+      
+      // Fetch user info
+      const userRes = await api.get('/users/me');
+      setUser(userRes.data);
+    } catch (err) {
+      throw new Error(err.response?.data?.detail || 'Login failed');
     }
-
-    const data = await res.json();
-    localStorage.setItem('access_token', data.access_token);
-    
-    // Fetch user info
-    const userRes = await fetch(API_URL + '/users/me', {
-      headers: { 'Authorization': `Bearer ${data.access_token}` }
-    });
-    const userData = await userRes.json();
-    setUser(userData);
   };
 
   const register = async (username, email, password) => {
-    const res = await fetch(API_URL + '/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, email, password })
-    });
-
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.detail || 'Registration failed');
+    try {
+      const res = await api.post('/register', { username, email, password });
+      const data = res.data;
+      localStorage.setItem('access_token', data.access_token);
+      
+      // Fetch user info
+      const userRes = await api.get('/users/me');
+      setUser(userRes.data);
+    } catch (err) {
+      throw new Error(err.response?.data?.detail || 'Registration failed');
     }
-
-    const data = await res.json();
-    localStorage.setItem('access_token', data.access_token);
-    
-    // Fetch user info
-    const userRes = await fetch(API_URL + '/users/me', {
-      headers: { 'Authorization': `Bearer ${data.access_token}` }
-    });
-    const userData = await userRes.json();
-    setUser(userData);
   };
 
   const logout = () => {
@@ -90,8 +62,12 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const isAdmin = () => user?.role === 'admin';
+  const isTeacher = () => user?.role === 'admin' || user?.role === 'teacher';
+  const isAssistant = () => user?.role === 'admin' || user?.role === 'teacher' || user?.role === 'assistant';
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, setUser, loading, login, register, logout, isAdmin, isTeacher, isAssistant }}>
       {!loading && children}
     </AuthContext.Provider>
   );

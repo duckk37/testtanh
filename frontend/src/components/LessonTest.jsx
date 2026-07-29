@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { CheckCircle2, AlertCircle, Flag, Clock, ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
 import { API_URL } from '../config';
+import api from '../services/api';
 
 export default function LessonTest({ lesson, onTestPassed }) {
   const [questions, setQuestions] = useState([]);
@@ -36,8 +37,8 @@ export default function LessonTest({ lesson, onTestPassed }) {
     
     // Fetch Exam Details & Questions
     Promise.all([
-      fetch(`${API_URL}/exams/${lesson.exam_id}`).then(r => r.json()),
-      fetch(`${API_URL}/exams/${lesson.exam_id}/questions`).then(r => r.json())
+      api.get(`/exams/${lesson.exam_id}`).then(r => r.data),
+      api.get(`/exams/${lesson.exam_id}/questions`).then(r => r.data)
     ])
     .then(([examData, questionsData]) => {
       setExam(examData);
@@ -97,19 +98,10 @@ export default function LessonTest({ lesson, onTestPassed }) {
     if (timerRef.current) clearInterval(timerRef.current);
     
     setSubmitting(true);
-    const token = localStorage.getItem('access_token');
     
     try {
-      const res = await fetch(`${API_URL}/lessons/${lesson.id}/submit-test`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ answers })
-      });
-      
-      const data = await res.json();
+      const res = await api.post(`/lessons/${lesson.id}/submit-test`, { answers });
+      const data = res.data;
       setResult(data);
       
       if (data.is_passed) {

@@ -1,22 +1,22 @@
 import React, { useRef, useState } from 'react';
 import { Download } from 'lucide-react';
-import { API_URL } from '../config';
+import api from '../services/api';
 
-const Certificate = ({ courseId }) => {
+const Certificate = ({ courseId, isEligible }) => {
   const certificateRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [certData, setCertData] = useState(null);
 
   const fetchAndDownload = async () => {
+    if (!isEligible) {
+      alert('Bạn cần hoàn thành tất cả các bài học trong khóa này để nhận chứng chỉ!');
+      return;
+    }
+    
     setLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch(`${API_URL}/certificates/generate?course_id=${courseId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error('Failed to fetch certificate data');
-      
-      const data = await res.json();
+      const res = await api.get(`/certificates/generate?course_id=${courseId}`);
+      const data = res.data;
       setCertData(data);
       
       // Allow React to render the hidden certificate div
@@ -47,7 +47,11 @@ const Certificate = ({ courseId }) => {
       }, 500);
     } catch (err) {
       console.error(err);
-      alert('Lỗi tải chứng chỉ!');
+      if (err.response && err.response.status === 400) {
+        alert(err.response.data.detail || 'Bạn chưa đủ điều kiện nhận chứng chỉ!');
+      } else {
+        alert('Lỗi tải chứng chỉ!');
+      }
       setLoading(false);
     }
   };
@@ -56,8 +60,13 @@ const Certificate = ({ courseId }) => {
     <>
       <button 
         onClick={fetchAndDownload}
-        disabled={loading}
-        className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+        disabled={loading || !isEligible}
+        title={!isEligible ? "Bạn cần hoàn thành toàn bộ khóa học để lấy chứng chỉ" : ""}
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors font-medium ${
+          !isEligible 
+            ? 'bg-slate-300 text-slate-500 cursor-not-allowed dark:bg-slate-700 dark:text-slate-400' 
+            : 'bg-yellow-500 hover:bg-yellow-600 text-white'
+        }`}
       >
         <Download size={18} />
         {loading ? 'Đang tạo PDF...' : 'Tải Chứng Chỉ (PDF)'}

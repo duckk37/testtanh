@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Youtube, Play, Volume2 } from 'lucide-react';
 import YouTube from 'react-youtube';
-import { API_URL } from '../config';
+import api from '../services/api';
 
 // A utility to extract video ID from various YouTube URL formats
 const extractVideoId = (url) => {
@@ -44,9 +44,8 @@ export default function VideoPlayer() {
 
   const fetchTranscript = async (id) => {
     if (!id) return [];
-    const res = await fetch(`${API_URL}/video/transcript?video_id=${id}`);
-    if (!res.ok) throw new Error('Không thể tải phụ đề cho video này.');
-    return res.json();
+    const res = await api.get(`/video/transcript?video_id=${id}`);
+    return res.data;
   };
 
   const { data: transcript = [], isLoading, error } = useQuery({

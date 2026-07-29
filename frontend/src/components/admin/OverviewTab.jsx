@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Users, TrendingUp, BookOpen, Layers, Wallet } from 'lucide-react';
-import { API_URL } from '../../config';
+import { Users, TrendingUp, BookOpen, Layers, Wallet, Activity, CheckCircle } from 'lucide-react';
+import api from '../../services/api';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar
@@ -15,15 +15,9 @@ export default function OverviewTab() {
   }, []);
 
   const fetchStats = async () => {
-    const token = localStorage.getItem('access_token');
     try {
-      const res = await fetch(API_URL + '/admin/stats', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setStats(data);
-      }
+      const res = await api.get('/admin/stats');
+      setStats(res.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -38,7 +32,7 @@ export default function OverviewTab() {
     <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4">
       <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">Tổng quan hệ thống</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4">
           <div className="w-14 h-14 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
             <Users className="text-blue-600 dark:text-blue-400" size={28} />
@@ -86,6 +80,26 @@ export default function OverviewTab() {
           <div>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Doanh Thu</p>
             <p className="text-2xl font-bold text-slate-900 dark:text-white">{(stats.totals.revenue || 0).toLocaleString()}đ</p>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4">
+          <div className="w-14 h-14 rounded-full bg-red-50 dark:bg-red-900/30 flex items-center justify-center">
+            <Activity className="text-red-600 dark:text-red-400" size={28} />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tỉ Lệ Rớt Đài</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.totals.churn_rate || 0}%</p>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4">
+          <div className="w-14 h-14 rounded-full bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center">
+            <CheckCircle className="text-teal-600 dark:text-teal-400" size={28} />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Hoàn Thành Bài Học</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.totals.completion_rate || 0}%</p>
           </div>
         </div>
       </div>

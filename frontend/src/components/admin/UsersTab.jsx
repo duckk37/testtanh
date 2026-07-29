@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Flame, MoreVertical, CircleDollarSign, Trash2, ShieldAlert, X } from 'lucide-react';
-import { API_URL } from '../../config';
+import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
 export default function UsersTab() {
@@ -13,20 +13,30 @@ export default function UsersTab() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [coinAmount, setCoinAmount] = useState(100);
 
+  const roleColors = {
+    admin: "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800",
+    teacher: "bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800",
+    assistant: "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800",
+    user: "bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 border border-blue-100 dark:border-blue-800"
+  };
+
+  const roleNames = {
+    admin: "Admin",
+    teacher: "Giáo viên",
+    assistant: "Trợ giảng",
+    user: "Học viên"
+  };
+
+  const targetUserIsMe = (u) => u.id === currentUser?.id;
+
   useEffect(() => {
     fetchUsers();
   }, []);
 
   const fetchUsers = async () => {
-    const token = localStorage.getItem('access_token');
     try {
-      const res = await fetch(API_URL + '/admin/users', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUsers(data);
-      }
+      const res = await api.get('/admin/users');
+      setUsers(res.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -34,38 +44,20 @@ export default function UsersTab() {
     }
   };
 
-  const handleRoleChange = async (targetUser) => {
+  const handleRoleChange = async (targetUser, newRole) => {
     if (targetUser.id === currentUser?.id) {
       alert("Bạn không thể tự thay đổi quyền của chính mình.");
       return;
     }
-    
-    const newRole = targetUser.role === 'admin' ? 'user' : 'admin';
-    const confirmMsg = targetUser.role === 'admin' 
-      ? `Hạ cấp ${targetUser.username} xuống học viên bình thường?` 
-      : `Thăng cấp ${targetUser.username} lên làm Admin?`;
       
-    if (!window.confirm(confirmMsg)) return;
+    if (!window.confirm(`Xác nhận đổi quyền của ${targetUser.username} thành ${roleNames[newRole]}?`)) return;
 
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch(`${API_URL}/admin/users/${targetUser.id}/role`, {
-        method: 'PUT',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ role: newRole })
-      });
-      
-      if (res.ok) {
-        fetchUsers();
-      } else {
-        const data = await res.json();
-        alert(`Lỗi: ${data.detail || "Không thể thay đổi quyền"}`);
-      }
+      await api.put(`/admin/users/${targetUser.id}/role`, { role: newRole });
+      fetchUsers();
     } catch (err) {
-      alert("Lỗi kết nối.");
+      const detail = err.response?.data?.detail || "Không thể thay đổi quyền";
+      alert(`Lỗi: ${detail}`);
     }
   };
 
@@ -78,20 +70,11 @@ export default function UsersTab() {
     if (!window.confirm(`Xóa vĩnh viễn người dùng ${targetUser.username}? Hành động này KHÔNG THỂ hoàn tác!`)) return;
 
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch(`${API_URL}/admin/users/${targetUser.id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (res.ok) {
-        fetchUsers();
-      } else {
-        const data = await res.json();
-        alert(`Lỗi: ${data.detail || "Không thể xóa người dùng"}`);
-      }
+      await api.delete(`/admin/users/${targetUser.id}`);
+      fetchUsers();
     } catch (err) {
-      alert("Lỗi kết nối.");
+      const detail = err.response?.data?.detail || "Không thể xóa người dùng";
+      alert(`Lỗi: ${detail}`);
     }
   };
 
@@ -100,22 +83,9 @@ export default function UsersTab() {
     if (!selectedUser || coinAmount <= 0) return;
 
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch(`${API_URL}/admin/users/${selectedUser.id}/coins`, {
-        method: 'PUT',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ coins: coinAmount })
-      });
-      
-      if (res.ok) {
-        setShowCoinModal(false);
-        fetchUsers();
-      } else {
-        alert("Có lỗi xảy ra khi cộng xu.");
-      }
+      await api.put(`/admin/users/${selectedUser.id}/coins`, { coins: coinAmount });
+      setShowCoinModal(false);
+      fetchUsers();
     } catch (err) {
       alert("Lỗi kết nối.");
     }
@@ -164,10 +134,21 @@ export default function UsersTab() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {u.role === 'admin' ? (
-                      <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">Admin</span>
+                    {targetUserIsMe(u) ? (
+                      <span className={`px-2.5 py-1 text-xs font-bold rounded-md ${roleColors[u.role]}`}>
+                        {roleNames[u.role] || u.role}
+                      </span>
                     ) : (
-                      <span className="px-2.5 py-1 text-xs font-medium rounded-md bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 border border-blue-100 dark:border-blue-800">Học viên</span>
+                      <select 
+                        value={u.role || 'user'} 
+                        onChange={(e) => handleRoleChange(u, e.target.value)}
+                        className={`text-xs font-bold rounded-md px-2 py-1 outline-none cursor-pointer ${roleColors[u.role] || roleColors.user}`}
+                      >
+                        <option value="user">Học viên</option>
+                        <option value="assistant">Trợ giảng</option>
+                        <option value="teacher">Giáo viên</option>
+                        <option value="admin">Admin</option>
+                      </select>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -181,13 +162,6 @@ export default function UsersTab() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="flex justify-end gap-2">
-                      <button 
-                        onClick={() => handleRoleChange(u)}
-                        title={u.role === 'admin' ? "Giáng cấp" : "Thăng cấp Admin"}
-                        className={`p-1.5 rounded-lg transition-colors ${u.role === 'admin' ? 'text-purple-600 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/40' : 'text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-slate-700'}`}
-                      >
-                        <ShieldAlert size={18} />
-                      </button>
                       <button 
                         onClick={() => openCoinModal(u)}
                         title="Tặng Xu"

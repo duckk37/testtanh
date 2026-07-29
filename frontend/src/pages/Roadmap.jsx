@@ -2,18 +2,14 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { Map, CheckCircle, Circle, ArrowRight, BrainCircuit, Sparkles } from 'lucide-react';
-import { API_URL } from '../config';
+import api from '../services/api';
 
 export default function Roadmap() {
   const navigate = useNavigate();
   
   const fetchRoadmap = async () => {
-    const token = localStorage.getItem('access_token');
-    const res = await fetch(`${API_URL}/learning-path/current`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!res.ok) throw new Error('Failed to fetch roadmap');
-    return res.json();
+    const res = await api.get('/learning-path/current');
+    return res.data;
   };
 
   const { data, isLoading } = useQuery({

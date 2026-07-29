@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import YouTube from 'react-youtube';
-import { API_URL } from '../config';
+import api from '../services/api';
 
 const mockSubtitles = [
   { id: 1, start: 1.0, end: 3.5, text: "Welcome to our interactive English lesson." },
@@ -20,13 +20,16 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd, subtitles: rawSubtitles
   const [speechScore, setSpeechScore] = useState(null);
   
   const timeUpdateInterval = useRef(null);
+  const activeSubtitleRef = useRef(null);
 
   const subtitles = useMemo(() => {
-    if (!rawSubtitles) return [];
+    if (!rawSubtitles || (Array.isArray(rawSubtitles) && rawSubtitles.length === 0)) {
+      return mockSubtitles;
+    }
     try {
       return typeof rawSubtitles === 'string' ? JSON.parse(rawSubtitles) : rawSubtitles;
     } catch (e) {
-      return [];
+      return mockSubtitles;
     }
   }, [rawSubtitles]);
 
@@ -55,6 +58,12 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd, subtitles: rawSubtitles
       setActiveSubtitle(currentSub || null);
     }
   }, [currentTime, subtitles]);
+
+  useEffect(() => {
+    if (activeSubtitleRef.current) {
+      activeSubtitleRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [activeSubtitle]);
 
   const seekTo = (time) => {
     if (player) {
@@ -95,26 +104,14 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd, subtitles: rawSubtitles
     if (!token) return alert('Vui lòng đăng nhập để lưu từ vựng!');
     
     try {
-      const response = await fetch(API_URL + '/api/v1/vocabulary', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          word: dictionaryData.word,
-          phonetic: dictionaryData.phonetic || '',
-          meaning: dictionaryData.meanings[0]?.definitions[0]?.definition || '',
-          example: dictionaryData.meanings[0]?.definitions[0]?.example || '',
-          user_id: '' // Will be resolved by server or JWT in real app, but for now we modified route
-        })
+      await api.post('/vocabularies', {
+        word: dictionaryData.word,
+        phonetic: dictionaryData.phonetic || '',
+        meaning: dictionaryData.meanings[0]?.definitions[0]?.definition || '',
+        example: dictionaryData.meanings[0]?.definitions[0]?.example || ''
       });
       
-      if (response.ok) {
-        alert('Đã lưu vào sổ tay!');
-      } else {
-        alert('Có lỗi xảy ra khi lưu từ.');
-      }
+      alert('Đã lưu vào sổ tay!');
     } catch (error) {
       console.error(error);
       alert('Lỗi mạng, không thể lưu.');
@@ -206,7 +203,7 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd, subtitles: rawSubtitles
   return (
     <div className="flex flex-col lg:flex-row gap-6 p-4 max-w-6xl mx-auto">
       <div className="flex-1">
-        <div className="w-full aspect-video rounded-xl overflow-hidden shadow-2xl bg-black">
+        <div className="w-full aspect-video rounded-xl overflow-hidden shadow-2xl bg-black relative">
           <YouTube 
             videoId={youtubeId} 
             onReady={onReady}
@@ -225,6 +222,7 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd, subtitles: rawSubtitles
               }
             }}
             className="w-full h-full"
+            iframeClassName="absolute top-0 left-0 w-full h-full"
           />
         </div>
         
@@ -269,6 +267,7 @@ const InteractiveVideoPlayer = ({ youtubeId, onVideoEnd, subtitles: rawSubtitles
             return (
               <div 
                 key={idx} 
+                ref={isActive ? activeSubtitleRef : null}
                 onClick={() => seekTo(sub.start)}
                 className={`p-3 rounded-xl cursor-pointer transition-colors ${isActive ? 'bg-blue-50 border-l-4 border-blue-500 shadow-sm' : 'hover:bg-slate-50 dark:bg-slate-900'}`}
               >

@@ -2,25 +2,17 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { BookOpen, Flame, Activity, Brain } from 'lucide-react';
-import { API_URL } from '../config';
+import api from '../services/api';
 
 export default function Analytics() {
   const fetchOverview = async () => {
-    const token = localStorage.getItem('access_token');
-    const res = await fetch(`${API_URL}/analytics/overview`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!res.ok) throw new Error('Failed to fetch analytics');
-    return res.json();
+    const res = await api.get('/analytics/overview');
+    return res.data;
   };
 
   const fetchWeakWords = async () => {
-    const token = localStorage.getItem('access_token');
-    const res = await fetch(`${API_URL}/analytics/weak-words`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!res.ok) throw new Error('Failed to fetch weak words');
-    return res.json();
+    const res = await api.get('/analytics/weak-words');
+    return res.data;
   };
 
   const { data: overview, isLoading: loadingOverview } = useQuery({

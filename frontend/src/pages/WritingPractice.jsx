@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PenTool, CheckCircle, RefreshCcw, AlertTriangle, Target } from 'lucide-react';
-import { API_URL } from '../config';
+import api from '../services/api';
 
 export default function WritingPractice() {
   const [text, setText] = useState(() => {
@@ -23,22 +23,10 @@ export default function WritingPractice() {
     if (!text.trim()) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/check-writing`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ text })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setResult(data);
-      } else {
-        alert('Có lỗi xảy ra khi kiểm tra.');
-      }
+      const res = await api.post('/api/check-writing', { text });
+      setResult(res.data);
     } catch (e) {
-      alert('Không kết nối được server.');
+      alert('Có lỗi xảy ra khi kiểm tra.');
     }
     setLoading(false);
   };

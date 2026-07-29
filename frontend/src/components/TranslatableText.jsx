@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { API_URL } from '../config';
 import { useAuth } from '../context/AuthContext';
 import { BookPlus, Volume2 } from 'lucide-react';
+import api from '../services/api';
 
 export default function TranslatableText({ text, className }) {
   const [selectedWord, setSelectedWord] = useState('');
@@ -48,22 +48,22 @@ export default function TranslatableText({ text, className }) {
     setLoading(true);
     setDefinition(null);
     try {
-      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-      if (res.ok) {
-        const data = await res.json();
-        const entry = data[0];
-        setDefinition({
-          word: entry.word,
-          phonetic: entry.phonetic || (entry.phonetics.find(p => p.text)?.text) || '',
-          audio: entry.phonetics.find(p => p.audio)?.audio || '',
-          meaning: entry.meanings[0].definitions[0].definition,
-          example: entry.meanings[0].definitions[0].example || ''
-        });
-      } else {
-        setDefinition({ error: 'Không tìm thấy từ này' });
-      }
+      const res = await api.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+      const data = res.data;
+      const entry = data[0];
+      setDefinition({
+        word: entry.word,
+        phonetic: entry.phonetic || (entry.phonetics.find(p => p.text)?.text) || '',
+        audio: entry.phonetics.find(p => p.audio)?.audio || '',
+        meaning: entry.meanings[0].definitions[0].definition,
+        example: entry.meanings[0].definitions[0].example || ''
+      });
     } catch (e) {
-      setDefinition({ error: 'Lỗi mạng' });
+      if (e.response && e.response.status === 404) {
+        setDefinition({ error: 'Không tìm thấy từ này' });
+      } else {
+        setDefinition({ error: 'Lỗi mạng' });
+      }
     }
     setLoading(false);
   };
@@ -72,21 +72,15 @@ export default function TranslatableText({ text, className }) {
     if (!definition || definition.error || !user) return;
     
     try {
-      const res = await fetch(`${API_URL}/api/v1/vocabulary`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          word: definition.word,
-          phonetic: definition.phonetic,
-          meaning: definition.meaning,
-          example: definition.example,
-          user_id: user.id
-        })
+      await api.post(`/api/v1/vocabulary`, {
+        word: definition.word,
+        phonetic: definition.phonetic,
+        meaning: definition.meaning,
+        example: definition.example,
+        user_id: user.id
       });
-      if (res.ok) {
-        alert('Đã thêm vào Flashcard cá nhân!');
-        setShowPopup(false);
-      }
+      alert('Đã thêm vào Flashcard cá nhân!');
+      setShowPopup(false);
     } catch (e) {
       alert('Có lỗi xảy ra');
     }

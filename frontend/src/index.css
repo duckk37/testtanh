@@ -3,24 +3,58 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Main HSL palette for flexibility */
+    --primary: 221 83% 53%; /* Blue 600 */
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 199 89% 48%; /* Sky 500 */
+    
+    --background: 210 40% 98%; /* slate-50 */
+    --surface: 0 0% 100%;
+    
+    --text-primary: 222 47% 11%;
+    --text-muted: 215 16% 47%;
+    
+    --border: 214 32% 91%;
+  }
+
+  .dark {
+    --primary: 217 91% 60%; /* Blue 500 */
+    --secondary: 199 89% 48%; /* Sky 500 */
+    
+    --background: 222 47% 11%; /* slate-900 */
+    --surface: 222 47% 15%; /* slate-800 */
+    
+    --text-primary: 210 40% 98%;
+    --text-muted: 215 20% 65%;
+    
+    --border: 217 33% 17%;
+  }
+
   body {
-    @apply antialiased text-slate-900;
-    @apply dark:text-slate-100;
+    @apply antialiased;
     font-family: 'Inter', sans-serif;
+    color: hsl(var(--text-primary));
+    
+    /* Modern, deep gradient background */
     background: 
-      radial-gradient(60% 45% at 88% 6%, rgba(37, 99, 235, 0.08), transparent 60%),
-      radial-gradient(55% 40% at 6% 96%, rgba(37, 99, 235, 0.06), transparent 60%),
-      linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      radial-gradient(40% 50% at 85% 10%, rgba(37, 99, 235, 0.12), transparent 100%),
+      radial-gradient(35% 45% at 5% 95%, rgba(14, 165, 233, 0.1), transparent 100%),
+      hsl(var(--background));
+    
     min-height: 100vh;
+    background-attachment: fixed;
   }
   
   .dark body {
     background: 
-      radial-gradient(60% 45% at 88% 6%, rgba(59, 130, 246, 0.15), transparent 60%),
-      radial-gradient(55% 40% at 6% 96%, rgba(16, 185, 129, 0.12), transparent 60%),
-      linear-gradient(180deg, #0f172a 0%, #020617 100%);
+      radial-gradient(45% 55% at 85% 10%, rgba(59, 130, 246, 0.25), transparent 100%),
+      radial-gradient(40% 50% at 5% 95%, rgba(16, 185, 129, 0.15), transparent 100%),
+      hsl(var(--background));
   }
   
+  /* Grid overlay for texture */
   body::before {
     content: "";
     position: fixed;
@@ -28,45 +62,107 @@
     z-index: -1;
     pointer-events: none;
     background-image: 
-      linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+      linear-gradient(hsla(var(--text-primary), 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, hsla(var(--text-primary), 0.04) 1px, transparent 1px);
     background-size: 32px 32px;
-    mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 72%);
-    -webkit-mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 72%);
-  }
-
-  .dark body::before {
-    background-image: 
-      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    mask-image: radial-gradient(circle at center, black 0%, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at center, black 0%, transparent 80%);
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Plus Jakarta Sans', sans-serif;
   }
+  
+  /* Custom Scrollbar for Premium Feel */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400 dark:bg-slate-600;
+  }
 }
 
 @layer components {
+  /* Glassmorphism 2.0 Card */
   .card-modern {
-    @apply bg-white dark:bg-slate-800/80 dark:backdrop-blur-sm border border-slate-200 dark:border-slate-700/50 rounded-2xl shadow-soft dark:shadow-none relative overflow-hidden;
+    @apply bg-white/80 dark:bg-slate-800/60 backdrop-blur-md;
+    border: 1px solid hsla(var(--border), 0.6);
+    @apply rounded-[24px] relative overflow-hidden transition-all duration-300;
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.02), 
+      0 2px 4px -1px rgba(0, 0, 0, 0.02),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
+  
+  .dark .card-modern {
+    box-shadow: 
+      0 10px 30px -10px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Top accent line */
   .card-modern::before {
     content: "";
-    @apply absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 opacity-90;
+    @apply absolute top-0 left-0 right-0 h-[2px] opacity-0 transition-opacity duration-300;
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--secondary)));
+  }
+  .card-modern:hover {
+    box-shadow: 0 20px 40px -15px rgba(37, 99, 235, 0.1);
+    transform: translateY(-2px);
+  }
+  .dark .card-modern:hover {
+    box-shadow: 0 20px 40px -15px rgba(0,0,0,0.6);
+  }
+  .card-modern:hover::before {
+    @apply opacity-100;
   }
   
+  /* Inputs */
   .input-modern {
-    @apply w-full h-[52px] bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-12 text-[15px] outline-none transition-all duration-200 dark:text-slate-100;
+    @apply w-full h-[52px] bg-slate-50 dark:bg-slate-900/50 backdrop-blur-sm;
+    border: 1px solid hsla(var(--border), 1);
+    @apply rounded-xl px-12 text-[15px] outline-none transition-all duration-300;
+    color: hsl(var(--text-primary));
   }
   .input-modern:focus {
-    @apply border-blue-500 ring-4 ring-blue-500/10 dark:ring-blue-500/20;
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 4px hsla(var(--primary), 0.15);
+    background: hsla(var(--surface), 0.9);
   }
   
+  /* Buttons */
   .btn-modern {
-    @apply w-full min-h-[52px] inline-flex items-center justify-center gap-2 rounded-xl text-[15px] font-semibold transition-all duration-200;
+    @apply w-full min-h-[52px] inline-flex items-center justify-center gap-2 rounded-xl text-[15px] font-semibold transition-all duration-300;
   }
+  
   .btn-primary-modern {
-    @apply bg-blue-600 text-white shadow-glow hover:bg-blue-700 hover:-translate-y-[1px] hover:shadow-glow-hover active:translate-y-0 disabled:opacity-60 disabled:hover:translate-y-0 disabled:shadow-none;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+    color: hsl(var(--primary-foreground));
+    box-shadow: 0 8px 20px -6px hsla(var(--primary), 0.5);
+  }
+  
+  .btn-primary-modern:hover {
+    box-shadow: 0 12px 24px -8px hsla(var(--primary), 0.6);
+    transform: translateY(-2px) scale(1.01);
+  }
+  
+  .btn-primary-modern:active {
+    transform: translateY(0) scale(0.98);
+  }
+  
+  .btn-primary-modern:disabled {
+    opacity: 0.6;
+    pointer-events: none;
+    box-shadow: none;
   }
 }
 

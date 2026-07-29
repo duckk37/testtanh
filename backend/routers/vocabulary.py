@@ -93,76 +93,6 @@ def submit_review(id: str, req: ReviewSubmit, db: Session = Depends(get_db), cur
     return {"message": "Reviewed successfully", "next_review_date": progress.next_review_date}
 
 
-class AddWordRequest(BaseModel):
-    word: str
-    phonetic: str = None
-    meaning: str = None
-    example: str = None
-    user_id: str = None
-
-@router.post("/api/v1/vocabulary", response_model=dict)
-def add_vocabulary(req: AddWordRequest, db: Session = Depends(get_db)):
-    vocab = db.query(models.Vocabulary).filter(models.Vocabulary.word == req.word).first()
-    if not vocab:
-        vocab = models.Vocabulary(word=req.word, phonetic=req.phonetic, meaning=req.meaning, example=req.example)
-        db.add(vocab)
-        db.commit()
-        db.refresh(vocab)
-    
-    if req.user_id:
-        progress = db.query(models.UserProgress).filter(
-            models.UserProgress.user_id == req.user_id,
-            models.UserProgress.vocabulary_id == vocab.id
-        ).first()
-        if not progress:
-            progress = models.UserProgress(user_id=req.user_id, vocabulary_id=vocab.id)
-            db.add(progress)
-            db.commit()
-            
-    return {"message": "Word added successfully", "vocabulary_id": vocab.id}
-
-class ReviewRequest(BaseModel):
-    user_id: str
-    vocabulary_id: str
-    quality: int
-
-class ReviewResponse(BaseModel):
-    message: str
-    next_review_date: datetime
-
-@router.post("/api/v1/progress/review", response_model=ReviewResponse)
-def review_vocabulary(request: ReviewRequest, db: Session = Depends(get_db)):
-    progress = db.query(models.UserProgress).filter(
-        models.UserProgress.user_id == request.user_id,
-        models.UserProgress.vocabulary_id == request.vocabulary_id
-    ).first()
-    
-    if not progress:
-        progress = models.UserProgress(user_id=request.user_id, vocabulary_id=request.vocabulary_id)
-        db.add(progress)
-        db.commit()
-        db.refresh(progress)
-    
-    new_stats = calculate_sm2(
-        quality=request.quality,
-        repetition=progress.repetition,
-        ease_factor=progress.ease_factor,
-        interval=progress.interval
-    )
-    
-    progress.repetition = new_stats["repetition"]
-    progress.interval = new_stats["interval"]
-    progress.ease_factor = new_stats["ease_factor"]
-    progress.next_review_date = new_stats["next_review_date"]
-    
-    db.commit()
-    
-    return ReviewResponse(
-        message="Cập nhật tiến độ ôn tập thành công!",
-        next_review_date=new_stats["next_review_date"]
-    )
-
-
 class WritingRequest(BaseModel):
     text: str
 
@@ -196,8 +126,11 @@ def check_writing(req: WritingRequest, db: Session = Depends(get_db), current_us
     """
     
     try:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
-        headers = {"Content-Type": "application/json"}
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent"
+        headers = {
+            "Content-Type": "application/json",
+            "x-goog-api-key": GEMINI_API_KEY
+        }
         payload = {
             "contents": [{"parts": [{"text": prompt}]}]
         }

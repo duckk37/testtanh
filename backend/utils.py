@@ -79,7 +79,36 @@ def check_and_update_streak(user: models.User, db: Session):
         
     db.commit()
 
+def ensure_daily_quests(user_id: str, db: Session):
+    today_str = datetime.utcnow().date().isoformat()
+    quests = db.query(models.DailyQuest).filter(
+        models.DailyQuest.user_id == user_id,
+        models.DailyQuest.date == today_str
+    ).all()
+    
+    if not quests:
+        quest_templates = [
+            {"type": "learn_words", "target": 10, "reward": 20},
+            {"type": "perfect_score", "target": 1, "reward": 50},
+            {"type": "complete_lesson", "target": 1, "reward": 30}
+        ]
+        
+        for q in quest_templates:
+            new_q = models.DailyQuest(
+                user_id=user_id,
+                quest_type=q["type"],
+                target_value=q["target"],
+                reward_coins=q["reward"],
+                date=today_str
+            )
+            db.add(new_q)
+            quests.append(new_q)
+        db.commit()
+    return quests
+
 def update_quest_progress(user_id: str, quest_type: str, progress_amount: int, db: Session):
+    ensure_daily_quests(user_id, db)
+    
     today_str = datetime.utcnow().date().isoformat()
     quest = db.query(models.DailyQuest).filter(
         models.DailyQuest.user_id == user_id,

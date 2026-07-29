@@ -1,9 +1,9 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Target, Award, BookOpen, Flame, ShoppingCart, CheckCircle, Shield, PaintBucket } from 'lucide-react';
-import { API_URL } from '../config';
+import api from '../services/api';
 
 export default function Profile() {
   const { user } = useAuth();
@@ -19,27 +19,19 @@ export default function Profile() {
     if (buying) return;
     setBuying(true);
     try {
-      const res = await fetch(`${API_URL}/store/buy/${item.id}`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        alert('Mua thành công!');
-        // Update user CircleDollarSign (this is simplistic, ideally update global auth context)
-        setStats(prev => ({...prev, CircleDollarSign: data.CircleDollarSign}));
-        user.CircleDollarSign = data.CircleDollarSign; 
-        
-        if (item.type === 'theme') {
-          user.active_theme = item.id;
-          alert('Hãy F5 lại trang để áp dụng Theme mới cho thẻ Flashcard nhé!');
-        }
-      } else {
-        const err = await res.json();
-        alert(err.detail || 'Không đủ xu hoặc đã sở hữu!');
+      const res = await api.post(`/store/buy/${item.id}`);
+      const data = res.data;
+      alert('Mua thành công!');
+      // Update user CircleDollarSign (this is simplistic, ideally update global auth context)
+      setStats(prev => ({...prev, CircleDollarSign: data.CircleDollarSign}));
+      user.CircleDollarSign = data.CircleDollarSign; 
+      
+      if (item.type === 'theme') {
+        user.active_theme = item.id;
+        alert('Hãy F5 lại trang để áp dụng Theme mới cho thẻ Flashcard nhé!');
       }
     } catch (e) {
-      alert('Có lỗi xảy ra');
+      alert(e.response?.data?.detail || 'Không đủ xu hoặc đã sở hữu!');
     }
     setBuying(false);
   };
@@ -47,16 +39,10 @@ export default function Profile() {
   useEffect(() => {
     if (user) {
       Promise.all([
-        fetch(API_URL + '/users/me/stats', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        }).then(res => res.json()),
-        fetch(API_URL + '/users/me/courses', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        }).then(res => res.json()),
-        fetch(API_URL + '/users/me/quests', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        }).then(res => res.json()),
-        fetch(API_URL + '/store/items').then(res => res.json())
+        api.get('/users/me/stats').then(res => res.data),
+        api.get('/users/me/courses').then(res => res.data),
+        api.get('/users/me/quests').then(res => res.data),
+        api.get('/store/items').then(res => res.data)
       ])
       .then(([statsData, coursesData, questsData, storeData]) => {
         setStats(statsData);

@@ -4,7 +4,7 @@ import ExamCard from '../components/ExamCard';
 import { BookOpen, Award, CheckCircle, ArrowRight } from 'lucide-react';
 import { SkeletonCard } from '../components/Skeleton';
 import { useQuery } from '@tanstack/react-query';
-import { API_URL } from '../config';
+import api from '../services/api';
 import { motion } from 'framer-motion';
 
 const containerVariants = {
@@ -24,18 +24,16 @@ function Home() {
   const { data: courses = [], isLoading: loadingCourses } = useQuery({
     queryKey: ['courses'],
     queryFn: async () => {
-      const res = await fetch(API_URL + '/courses');
-      if (!res.ok) throw new Error("Error fetching courses");
-      return res.json();
+      const res = await api.get('/courses');
+      return res.data;
     }
   });
 
   const { data: exams = [], isLoading: loadingExams } = useQuery({
     queryKey: ['exams'],
     queryFn: async () => {
-      const res = await fetch(API_URL + '/exams');
-      if (!res.ok) throw new Error("Error fetching exams");
-      return res.json();
+      const res = await api.get('/exams');
+      return res.data;
     }
   });
 

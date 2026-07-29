@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, X, ListVideo } from 'lucide-react';
+import api from '../../services/api';
 import { API_URL } from '../../config';
 import CourseContentManager from './CourseContentManager';
 
@@ -27,11 +28,8 @@ export default function CoursesTab() {
 
   const fetchCourses = async () => {
     try {
-      const res = await fetch(API_URL + '/courses');
-      if (res.ok) {
-        const data = await res.json();
-        setCourses(data);
-      }
+      const res = await api.get('/courses');
+      setCourses(res.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -49,28 +47,15 @@ export default function CoursesTab() {
       return;
     }
     
-    const token = localStorage.getItem('access_token');
     try {
-      const res = await fetch(API_URL + '/admin/courses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ ...newCourse, title: trimmedTitle, description: trimmedDesc })
-      });
-      
-      if (res.ok) {
-        alert("Thêm khóa học thành công!");
-        setShowAddCourseModal(false);
-        setNewCourse({ title: '', description: '', price: 0, thumbnail: '' });
-        fetchCourses();
-      } else {
-        alert("Có lỗi xảy ra khi thêm khóa học.");
-      }
+      await api.post('/admin/courses', { ...newCourse, title: trimmedTitle, description: trimmedDesc });
+      alert("Thêm khóa học thành công!");
+      setShowAddCourseModal(false);
+      setNewCourse({ title: '', description: '', price: 0, thumbnail: '' });
+      fetchCourses();
     } catch (err) {
       console.error(err);
-      alert("Lỗi kết nối.");
+      alert("Lỗi kết nối hoặc có lỗi xảy ra khi thêm khóa học.");
     }
   };
 
@@ -84,33 +69,20 @@ export default function CoursesTab() {
       return;
     }
 
-    const token = localStorage.getItem('access_token');
     try {
-      const res = await fetch(`${API_URL}/admin/courses/${editingCourse.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          title: trimmedTitle,
-          description: trimmedDesc,
-          price: editingCourse.price,
-          thumbnail: editingCourse.thumbnail
-        })
+      await api.put(`/admin/courses/${editingCourse.id}`, {
+        title: trimmedTitle,
+        description: trimmedDesc,
+        price: editingCourse.price,
+        thumbnail: editingCourse.thumbnail
       });
-      
-      if (res.ok) {
-        alert("Cập nhật khóa học thành công!");
-        setShowEditCourseModal(false);
-        setEditingCourse(null);
-        fetchCourses();
-      } else {
-        alert("Có lỗi xảy ra khi cập nhật khóa học.");
-      }
+      alert("Cập nhật khóa học thành công!");
+      setShowEditCourseModal(false);
+      setEditingCourse(null);
+      fetchCourses();
     } catch (err) {
       console.error(err);
-      alert("Lỗi kết nối.");
+      alert("Lỗi kết nối hoặc có lỗi xảy ra khi cập nhật khóa học.");
     }
   };
 
@@ -119,21 +91,13 @@ export default function CoursesTab() {
       return;
     }
     
-    const token = localStorage.getItem('access_token');
     try {
-      const res = await fetch(`${API_URL}/admin/courses/${courseId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (res.ok) {
-        alert("Đã xóa khóa học.");
-        fetchCourses();
-      } else {
-        alert("Lỗi khi xóa khóa học.");
-      }
+      await api.delete(`/admin/courses/${courseId}`);
+      alert("Đã xóa khóa học.");
+      fetchCourses();
     } catch (err) {
       console.error(err);
+      alert("Lỗi kết nối hoặc lỗi khi xóa khóa học.");
     }
   };
 

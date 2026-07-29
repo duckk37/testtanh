@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Edit, Trash2, ListVideo, X } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, ListVideo, X, GripVertical } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import api from '../../services/api';
 import { API_URL } from '../../config';
 
 export default function CourseContentManager({ course, onBack }) {
@@ -21,13 +23,8 @@ export default function CourseContentManager({ course, onBack }) {
 
   const fetchExams = async () => {
     try {
-      const res = await fetch(API_URL + '/exams', {
-        headers: getAuthHeaders()
-      });
-      if (res.ok) {
-        const json = await res.json();
-        setExams(json);
-      }
+      const res = await api.get('/exams');
+      setExams(res.data);
     } catch (err) {
       console.error(err);
     }
@@ -36,13 +33,10 @@ export default function CourseContentManager({ course, onBack }) {
   const fetchLessons = async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_URL + `/courses/${course.id}/lessons`, {
-        headers: getAuthHeaders()
-      });
-      if (res.ok) {
-        const json = await res.json();
-        setLessons(json);
-      }
+      const res = await api.get(`/courses/${course.id}/lessons`);
+      // Sort lessons by order_index just in case
+      const sortedLessons = res.data.sort((a, b) => a.order_index - b.order_index);
+      setLessons(sortedLessons);
     } catch (err) {
       console.error(err);
     } finally {
@@ -50,12 +44,31 @@ export default function CourseContentManager({ course, onBack }) {
     }
   };
 
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('access_token');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
+  const onDragEnd = async (result) => {
+    if (!result.destination) return;
+
+    const items = Array.from(lessons);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Optimistically update UI
+    const updatedItems = items.map((item, index) => ({
+      ...item,
+      order_index: index + 1,
+      order_num: index + 1
+    }));
+    setLessons(updatedItems);
+
+    try {
+      // Send to backend
+      await api.put(`/admin/courses/${course.id}/lessons/reorder`, {
+        lesson_ids: updatedItems.map(item => item.id)
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi khi lưu vị trí mới. Đang tải lại dữ liệu...");
+      fetchLessons();
+    }
   };
 
   const handleSaveLesson = async (e) => {
@@ -63,42 +76,30 @@ export default function CourseContentManager({ course, onBack }) {
     const endpoint = editingItem 
       ? `/admin/lessons/${editingItem.id}` 
       : `/admin/courses/${course.id}/lessons`;
-    const method = editingItem ? 'PUT' : 'POST';
 
     const payload = { ...lessonForm };
     payload.youtube_id = payload.video_url; // Map video_url to youtube_id for backend
     
     try {
-      const res = await fetch(API_URL + endpoint, {
-        method,
-        headers: getAuthHeaders(),
-        body: JSON.stringify(payload)
-      });
-      if (res.ok) {
-        setShowModal(false);
-        fetchLessons();
+      if (editingItem) {
+        await api.put(endpoint, payload);
       } else {
-        alert("Có lỗi xảy ra.");
+        await api.post(endpoint, payload);
       }
+      setShowModal(false);
+      fetchLessons();
     } catch (err) {
-      alert("Lỗi kết nối.");
+      alert("Lỗi kết nối hoặc có lỗi xảy ra.");
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa?")) return;
     try {
-      const res = await fetch(API_URL + `/admin/lessons/${id}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
-      if (res.ok) {
-        fetchLessons();
-      } else {
-        alert("Lỗi khi xóa.");
-      }
+      await api.delete(`/admin/lessons/${id}`);
+      fetchLessons();
     } catch (err) {
-      alert("Lỗi kết nối.");
+      alert("Lỗi kết nối hoặc lỗi khi xóa.");
     }
   };
 
@@ -151,48 +152,71 @@ export default function CourseContentManager({ course, onBack }) {
           <div className="text-center p-10 text-slate-500 dark:text-slate-400">Đang tải dữ liệu...</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-              <thead className="bg-slate-50 dark:bg-slate-900/50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">STT</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Tiêu đề</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Bài kiểm tra</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Video URL</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Hành động</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                {lessons.map(item => (
-                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                    <td className="px-4 py-3 text-sm font-medium text-slate-900 dark:text-white">{item.order_num}</td>
-                    <td className="px-4 py-3 text-sm text-slate-900 dark:text-white">{item.title}</td>
-                    <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
-                      {item.exam_id ? (
-                        <span className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-xs font-medium border border-indigo-100">
-                          Có đính kèm
-                        </span>
-                      ) : (
-                        <span className="text-slate-400 text-xs italic">-</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400 line-clamp-1 max-w-[200px]">{item.video_url || item.youtube_id}</td>
-                    <td className="px-4 py-3 text-right">
-                      <button onClick={() => openEditModal(item)} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-2 rounded-lg transition-colors mr-2">
-                        <Edit size={16} />
-                      </button>
-                      <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-2 rounded-lg transition-colors">
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {lessons.length === 0 && (
+            <DragDropContext onDragEnd={onDragEnd}>
+              <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                <thead className="bg-slate-50 dark:bg-slate-900/50">
                   <tr>
-                    <td colSpan="4" className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">Chưa có bài học nào.</td>
+                    <th className="px-4 py-3 w-10 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase"></th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">STT</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Tiêu đề</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Bài kiểm tra</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Video URL</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Hành động</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <Droppable droppableId="lessons-list">
+                  {(provided) => (
+                    <tbody 
+                      className="divide-y divide-slate-100 dark:divide-slate-700 bg-white dark:bg-slate-800"
+                      {...provided.droppableProps} 
+                      ref={provided.innerRef}
+                    >
+                      {lessons.map((item, index) => (
+                        <Draggable key={item.id} draggableId={item.id} index={index}>
+                          {(provided, snapshot) => (
+                            <tr 
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className={`hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${snapshot.isDragging ? 'bg-blue-50/80 dark:bg-blue-900/20 shadow-md' : ''}`}
+                            >
+                              <td className="px-4 py-3 text-slate-400" {...provided.dragHandleProps}>
+                                <GripVertical size={16} className="cursor-grab hover:text-slate-600 dark:hover:text-slate-200" />
+                              </td>
+                              <td className="px-4 py-3 text-sm font-medium text-slate-900 dark:text-white">{item.order_num || item.order_index}</td>
+                              <td className="px-4 py-3 text-sm text-slate-900 dark:text-white">{item.title}</td>
+                              <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
+                                {item.exam_id ? (
+                                  <span className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-xs font-medium border border-indigo-100 dark:bg-indigo-900/30 dark:border-indigo-800 dark:text-indigo-300">
+                                    Có đính kèm
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-400 text-xs italic">-</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400 line-clamp-1 max-w-[200px]">{item.video_url || item.youtube_id}</td>
+                              <td className="px-4 py-3 text-right">
+                                <button onClick={() => openEditModal(item)} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-2 rounded-lg transition-colors mr-2">
+                                  <Edit size={16} />
+                                </button>
+                                <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-2 rounded-lg transition-colors">
+                                  <Trash2 size={16} />
+                                </button>
+                              </td>
+                            </tr>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                      {lessons.length === 0 && (
+                        <tr>
+                          <td colSpan="6" className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">Chưa có bài học nào.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  )}
+                </Droppable>
+              </table>
+            </DragDropContext>
           </div>
         )}
       </div>

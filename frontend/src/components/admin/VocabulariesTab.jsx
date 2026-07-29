@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
-import { API_URL } from '../../config';
+import api from '../../services/api';
 
 export default function VocabulariesTab() {
   const [vocabularies, setVocabularies] = useState([]);
@@ -17,14 +17,8 @@ export default function VocabulariesTab() {
   const fetchVocabularies = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch(API_URL + '/admin/vocabularies', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const json = await res.json();
-        setVocabularies(json);
-      }
+      const res = await api.get('/admin/vocabularies');
+      setVocabularies(res.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -32,13 +26,7 @@ export default function VocabulariesTab() {
     }
   };
 
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('access_token');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    };
-  };
+
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -48,17 +36,9 @@ export default function VocabulariesTab() {
     const method = editingItem ? 'PUT' : 'POST';
 
     try {
-      const res = await fetch(API_URL + endpoint, {
-        method,
-        headers: getAuthHeaders(),
-        body: JSON.stringify(vocabForm)
-      });
-      if (res.ok) {
-        setShowModal(false);
-        fetchVocabularies();
-      } else {
-        alert("Có lỗi xảy ra.");
-      }
+      await (method === 'PUT' ? api.put(endpoint, vocabForm) : api.post(endpoint, vocabForm));
+      setShowModal(false);
+      fetchVocabularies();
     } catch (err) {
       alert("Lỗi kết nối.");
     }
@@ -67,15 +47,8 @@ export default function VocabulariesTab() {
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa?")) return;
     try {
-      const res = await fetch(API_URL + `/admin/vocabularies/${id}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
-      if (res.ok) {
-        fetchVocabularies();
-      } else {
-        alert("Lỗi khi xóa.");
-      }
+      await api.delete(`/admin/vocabularies/${id}`);
+      fetchVocabularies();
     } catch (err) {
       alert("Lỗi kết nối.");
     }

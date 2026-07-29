@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { MessageSquare, Send, Bot, User, X, Mic } from 'lucide-react';
-import { API_URL } from '../config';
+import api from '../services/api';
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -60,20 +60,12 @@ export default function AIChatWidget() {
 
   const chatMutation = useMutation({
     mutationFn: async (message) => {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch(`${API_URL}/ai/chat`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}` 
-        },
-        body: JSON.stringify({ message })
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || 'Failed to chat');
+      try {
+        const res = await api.post('/ai/chat', { message });
+        return res.data;
+      } catch (error) {
+        throw new Error(error.response?.data?.detail || 'Failed to chat');
       }
-      return res.json();
     },
     onSuccess: (data) => {
       setMessages(prev => [
